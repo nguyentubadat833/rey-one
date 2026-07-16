@@ -7,13 +7,13 @@ import {
   ORGANIZATION_TYPES,
   APP_PERMISSIONS,
   APP_PERMISSION_GROUPS,
+  CURRENCIES,
 } from "../constants";
-import { CURRENCIES } from "../constants/catalog.constant";
+
+export type Currency = (typeof CURRENCIES)[number];
 
 export type AppPermission = (typeof APP_PERMISSIONS)[number];
 export type AppPermissionGroup = (typeof APP_PERMISSION_GROUPS)[number];
-
-export type Currency = (typeof CURRENCIES)[number];
 
 export type UserProvider = (typeof USER_PROVIDERS)[number];
 export type UserRole = (typeof USER_ROLES)[number];
