@@ -1,4 +1,4 @@
-import { defineEntity, InferEntity, p } from '@mikro-orm/core';
+import { defineEntity, p } from '@mikro-orm/core';
 import { USER_ROLES, USER_STATUSES, UserStatus } from '@rey-one/shared';
 import { AppError } from '@/utils/errors/app.error';
 import { Party } from './iam.party-entity';
@@ -23,8 +23,6 @@ const UserEntitySchema = defineEntity({
   },
 });
 
-export type IUser = InferEntity<typeof UserEntitySchema>;
-
 export class User extends UserEntitySchema.class {
   declare readonly email: string;
 
@@ -36,13 +34,13 @@ export class User extends UserEntitySchema.class {
     deleted: [], // không thể đổi gì nữa
   };
 
-  static ensureExists(user: IUser | null): asserts user is IUser {
+  static ensureExists(user: User | null): asserts user is User {
     if (!user) {
       throw new AppError('USER_NOT_FOUND');
     }
   }
 
-  static ensureActive(user: IUser) {
+  static ensureActive(user: User) {
     if (user.status !== 'active') {
       throw new AppError('INVALID_USER_STATUS');
     }

@@ -1,4 +1,4 @@
-import { defineEntity, InferEntity, p } from '@mikro-orm/core';
+import { defineEntity, p } from '@mikro-orm/core';
 import { Organization } from './iam.organization-entity';
 import { PRODUCT_STATUSES, PRODUCT_TYPES } from '@rey-one/shared';
 import { ProductPricing } from './product-pricing-entity';
@@ -32,8 +32,6 @@ const ProductEntitySchema = defineEntity({
     },
   },
 });
-
-export type IProduct = InferEntity<typeof ProductEntitySchema>;
 
 export class Product extends ProductEntitySchema.class {}
 

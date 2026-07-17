@@ -1,4 +1,4 @@
-import { defineEntity, InferEntity, p } from "@mikro-orm/core";
+import { defineEntity, p } from "@mikro-orm/core";
 import { PARTY_TYPES } from "@rey-one/shared";
 
 const PartyEntitySchema = defineEntity({
@@ -15,8 +15,6 @@ const PartyEntitySchema = defineEntity({
         address: p.string().length(255).nullable(),
     },
 })
-
-export type IParty = InferEntity<typeof PartyEntitySchema>;
 
 export class Party extends PartyEntitySchema.class {}
 

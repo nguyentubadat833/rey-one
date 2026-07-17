@@ -1,4 +1,4 @@
-import { ArrayType, defineEntity, InferEntity, p } from '@mikro-orm/core';
+import { ArrayType, defineEntity, p } from '@mikro-orm/core';
 import { ORGANIZATION_STATUSES, AppPermission, OrganizationStatus, AppPermissionGroup, CURRENCIES } from '@rey-one/shared';
 import { AppError } from '@/utils/errors/app.error';
 import { Party } from './iam.party-entity';
@@ -28,16 +28,14 @@ const OrganizationEntitySchema = defineEntity({
   },
 });
 
-export type IOrganization = InferEntity<typeof OrganizationEntitySchema>;
-
 export class Organization extends OrganizationEntitySchema.class {
-  static ensureExists(organization: IOrganization | null): asserts organization is IOrganization {
+  static ensureExists(organization: Organization | null): asserts organization is Organization {
     if (!organization) {
       throw new AppError('ORGANIZATION_NOT_FOUND');
     }
   }
 
-  static ensureActive(organization: IOrganization) {
+  static ensureActive(organization: Organization) {
     if (organization.status !== 'active') {
       throw new AppError('INVALID_ORGANIZATION_STATUS');
     }

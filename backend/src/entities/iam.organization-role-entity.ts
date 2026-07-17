@@ -1,4 +1,4 @@
-import { ArrayType, defineEntity, InferEntity, p } from '@mikro-orm/core';
+import { ArrayType, defineEntity, p } from '@mikro-orm/core';
 import { AppPermission } from '@rey-one/shared';
 import { Organization } from './iam.organization-entity';
 import { OrganizationMembership } from './iam.organization-membership-entity';
@@ -25,9 +25,8 @@ const OrganizationRoleEntitySchema = defineEntity({
   ],
 });
 
-export type IOrganizationRole = InferEntity<typeof OrganizationRoleEntitySchema>;
 export class OrganizationRole extends OrganizationRoleEntitySchema.class {
-  static ensureExists(role: IOrganizationRole | null): asserts role is IOrganizationRole {
+  static ensureExists(role: OrganizationRole | null): asserts role is OrganizationRole {
     if (!role) {
       throw new AppError('ORGANIZATION_ROLE_NOT_FOUND');
     }

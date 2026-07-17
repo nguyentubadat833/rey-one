@@ -1,4 +1,4 @@
-import { defineEntity, InferEntity, p } from '@mikro-orm/core';
+import { defineEntity, p } from '@mikro-orm/core';
 import { Organization } from './iam.organization-entity';
 import { User } from './iam.user-entity';
 import { OrganizationRole } from './iam.organization-role-entity';
@@ -39,10 +39,8 @@ const OrganizationMembershipEntitySchema = defineEntity({
   // },
 });
 
-export type IOrganizationMembership = InferEntity<typeof OrganizationMembershipEntitySchema>;
-
 export class OrganizationMembership extends OrganizationMembershipEntitySchema.class {
-  static ensureExists(member: IOrganizationMembership | null): asserts member is IOrganizationMembership {
+  static ensureExists(member: OrganizationMembership | null): asserts member is OrganizationMembership {
     if (!member) {
       throw new AppError('MEMBERSHIP_NOT_FOUND');
     }

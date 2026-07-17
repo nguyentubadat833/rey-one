@@ -1,4 +1,4 @@
-import { defineEntity, InferEntity, p } from "@mikro-orm/core";
+import { defineEntity, p } from "@mikro-orm/core";
 import { Product } from "./product-entity";
 import { CURRENCIES } from "@rey-one/shared";
 
@@ -12,8 +12,6 @@ const ProductPricingEntitySchema = defineEntity({
     sellingPrice: p.bigint().nullable().fieldName('selling_price'),
   },
 });
-
-export type IProductPricing = InferEntity<typeof ProductPricingEntitySchema>;
 
 export class ProductPricing extends ProductPricingEntitySchema.class {}
 
