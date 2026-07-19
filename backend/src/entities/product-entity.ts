@@ -4,7 +4,7 @@ import { PRODUCT_STATUSES, PRODUCT_TYPES } from '@rey-one/shared';
 import { ProductPricing } from './product-pricing-entity';
 
 const ProductEntitySchema = defineEntity({
-  name: 'V2Product',
+  name: 'Product',
   tableName: 'product',
   properties: {
     id: p.uuid().primary().defaultRaw('gen_random_uuid()'),

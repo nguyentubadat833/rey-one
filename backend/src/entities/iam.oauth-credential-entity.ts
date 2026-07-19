@@ -3,8 +3,8 @@ import { OAUTH_PROVIDERS } from "@rey-one/shared";
 import { User } from "./iam.user-entity";
 
 const OAuthCredentialEntitySchema = defineEntity({
-    name: 'IAMV2OAuthCredential',
-    tableName: 'iam_v2_oauth_credential',
+    name: 'IAMOAuthCredential',
+    tableName: 'iam_oauth_credential',
     properties: {
         id: p.uuid().primary().defaultRaw('gen_random_uuid()'),
         user: () => p.manyToOne(User).joinColumn('user_id').owner(),
@@ -15,7 +15,7 @@ const OAuthCredentialEntitySchema = defineEntity({
         {
             properties: ['user', 'provider']
         }
-    ]
+    ] 
 })
 
 export class OAuthCredential extends OAuthCredentialEntitySchema.class { }

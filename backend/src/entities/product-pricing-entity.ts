@@ -3,7 +3,7 @@ import { Product } from "./product-entity";
 import { CURRENCIES } from "@rey-one/shared";
 
 const ProductPricingEntitySchema = defineEntity({
-  name: 'V2ProductPricing',
+  name: 'ProductPricing',
   tableName: 'product_pricing',
   properties: {
     product: () => p.oneToOne(Product).joinColumn('id').primary().owner(),

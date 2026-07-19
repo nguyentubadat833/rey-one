@@ -2,8 +2,8 @@ import { defineEntity, p } from "@mikro-orm/core";
 import { PARTY_TYPES } from "@rey-one/shared";
 
 const PartyEntitySchema = defineEntity({
-    name: 'IAMV2Party',
-    tableName: 'iam_v2_party',
+    name: 'IAMParty',
+    tableName: 'iam_party',
     properties: {
         id: p.uuid().primary().defaultRaw('gen_random_uuid()'),
         type: p.enum(() => PARTY_TYPES),

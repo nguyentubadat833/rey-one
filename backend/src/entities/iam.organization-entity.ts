@@ -9,8 +9,8 @@ import { Product } from './product-entity';
 const defaultStatus: OrganizationStatus = 'active';
 
 const OrganizationEntitySchema = defineEntity({
-  name: 'IAMCV2Organization',
-  tableName: 'iam_v2_organization',
+  name: 'IAMOrganization',
+  tableName: 'iam_organization',
   properties: {
     party: () => p.oneToOne(Party).owner().primary().joinColumn('id'),
     parent: () => p.manyToOne(Organization).joinColumn('parent_id').nullable().owner(),

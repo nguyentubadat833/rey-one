@@ -5,8 +5,8 @@ import { OrganizationRole } from './iam.organization-role-entity';
 import { AppError } from '@/utils/errors/app.error';
 
 const OrganizationMembershipEntitySchema = defineEntity({
-  name: 'IAMV2OrganizationMembership',
-  tableName: 'iam_v2_organization_membership',
+  name: 'IAMOrganizationMembership',
+  tableName: 'iam_organization_membership',
   properties: {
     id: p.uuid().primary().defaultRaw('gen_random_uuid()'),
     organization: () =>

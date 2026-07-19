@@ -6,8 +6,8 @@ import { OAuthCredential } from './iam.oauth-credential-entity';
 import { OrganizationMembership } from './iam.organization-membership-entity';
 
 const UserEntitySchema = defineEntity({
-  name: 'IAMV2User',
-  tableName: 'iam_v2_user',
+  name: 'IAMUser',
+  tableName: 'iam_user',
   properties: {
     party: () => p.oneToOne(Party).owner().primary().joinColumn('id'),
     oauthCredentials: () => p.oneToMany(OAuthCredential).mappedBy((c) => c.user),
