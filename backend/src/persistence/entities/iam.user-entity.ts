@@ -31,7 +31,7 @@ const UserAuthSchema = defineEntity({
     failedLoginAttempts: p.integer().nullable().fieldName('failed_login_attempts'),
     lastFailedLoginAttemptAt: p.datetime().nullable().fieldName('last_failed_login_attempt_at'),
     lastSuccessfulLoginAt: p.datetime().nullable().fieldName('last_successful_login_at'),
-    token: p.string().persist(false).nullable()
+    token: p.string().persist(false).nullable(),
   }
 })
 
