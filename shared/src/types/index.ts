@@ -1,5 +1,4 @@
 import {
-  USER_ROLES,
   USER_STATUSES,
   OAUTH_PROVIDERS,
   USER_PROVIDERS,
@@ -16,7 +15,6 @@ export type AppPermission = (typeof APP_PERMISSIONS)[number];
 export type AppPermissionGroup = (typeof APP_PERMISSION_GROUPS)[number];
 
 export type UserProvider = (typeof USER_PROVIDERS)[number];
-export type UserRole = (typeof USER_ROLES)[number];
 export type UserStatus = (typeof USER_STATUSES)[number];
 export type OAuthProvider = (typeof OAUTH_PROVIDERS)[number];
 

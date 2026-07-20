@@ -13,6 +13,7 @@ import { AppModules } from './app/app.modules';
 import { ResponseConfig } from './utils/interceptors/response-config';
 import { ZodValidationPipeConfig } from './utils/pipes/validate-configs';
 import { AppCatchEverythingFilter } from './utils/errors/filters/catch-everything.filter';
+import { DatabaseSeeder } from './app/app.seeder';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(AppModules, new FastifyAdapter());
@@ -38,6 +39,8 @@ async function bootstrap() {
     //   console.log(diff);
     //   await orm.schema.update();
     // }
+
+    await orm.seeder.seed(DatabaseSeeder);
   }
 
   // app.useWebSocketAdapter(new SocketIoAdapter(app, configService));

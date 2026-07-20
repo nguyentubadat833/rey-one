@@ -1,22 +1,20 @@
-import { defineEntity, p } from '@mikro-orm/core';
-import { USER_ROLES, USER_STATUSES, UserStatus } from '@rey-one/shared';
+import { defineEntity, EventArgs, p } from '@mikro-orm/core';
+import { USER_STATUSES, UserStatus } from '@rey-one/shared';
 import { AppError } from '@/utils/errors/app.error';
-import { Party } from './iam.party-entity';
 import { OAuthCredential } from './iam.oauth-credential-entity';
-import { OrganizationMembership } from './iam.organization-membership-entity';
+import { ConflictException, NotFoundException } from '@nestjs/common';
+import { hash, verify } from 'argon2';
 
 const UserEntitySchema = defineEntity({
   name: 'IAMUser',
   tableName: 'iam_user',
   properties: {
-    party: () => p.oneToOne(Party).owner().primary().joinColumn('id'),
+    id: p.uuid().primary().defaultRaw('gen_random_uuid()'),
     oauthCredentials: () => p.oneToMany(OAuthCredential).mappedBy((c) => c.user),
-    memberships: () => p.oneToMany(OrganizationMembership).mappedBy((org) => org.user),
     email: p.string().length(255).unique(),
-    password: p.string().length(255).nullable(),
+    password: p.string().length(255).hidden().lazy().ref().nullable(),
     status: p.enum(() => USER_STATUSES),
     isVerified: p.boolean().default(false).fieldName('is_verified'),
-    role: p.enum(() => USER_ROLES),
     failedLoginAttempts: p.integer().nullable().fieldName('failed_login_attempts'),
     lastFailedLoginAttemptAt: p.datetime().nullable().fieldName('last_failed_login_attempt_at'),
     lastSuccessfulLoginAt: p.datetime().nullable().fieldName('last_successful_login_at'),
@@ -36,18 +34,28 @@ export class User extends UserEntitySchema.class {
 
   static ensureExists(user: User | null): asserts user is User {
     if (!user) {
-      throw new AppError('USER_NOT_FOUND');
+      throw new NotFoundException('User not found');
     }
   }
 
   static ensureActive(user: User) {
     if (user.status !== 'active') {
-      throw new AppError('INVALID_USER_STATUS');
+      throw new ConflictException('Invalid user status');
     }
   }
 
   isActive() {
     return this.status === 'active';
+  }
+
+  async verifyPassword(password: string) {
+    const passwordHashed = await this.password.load()
+
+    if(!passwordHashed){
+      throw new AppError('PASSWORD_HASHED_NOT_FOUND')
+    }
+
+    return verify(passwordHashed, password);
   }
 
   // getId() {
@@ -60,3 +68,15 @@ export class User extends UserEntitySchema.class {
 }
 
 UserEntitySchema.setClass(User);
+
+UserEntitySchema.addHook('beforeCreate', hashPassword);
+UserEntitySchema.addHook('beforeUpdate', hashPassword);
+
+async function hashPassword(args: EventArgs<User>) {
+  const password = args.changeSet?.payload.password;
+
+  if (typeof password === 'string') {
+    const hashed = await hash(password);
+    args.entity.password.set(hashed)
+  }
+}

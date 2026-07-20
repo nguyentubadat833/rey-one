@@ -36,6 +36,7 @@
     "@mikro-orm/migrations": "7.1.0",
     "@mikro-orm/nestjs": "^7.0.2",
     "@mikro-orm/postgresql": "^7.1.0",
+    "@mikro-orm/seeder": "^7.1.7",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.0.1",

@@ -7,12 +7,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
-import { OAuthCredential } from '@/entities/iam.oauth-credential-entity';
-import { Organization } from '@/entities/iam.organization-entity';
-import { OrganizationMembership } from '@/entities/iam.organization-membership-entity';
-import { OrganizationRole } from '@/entities/iam.organization-role-entity';
-import { Party } from '@/entities/iam.party-entity';
 import { User } from '@/entities/iam.user-entity';
+import { UserGroup } from '@/entities/iam.user-group-entity';
 
 @Module({
   imports: [
@@ -33,7 +29,7 @@ import { User } from '@/entities/iam.user-entity';
         password: config.dbPassword,
         dbName: config.dbName,
         debug: true,
-        entities: [Party, User, OAuthCredential, Organization, OrganizationMembership, OrganizationRole],
+        entities: [User, UserGroup],
         // autoLoadEntities: true,
         // entities: ['./dist/**/*.entity.js'],
         // entitiesTs: ['./src/**/*.entity.ts'],
