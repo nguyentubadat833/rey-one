@@ -23,4 +23,8 @@ export class UserRepository extends EntityRepository<User> {
 
         throw err;
     }
+
+    async verifyOAuthCredential(){
+        
+    }
 }
