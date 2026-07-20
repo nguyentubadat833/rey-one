@@ -7,8 +7,9 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
-import { User } from '@/entities/iam.user-entity';
-import { UserGroup } from '@/entities/iam.user-group-entity';
+import { User } from '@/persistence/entities/iam.user-entity';
+import { UserGroup } from '@/persistence/entities/iam.user-group-entity';
+import { IAMModule } from '@/modules/iam/iam.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { UserGroup } from '@/entities/iam.user-group-entity';
         // entitiesTs: ['./src/**/*.entity.ts'],
       }),
     }),
+    IAMModule
   ],
   controllers: [AppController],
   providers: [],

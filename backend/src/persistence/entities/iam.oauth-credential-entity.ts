@@ -7,7 +7,7 @@ const OAuthCredentialEntitySchema = defineEntity({
     tableName: 'iam_oauth_credential',
     properties: {
         id: p.uuid().primary().defaultRaw('gen_random_uuid()'),
-        user: () => p.manyToOne(User).joinColumn('user_id').owner(),
+        user: () => p.manyToOne(User).eager(),
         provider: p.enum(() => OAUTH_PROVIDERS),
         providerAccountId: p.string().length(255).fieldName('provider_account_id')
     },

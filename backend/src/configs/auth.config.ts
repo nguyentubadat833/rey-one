@@ -9,7 +9,7 @@ const schema = z
     JWT_SECRET: z.string().min(10).default('123456789a'),
     JWT_ACCESS_EXPIRES_IN_MINUTES: z.coerce.number().positive().int().default(15),
     JWT_REFRESH_EXPIRES_IN_MINUTES: z.coerce.number().positive().int().default(10080), // 7d
-    ADMIN_USERNAME: z.string().default('sysadmin'),
+    ADMIN_EMAIL: z.string().default('sysadmin@gmail.com'),
     ADMIN_PASSWORD: z.string().default('sysadmin'),
   })
   .superRefine((val, ctx) => {
@@ -30,5 +30,10 @@ export const authConfig = registerAs('auth', () => {
     jwtSecret: parsed.JWT_SECRET,
     jwtAccessExpiresIn: parsed.JWT_ACCESS_EXPIRES_IN_MINUTES,
     jwtRefreshExpiresIn: parsed.JWT_REFRESH_EXPIRES_IN_MINUTES,
+    admin: {
+      group: 'sysadmin',
+      email: parsed.ADMIN_EMAIL,
+      password: parsed.ADMIN_PASSWORD
+    }
   };
 });

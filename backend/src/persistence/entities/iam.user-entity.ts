@@ -1,23 +1,58 @@
 import { defineEntity, EventArgs, p } from '@mikro-orm/core';
-import { USER_STATUSES, UserStatus } from '@rey-one/shared';
+import { USER_STATUSES, USER_TYPES, UserStatus } from '@rey-one/shared';
 import { AppError } from '@/utils/errors/app.error';
 import { OAuthCredential } from './iam.oauth-credential-entity';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { hash, verify } from 'argon2';
+import { UserGroup } from './iam.user-group-entity';
 
+// User Info
+export const UserInfoSchema = defineEntity({
+  name: 'IAMUserInfo',
+  embeddable: true,
+  properties: {
+    name: p.string().length(255).nullable(),
+    taxCode: p.string().length(50).fieldName('tax_code').nullable(),
+    email: p.string().length(255).nullable(),
+    phone: p.string().length(30).nullable(),
+    website: p.string().length(255).nullable(),
+    address: p.string().length(255).nullable(),
+  },
+})
+
+export class UserInfo extends UserInfoSchema.class { }
+UserInfoSchema.setClass(UserInfo);
+
+// User Auth
+const UserAuthSchema = defineEntity({
+  name: 'IAMUserAuth',
+  embeddable: true,
+  properties: {
+    failedLoginAttempts: p.integer().nullable().fieldName('failed_login_attempts'),
+    lastFailedLoginAttemptAt: p.datetime().nullable().fieldName('last_failed_login_attempt_at'),
+    lastSuccessfulLoginAt: p.datetime().nullable().fieldName('last_successful_login_at'),
+    token: p.string().persist(false).nullable()
+  }
+})
+
+export class UserAuth extends UserAuthSchema.class { }
+UserAuthSchema.setClass(UserAuth);
+
+// User Entity
 const UserEntitySchema = defineEntity({
   name: 'IAMUser',
   tableName: 'iam_user',
   properties: {
     id: p.uuid().primary().defaultRaw('gen_random_uuid()'),
-    oauthCredentials: () => p.oneToMany(OAuthCredential).mappedBy((c) => c.user),
-    email: p.string().length(255).unique(),
+    type: p.enum(() => USER_TYPES),
+    oauthCredentials: () => p.oneToMany(OAuthCredential).mappedBy((c) => c.user).orphanRemoval().lazyRef(),
+    email: p.string().length(255).unique().nullable(),
     password: p.string().length(255).hidden().lazy().ref().nullable(),
-    status: p.enum(() => USER_STATUSES),
+    status: p.enum(() => USER_STATUSES).default('active' satisfies UserStatus),
     isVerified: p.boolean().default(false).fieldName('is_verified'),
-    failedLoginAttempts: p.integer().nullable().fieldName('failed_login_attempts'),
-    lastFailedLoginAttemptAt: p.datetime().nullable().fieldName('last_failed_login_attempt_at'),
-    lastSuccessfulLoginAt: p.datetime().nullable().fieldName('last_successful_login_at'),
+    group: () => p.manyToOne(UserGroup).lazyRef(),
+    auth: () => p.embedded(UserAuthSchema).onCreate(() => new UserAuth()).lazyRef(),
+    info: () => p.embedded(UserInfoSchema).onCreate(() => new UserInfo()).lazyRef()
   },
 });
 
@@ -51,20 +86,12 @@ export class User extends UserEntitySchema.class {
   async verifyPassword(password: string) {
     const passwordHashed = await this.password.load()
 
-    if(!passwordHashed){
-      throw new AppError('PASSWORD_HASHED_NOT_FOUND')
+    if (!passwordHashed) {
+      throw new AppError('USER_PASSWORD_NOT_INITIALIZED')
     }
 
     return verify(passwordHashed, password);
   }
-
-  // getId() {
-  //   const id = helper(this.party).getPrimaryKey();
-  //   if (!id) {
-  //     throw new BaseError('USER_NOT_FOUND', 'Entity has not been persisted yet.');
-  //   }
-  //   return id as string;
-  // }
 }
 
 UserEntitySchema.setClass(User);

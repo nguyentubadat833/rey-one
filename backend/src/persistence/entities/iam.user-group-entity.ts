@@ -1,6 +1,9 @@
 import { AppError } from '@/utils/errors/app.error';
 import { defineEntity, EventArgs, p } from '@mikro-orm/core';
 import { APP_PERMISSIONS, AppPermission } from '@rey-one/shared';
+import { User } from './iam.user-entity';
+import { group } from 'console';
+import slugify from 'slugify';
 
 const UserRoleSchema = defineEntity({
   name: 'IAMUserRole',
@@ -16,9 +19,13 @@ const UserGroupEntitySchema = defineEntity({
   name: 'IAMUserGroup',
   tableName: 'iam_user_group',
   properties: {
-    id: p.uuid().primary().defaultRaw('gen_random_uuid()'),
+    id: p.string().primary().onCreate(group => slugify(group.name, {
+      lower: true,
+      strict: true,
+    })),
     name: p.string().unique(),
     active: p.boolean().default(true),
+    users: () => p.oneToMany(User).mappedBy(user => user.group).lazyRef(),
     permissions: p.enum(APP_PERMISSIONS).array().default([]),
     roles: p
       .embedded(UserRoleSchema)
@@ -36,7 +43,7 @@ export class UserGroup extends UserGroupEntitySchema.class {
   }
 }
 
-class UserRole extends UserRoleSchema.class {}
+class UserRole extends UserRoleSchema.class { }
 
 UserGroupEntitySchema.setClass(UserGroup);
 UserRoleSchema.setClass(UserRole);
@@ -44,7 +51,7 @@ UserRoleSchema.setClass(UserRole);
 UserGroupEntitySchema.addHook('beforeCreate', validateChangeSetRoles);
 UserGroupEntitySchema.addHook('beforeUpdate', validateChangeSetRoles)
 
-function validateChangeSetRoles(args: EventArgs<UserGroup>){
+function validateChangeSetRoles(args: EventArgs<UserGroup>) {
   const entity = args.entity;
   const changeSet = args.changeSet;
 

@@ -77,7 +77,8 @@ const MikroErrorHttpStatus: Record<string, HttpStatus> = {
 const AppErrorHttpStatus: Record<ErrorKey, HttpStatus> = {
   UNKNOWN_ERROR: HttpStatus.INTERNAL_SERVER_ERROR,
   USER_PERMISSIONS_EXCEED_GROUP: HttpStatus.BAD_REQUEST,
-  PASSWORD_HASHED_NOT_FOUND: HttpStatus.NOT_FOUND
+  USER_PASSWORD_NOT_INITIALIZED: HttpStatus.CONFLICT,
+  INVALID_CREDENTIAL: HttpStatus.UNAUTHORIZED
 };
 
 // const AppErrorHttpStatus: Record<ErrorType, HttpStatus> = {

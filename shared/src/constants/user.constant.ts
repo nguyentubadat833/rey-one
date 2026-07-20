@@ -8,3 +8,7 @@ export const USER_STATUSES = [
   "inactive",
   "pending",
 ] as const;
+export const USER_TYPES = [
+  'people',
+  'organization'
+]
