@@ -66,7 +66,7 @@ const UserEntitySchema = defineEntity({
         .onCreate(() => new UserAuth())
         .lazy(),
     info: () => p.embedded(UserInfoSchema).lazy(),
-    domainRole: () => p.manyToOne(DomainRole).fieldName('domain_role_id').ref().nullable()
+    domainRole: () => p.manyToOne(DomainRole).fieldName('domain_role_id').nullable().ref()
   },
 });
 export class User extends UserEntitySchema.class {
@@ -88,10 +88,6 @@ export class User extends UserEntitySchema.class {
     if (user.status !== 'active') {
       throw AppError.withMessage('INVALID_STATUS', "Invalid user status");
     }
-  }
-
-  isOrganization() {
-    return this.type === org;
   }
 
   isActive() {
@@ -124,7 +120,14 @@ async function saveHandler(args: EventArgs<User>) {
     const hashed = await hash(password);
     args.entity.password.set(hashed);
   }
-  
+
+  if (args.entity.domainRole) {
+    const role = await args.entity.domainRole.loadOrFail()
+    const domain = await role.domain.loadOrFail()
+
+    domain.ensurePermissionsValid(args.entity.permissions)
+  }
+
   if (changeSetType === ChangeSetType.UPDATE) {
 
     if (args.changeSet?.payload.email) {
