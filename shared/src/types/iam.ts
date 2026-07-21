@@ -11,19 +11,29 @@ export type UserProvider = (typeof USER_PROVIDERS)[number];
 export type UserStatus = (typeof USER_STATUSES)[number];
 export type OAuthProvider = (typeof OAUTH_PROVIDERS)[number];
 
-export interface MeResponse {
+export interface UserInfoResponse {
+  name: string;
+  taxCode?: string;
+  phone?: string;
+  website?: string;
+  address?: string;
+}
+
+export type UserResponse = UserInfoResponse & {
   id: string;
-  email: string;
+  email?: string;
   isVerified: boolean;
   type: UserType;
   permissions: AppPermission[];
-  info: {
-    name: string;
-    taxCode?: string;
-  };
+}
+
+export type OrganizationResponse = UserInfoResponse & {
+  id: string;
+  permissions: AppPermission[];
+  status: UserStatus;
 }
 
 export interface LoginResponse {
   token: string;
-  user: MeResponse;
+  user: UserResponse;
 }

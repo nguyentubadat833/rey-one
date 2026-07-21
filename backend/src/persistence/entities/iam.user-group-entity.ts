@@ -18,10 +18,7 @@ const UserGroupEntitySchema = defineEntity({
   name: 'IAMUserGroup',
   tableName: 'iam_user_group',
   properties: {
-    id: p.string().primary().onCreate(group => slugify(group.name, {
-      lower: true,
-      strict: true,
-    })),
+    id: p.string().primary().onCreate(group => generateId(group.name)),
     name: p.string().unique(),
     active: p.boolean().default(true),
     users: () => p.oneToMany(User).mappedBy(user => user.group).lazyRef(),
@@ -61,4 +58,18 @@ function validateChangeSetRoles(args: EventArgs<UserGroup>) {
       entity.ensurePermissionsValid(role.permissions);
     });
   }
+}
+
+export function generateId(name: string) {
+  const slug = slugify(name, {
+    strict: true,
+  })
+    .slice(0, 7)
+    .trim()
+    .replace(/-+$/, '')
+    .toUpperCase()
+
+  const suffix = crypto.randomUUID().slice(0, 7).toUpperCase();
+
+  return `${slug}-${suffix}`;
 }

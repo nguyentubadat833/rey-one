@@ -2,11 +2,41 @@ import { User } from '@/persistence/entities/iam.user-entity';
 import { AppError } from '@/utils/errors/app.error';
 import { EntityRepository, wrap } from '@mikro-orm/core';
 import { Injectable } from '@nestjs/common';
+import { UserOrganizationWithGroup } from '../types/user.type';
 
 @Injectable()
 export class UserRepository extends EntityRepository<User> {
   static toObject(user: User) {
     return wrap(user).toObject(['password', 'group']);
+  }
+
+  async findOrganizations(): Promise<UserOrganizationWithGroup[]> {
+    return this.em.find(
+      User,
+      {
+        type: 'organization',
+      },
+      {
+        populate: ['group', 'info'],
+      },
+    );
+  }
+
+  async findOrganizationById(orgId: string) {
+    return this.em.findOne(
+      User,
+      {
+        type: 'organization',
+        id: orgId,
+      },
+      {
+        populate: ['group'],
+      },
+    );
+  }
+
+  async findOrganizationMembers(orgId: string) {
+    
   }
 
   async getProfileById(id: string) {

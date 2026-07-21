@@ -1,1 +1,0 @@
-export const PARTY_TYPES = ['user', 'organization', 'guest'] as const

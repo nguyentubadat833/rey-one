@@ -4,11 +4,11 @@ import { BaseLoginDto } from '../dtos/auth-dto';
 import { JwtService } from '@nestjs/jwt';
 import { authConfig } from '@/configs/auth.config';
 import { ApiTags } from '@nestjs/swagger';
-import type { ConfigType } from '@nestjs/config';
-import type { FastifyReply } from 'fastify';
-import { CurrentUser, RequireAuth, RequireAuthAndPermission } from '@/utils/decorators/auth.decorator';
+import { CurrentUser, RequireAuth } from '@/utils/decorators/auth.decorator';
 import { LoginResponse, UserType } from '@rey-one/shared';
 import { UserMapper } from '../mappers/user-mapper';
+import type { ConfigType } from '@nestjs/config';
+import type { FastifyReply } from 'fastify';
 
 @ApiTags('IAM / Auth')
 @Controller('auth')
@@ -18,6 +18,13 @@ export class AuthController {
     private readonly userRepo: UserRepository,
     private readonly jwtService: JwtService,
   ) {}
+
+  @RequireAuth()
+  @Get()
+  async getAuth(@CurrentUser('id') userId: string) {
+    const user = await this.userRepo.getProfileById(userId);
+    return UserMapper.toUserResponse(user);
+  }
 
   @Post('login')
   async baseLogin(@Body() dto: BaseLoginDto, @Res({ passthrough: true }) reply: FastifyReply) {
@@ -42,14 +49,7 @@ export class AuthController {
 
     return {
       token: accessToken,
-      user: UserMapper.toMeResponse(user),
+      user: UserMapper.toUserResponse(user),
     } satisfies LoginResponse;
-  }
-
-  @RequireAuth()
-  @Get('me')
-  async getMe(@CurrentUser('id') userId: string) {
-    const user = await this.userRepo.getProfileById(userId)
-    return UserMapper.toMeResponse(user)
   }
 }

@@ -9,6 +9,7 @@ import { ModuleRef } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './controllers/auth-controller';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { OrganizationController } from './controllers/org-controller';
 
 @Global()
 @Module({
@@ -26,7 +27,7 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
       }),
     }),
   ],
-  controllers: [AuthController],
+  controllers: [AuthController, OrganizationController],
   providers: [],
 })
 export class IAMModule implements OnModuleInit {

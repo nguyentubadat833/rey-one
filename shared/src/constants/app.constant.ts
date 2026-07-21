@@ -24,12 +24,12 @@ export const APP_PERMISSIONS = [
   "academy:enrollment:view",
 
   // "org:member:invite",
-  "organization:role:read",
-  "organization:role:manage", // add/update role
+  // "organization:role:read",
+  // "organization:role:manage", // add/update role
   "organization:member:read",
   "organization:member:manage", // add/update member
-  "organization:module:read",
-  "organization:module:manage", // add/update organization, member, role
+  "organization:manage:read",
+  "organization:manage", // add/update organization, member, role
 ] as const;
 
 // export const ACADEMY_PERMISSION = {

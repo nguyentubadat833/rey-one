@@ -10,6 +10,7 @@ import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { User } from '@/persistence/entities/iam.user-entity';
 import { UserGroup } from '@/persistence/entities/iam.user-group-entity';
 import { IAMModule } from '@/modules/iam/iam.module';
+import { CatalogModule } from '@/modules/catalog/catalog.module';
 
 @Module({
   imports: [
@@ -36,7 +37,8 @@ import { IAMModule } from '@/modules/iam/iam.module';
         // entitiesTs: ['./src/**/*.entity.ts'],
       }),
     }),
-    IAMModule
+    IAMModule,
+    CatalogModule
   ],
   controllers: [AppController],
   providers: [],
