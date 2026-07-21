@@ -1,7 +1,5 @@
 import { authConfig } from '@/configs/auth.config';
-import { User, UserInfo } from '@/persistence/entities/iam.user-entity';
-import { UserGroup } from '@/persistence/entities/iam.user-group-entity';
-import { UserRepository } from '@/persistence/repositories/user-repository';
+import { User } from '@/persistence/entities/iam.user-entity';
 import { MikroORM, RequestContext } from '@mikro-orm/core';
 import { Global, Inject, Module, OnModuleInit } from '@nestjs/common';
 import { ConfigModule, type ConfigType } from '@nestjs/config';
@@ -15,7 +13,7 @@ import { OrganizationController } from './controllers/org-controller';
 @Module({
   imports: [
     MikroOrmModule.forFeature({
-      entities: [User, UserGroup],
+      entities: [User],
     }),
     ConfigModule.forFeature(authConfig),
     JwtModule.registerAsync({
@@ -43,33 +41,33 @@ export class IAMModule implements OnModuleInit {
 
       const users = [this.config.userDefault.admin, this.config.userDefault.support];
 
-      for (const item of users) {
-        const user = await em.findOne(User, {
-          email: item.email,
-        });
+      // for (const item of users) {
+      //   const user = await em.findOne(User, {
+      //     email: item.email,
+      //   });
 
-        if (!user) {
-          let userGroup = await em.findOne(UserGroup, {
-            name: item.group,
-          });
+      //   if (!user) {
+      //     let userGroup = await em.findOne(UserGroup, {
+      //       name: item.group,
+      //     });
 
-          userGroup ??= em.create(UserGroup, {
-            name: item.group,
-          });
+      //     userGroup ??= em.create(UserGroup, {
+      //       name: item.group,
+      //     });
 
-          em.create(User, {
-            type: 'people',
-            group: userGroup,
-            email: item.email,
-            password: item.password,
-            info: {
-              name: item.email,
-            },
-          });
-        }
-      }
+      //     em.create(User, {
+      //       type: 'people',
+      //       group: userGroup,
+      //       email: item.email,
+      //       password: item.password,
+      //       info: {
+      //         name: item.email,
+      //       },
+      //     });
+      //   }
+      // }
 
-      await em.flush();
+      // await em.flush();
     });
   }
 }

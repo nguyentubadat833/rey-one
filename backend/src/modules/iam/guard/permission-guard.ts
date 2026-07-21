@@ -1,5 +1,5 @@
 import { authConfig } from '@/configs/auth.config';
-import { UserObject } from '@/persistence/entities/iam.user-entity';
+import { UserObject } from '@/persistence/types/user.type';
 import { AppError } from '@/utils/errors/app.error';
 import { REQUEST_USER_KEY, REQUIRE_PERMISSION_KEY } from '@/utils/types/tokens';
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, ForbiddenException, Inject } from '@nestjs/common';

@@ -1,5 +1,3 @@
-import { User } from '@/persistence/entities/iam.user-entity';
-import { UserGroup } from '@/persistence/entities/iam.user-group-entity';
 import { EntityManager, Dictionary } from '@mikro-orm/core';
 import { Seeder } from '@mikro-orm/seeder';
 

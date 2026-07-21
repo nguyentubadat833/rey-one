@@ -27,11 +27,11 @@ const ProductEntitySchema = defineEntity({
     currency: p.enum(() => CURRENCIES).default('VND'),
     info: p.embedded(ProductInfoSchema),
     trackInventory: p.boolean().default(false).fieldName('track_inventory'),
-    owner: () =>
-      p
-        .manyToOne(User)
-        .inversedBy((user) => user.products)
-        .ref(),
+    // owner: () =>
+    //   p
+    //     .manyToOne(User)
+    //     .inversedBy((user) => user.products)
+    //     .ref(),
     pricing: () => p.oneToOne(ProductPricing).mappedBy((pricing) => pricing.product),
   },
 });
@@ -44,24 +44,23 @@ ProductEntitySchema.addHook('beforeCreate', createHandler);
 ProductEntitySchema.addHook('beforeUpdate', updateHandler);
 
 async function createHandler(args: EventArgs<Product>) {
-  const owner = await args.entity.owner.load();
-  User.ensureExists(owner);
-  User.ensureActive(owner);
-  User.ensureOrganization(owner);
+  // const owner = await args.entity.owner.load();
+  // User.ensureExists(owner);
+  // User.ensureActive(owner);
 }
 
 export function updateHandler(args: EventArgs<Product>) {
-  if(args.changeSet?.payload.sku){
-    throw new AppError('PRODUCT_SKU_IMMUTABLE')
-  }
+  // if(args.changeSet?.payload.sku){
+  //   throw new AppError('PRODUCT_SKU_IMMUTABLE')
+  // }
 
-  if(args.changeSet?.payload.currency){
-    throw new AppError('PRODUCT_CURRENCY_IMMUTABLE')
-  }
+  // if(args.changeSet?.payload.currency){
+  //   throw new AppError('PRODUCT_CURRENCY_IMMUTABLE')
+  // }
 
-  if(args.changeSet?.payload.owner){
-    throw new AppError('PRODUCT_OWNER_IMMUTABLE')
-  }
+  // if(args.changeSet?.payload.owner){
+  //   throw new AppError('PRODUCT_OWNER_IMMUTABLE')
+  // }
 }
 
 export function generateSku(name: string) {

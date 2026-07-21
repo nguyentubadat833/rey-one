@@ -1,5 +1,5 @@
-import { UserObject } from '@/persistence/entities/iam.user-entity';
 import { UserRepository } from '@/persistence/repositories/user-repository';
+import { UserObject } from '@/persistence/types/user.type';
 import { IS_PUBLIC_KEY, REQUEST_USER_KEY } from '@/utils/types/tokens';
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';

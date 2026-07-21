@@ -8,7 +8,6 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { User } from '@/persistence/entities/iam.user-entity';
-import { UserGroup } from '@/persistence/entities/iam.user-group-entity';
 import { IAMModule } from '@/modules/iam/iam.module';
 import { CatalogModule } from '@/modules/catalog/catalog.module';
 
@@ -31,7 +30,7 @@ import { CatalogModule } from '@/modules/catalog/catalog.module';
         password: config.dbPassword,
         dbName: config.dbName,
         debug: true,
-        entities: [User, UserGroup],
+        entities: [User],
         // autoLoadEntities: true,
         // entities: ['./dist/**/*.entity.js'],
         // entitiesTs: ['./src/**/*.entity.ts'],

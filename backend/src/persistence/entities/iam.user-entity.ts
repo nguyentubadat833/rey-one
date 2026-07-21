@@ -1,13 +1,12 @@
-import { defineEntity, EntityDTO, EventArgs, p } from '@mikro-orm/core';
+import { ChangeSetType, defineEntity, EntityDTO, EventArgs, p } from '@mikro-orm/core';
 import { APP_PERMISSIONS, AppPermission, USER_STATUSES, USER_TYPES, UserStatus, UserType } from '@rey-one/shared';
 import { AppError } from '@/utils/errors/app.error';
 import { OAuthCredential } from './iam.oauth-credential-entity';
-import { ConflictException, NotFoundException } from '@nestjs/common';
 import { hash, verify } from 'argon2';
-import { UserGroup } from './iam.user-group-entity';
 import { UserRepository } from '../repositories/user-repository';
 import { Product } from './catalog.product-entity';
-import { th } from 'zod/v4/locales';
+import { Domain } from './iam.domain-entity';
+import { DomainRole } from './iam.domain-role-entity';
 
 const org = 'organization' satisfies UserType;
 
@@ -24,7 +23,7 @@ export const UserInfoSchema = defineEntity({
   },
 });
 
-export class UserInfo extends UserInfoSchema.class {}
+export class UserInfo extends UserInfoSchema.class { }
 UserInfoSchema.setClass(UserInfo);
 
 // User Auth
@@ -39,7 +38,7 @@ const UserAuthSchema = defineEntity({
   },
 });
 
-export class UserAuth extends UserAuthSchema.class {}
+export class UserAuth extends UserAuthSchema.class { }
 UserAuthSchema.setClass(UserAuth);
 
 // User Entity
@@ -49,7 +48,7 @@ const UserEntitySchema = defineEntity({
   repository: () => UserRepository,
   properties: {
     id: p.uuid().primary().defaultRaw('gen_random_uuid()'),
-    type: p.enum(() => USER_TYPES),
+    type: p.enum(USER_TYPES),
     oauthCredentials: () =>
       p
         .oneToMany(OAuthCredential)
@@ -58,17 +57,16 @@ const UserEntitySchema = defineEntity({
         .lazyRef(),
     email: p.string().length(255).unique().nullable(),
     password: p.string().length(255).nullable().hidden().lazy().ref(),
-    status: p.enum(() => USER_STATUSES).default('active' satisfies UserStatus),
+    status: p.enum(USER_STATUSES).default('active' satisfies UserStatus),
     isVerified: p.boolean().default(false).fieldName('is_verified'),
     permissions: p.enum(APP_PERMISSIONS).array().default([]),
-    group: () => p.manyToOne(UserGroup).lazy().ref(),
     auth: () =>
       p
         .embedded(UserAuthSchema)
         .onCreate(() => new UserAuth())
         .lazy(),
     info: () => p.embedded(UserInfoSchema).lazy(),
-    products: () => p.oneToMany(Product).mappedBy((prd) => prd.owner),
+    domainRole: () => p.manyToOne(DomainRole).fieldName('domain_role_id').ref().nullable()
   },
 });
 export class User extends UserEntitySchema.class {
@@ -82,19 +80,13 @@ export class User extends UserEntitySchema.class {
 
   static ensureExists(user: User | null): asserts user is User {
     if (!user) {
-      throw new AppError('USER_NOT_FOUND');
+      throw AppError.withMessage('OBJECT_NOT_FOUND', "User not found");
     }
   }
 
   static ensureActive(user: User) {
     if (user.status !== 'active') {
-      throw new AppError('INVALID_USER_STATUS');
-    }
-  }
-
-  static ensureOrganization(user: User) {
-    if (user.type !== org) {
-      throw new AppError('USER_NOT_ORGANIZATION');
+      throw AppError.withMessage('INVALID_STATUS', "Invalid user status");
     }
   }
 
@@ -110,7 +102,7 @@ export class User extends UserEntitySchema.class {
     const passwordHashed = await this.password.load();
 
     if (!passwordHashed) {
-      throw new AppError('USER_PASSWORD_NOT_INITIALIZED');
+      throw new AppError("PROPERTY_NOT_INITIALIZED", "Password not initialized");
     }
 
     return verify(passwordHashed, password);
@@ -119,38 +111,24 @@ export class User extends UserEntitySchema.class {
 
 UserEntitySchema.setClass(User);
 
-UserEntitySchema.addHook('beforeCreate', createHandler);
-UserEntitySchema.addHook('beforeUpdate', updateHandler);
+UserEntitySchema.addHook('beforeCreate', saveHandler);
+UserEntitySchema.addHook('beforeUpdate', saveHandler);
 
-function createHandler(args: EventArgs<User>) {
-  identityHandler(args);
-}
+async function saveHandler(args: EventArgs<User>) {
+  const changeSetType: ChangeSetType | undefined = args.changeSet?.type
 
-function updateHandler(args: EventArgs<User>) {
-  identityHandler(args);
+  if (!changeSetType) return
 
-  if (args.entity.email && args.changeSet?.payload.email) {
-    throw new AppError('USER_EMAIL_IMMUTABLE');
-  }
-
-  if (args.entity.isOrganization() && args.changeSet?.payload.group) {
-    throw new AppError('USER_ORGANIZATION_GROUP_IMMUTABLE');
-  }
-}
-
-async function identityHandler(args: EventArgs<User>) {
   const password = args.changeSet?.payload.password;
-  const permissions = args.changeSet?.payload.permissions;
-
   if (typeof password === 'string') {
     const hashed = await hash(password);
     args.entity.password.set(hashed);
   }
+  
+  if (changeSetType === ChangeSetType.UPDATE) {
 
-  if (permissions) {
-    const group = await args.entity.group.loadOrFail();
-    group.ensurePermissionsValid(args.entity.permissions);
+    if (args.changeSet?.payload.email) {
+      throw AppError.withMessage('PROPERTY_IMMUTABLE', "Email immutable");
+    }
   }
 }
-
-export type UserObject = EntityDTO<Omit<User, 'password'>>;

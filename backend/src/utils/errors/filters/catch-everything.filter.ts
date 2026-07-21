@@ -8,7 +8,7 @@ import { DriverException, UniqueConstraintViolationException } from '@mikro-orm/
 export class AppCatchEverythingFilter implements ExceptionFilter {
   private readonly logger = new Logger(AppCatchEverythingFilter.name);
 
-  constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
+  constructor(private readonly httpAdapterHost: HttpAdapterHost) { }
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const { httpAdapter } = this.httpAdapterHost;
@@ -78,16 +78,11 @@ const AppErrorHttpStatus: Record<ErrorKey, HttpStatus> = {
   UNKNOWN_ERROR: HttpStatus.INTERNAL_SERVER_ERROR,
   INSUFFICIENT_PERMISSION: HttpStatus.FORBIDDEN,
   INVALID_CREDENTIAL: HttpStatus.UNAUTHORIZED,
-  INVALID_USER_STATUS: HttpStatus.CONFLICT,
-  USER_PERMISSIONS_EXCEED_GROUP: HttpStatus.BAD_REQUEST,
-  USER_PASSWORD_NOT_INITIALIZED: HttpStatus.CONFLICT,
-  USER_NOT_FOUND: HttpStatus.NOT_FOUND,
-  USER_NOT_ORGANIZATION: HttpStatus.CONFLICT,
-  USER_EMAIL_IMMUTABLE: HttpStatus.CONFLICT,
-  USER_ORGANIZATION_GROUP_IMMUTABLE: HttpStatus.CONFLICT,
-  PRODUCT_SKU_IMMUTABLE: HttpStatus.CONFLICT,
-  PRODUCT_CURRENCY_IMMUTABLE: HttpStatus.CONFLICT,
-  PRODUCT_OWNER_IMMUTABLE: HttpStatus.CONFLICT
+  INVALID_PERMISSION: HttpStatus.BAD_REQUEST,
+  INVALID_STATUS: HttpStatus.CONFLICT,
+  PROPERTY_IMMUTABLE: HttpStatus.CONFLICT,
+  PROPERTY_NOT_INITIALIZED: HttpStatus.CONFLICT,
+  OBJECT_NOT_FOUND: HttpStatus.NOT_FOUND,
 };
 
 // const AppErrorHttpStatus: Record<ErrorType, HttpStatus> = {

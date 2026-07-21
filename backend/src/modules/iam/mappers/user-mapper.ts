@@ -1,6 +1,5 @@
 import { User } from '@/persistence/entities/iam.user-entity';
-import { UserOrganizationWithGroup } from '@/persistence/types/user.type';
-import { UserResponse, OrganizationResponse, UserStatus, UserType, UserInfoResponse } from '@rey-one/shared';
+import { UserResponse, UserType, UserInfoResponse } from '@rey-one/shared';
 
 export class UserMapper {
   static toUserInfo(info: User['info']) {
@@ -22,14 +21,5 @@ export class UserMapper {
       permissions: user.permissions,
       ...UserMapper.toUserInfo(user.info),
     } satisfies UserResponse;
-  }
-
-  static toOrganizationResponse(user: UserOrganizationWithGroup) {
-    return {
-      id: user.id,
-      permissions: user.group.getEntity().permissions,
-      status: user.status as UserStatus,
-      ...UserMapper.toUserInfo(user.info),
-    } satisfies OrganizationResponse;
   }
 }
