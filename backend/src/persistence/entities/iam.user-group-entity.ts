@@ -2,7 +2,6 @@ import { AppError } from '@/utils/errors/app.error';
 import { defineEntity, EventArgs, p } from '@mikro-orm/core';
 import { APP_PERMISSIONS, AppPermission } from '@rey-one/shared';
 import { User } from './iam.user-entity';
-import { group } from 'console';
 import slugify from 'slugify';
 
 const UserRoleSchema = defineEntity({
@@ -35,7 +34,7 @@ const UserGroupEntitySchema = defineEntity({
 });
 
 export class UserGroup extends UserGroupEntitySchema.class {
-  ensureRolePermissionsValid(permissions: AppPermission[]) {
+  ensurePermissionsValid(permissions: AppPermission[]) {
     const invalid = permissions.filter((p) => !this.permissions.includes(p));
     if (invalid.length > 0) {
       throw new AppError('USER_PERMISSIONS_EXCEED_GROUP', `Permissions not available in group: ${invalid.join(', ')}`);
@@ -59,7 +58,7 @@ function validateChangeSetRoles(args: EventArgs<UserGroup>) {
 
   if (changeSet.payload.roles) {
     entity.roles.forEach((role) => {
-      entity.ensureRolePermissionsValid(role.permissions);
+      entity.ensurePermissionsValid(role.permissions);
     });
   }
 }

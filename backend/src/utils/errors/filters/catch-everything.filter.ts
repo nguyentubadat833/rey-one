@@ -54,7 +54,7 @@ export class AppCatchEverythingFilter implements ExceptionFilter {
     }
 
     if (error instanceof DriverException) {
-      console.log(JSON.stringify(error))
+      console.log(JSON.stringify(error));
       const statusCode = MikroErrorHttpStatus[error.name];
       return {
         statusCode: statusCode ?? 500,
@@ -76,9 +76,11 @@ const MikroErrorHttpStatus: Record<string, HttpStatus> = {
 
 const AppErrorHttpStatus: Record<ErrorKey, HttpStatus> = {
   UNKNOWN_ERROR: HttpStatus.INTERNAL_SERVER_ERROR,
+  INSUFFICIENT_PERMISSION: HttpStatus.FORBIDDEN,
+  INVALID_CREDENTIAL: HttpStatus.UNAUTHORIZED,
   USER_PERMISSIONS_EXCEED_GROUP: HttpStatus.BAD_REQUEST,
   USER_PASSWORD_NOT_INITIALIZED: HttpStatus.CONFLICT,
-  INVALID_CREDENTIAL: HttpStatus.UNAUTHORIZED
+  USER_NOT_FOUND: HttpStatus.NOT_FOUND,
 };
 
 // const AppErrorHttpStatus: Record<ErrorType, HttpStatus> = {

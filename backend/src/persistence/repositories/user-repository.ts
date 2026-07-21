@@ -1,30 +1,60 @@
-import { User } from "@/persistence/entities/iam.user-entity";
-import { AppError } from "@/utils/errors/app.error";
-import { EntityRepository } from "@mikro-orm/core";
-import { Injectable } from "@nestjs/common";
+import { User } from '@/persistence/entities/iam.user-entity';
+import { AppError } from '@/utils/errors/app.error';
+import { EntityRepository, wrap } from '@mikro-orm/core';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class UserRepository extends EntityRepository<User> {
+  static toObject(user: User) {
+    return wrap(user).toObject(['password', 'group']);
+  }
 
-    async verifyBaseCredential(email: string, password: string) {
+  async getProfileById(id: string) {
+    return this.findOneOrFail(
+      { id },
+      {
+        populate: ['info.name'],
+        failHandler: () => new AppError('USER_NOT_FOUND'),
+      },
+    );
+  }
 
-        const err = new AppError('INVALID_CREDENTIAL')
-        const user = await this.findOneOrFail(
-            { email },
-            {
-                populate: ['password'],
-                failHandler: () => err
-            }
-        )
+  async authenticateByPassword(email: string, password: string) {
+    const err = new AppError('INVALID_CREDENTIAL');
+    const user = await this.findOneOrFail(
+      { email },
+      {
+        populate: ['auth.failedLoginAttempts', 'auth.lastFailedLoginAttemptAt', 'auth.lastSuccessfulLoginAt', 'auth.token', 'info.name'],
+        failHandler: () => err,
+      },
+    );
 
-        if (await user.verifyPassword(password)) {
-            return user;
-        }
-
-        throw err;
+    if (await user.verifyPassword(password)) {
+      return user;
+    } else {
+      await this.recordFailedAuthentication(user);
     }
 
-    async verifyOAuthCredential(){
-        
-    }
+    throw err;
+  }
+
+  async recordFailedAuthentication(user: User) {
+    user.auth.failedLoginAttempts = user.auth.failedLoginAttempts ? user.auth.failedLoginAttempts + 1 : 1;
+    user.auth.lastFailedLoginAttemptAt = new Date();
+
+    await this.save(user);
+  }
+
+  async recordSuccessfulAuthentication(user: User) {
+    user.auth.failedLoginAttempts = 0;
+    user.auth.lastFailedLoginAttemptAt = null;
+    user.auth.lastSuccessfulLoginAt = new Date();
+
+    await this.save(user);
+  }
+
+  async save(user: User) {
+    this.em.persist(user);
+    return this.em.flush();
+  }
 }
