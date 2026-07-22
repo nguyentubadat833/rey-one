@@ -32,14 +32,12 @@ export const authConfig = registerAs('auth', () => {
     jwtSecret: parsed.JWT_SECRET,
     jwtAccessExpiresIn: parsed.JWT_ACCESS_EXPIRES_IN_MINUTES,
     jwtRefreshExpiresIn: parsed.JWT_REFRESH_EXPIRES_IN_MINUTES,
-    userDefault: {
+    systemUser: {
       admin: {
-        group: 'sys_admin',
         email: parsed.USER_ADMIN_EMAIL,
         password: parsed.USER_ADMIN_PASSWORD,
       },
       support: {
-        group: 'sys_support',
         email: parsed.USER_SUPPORT_EMAIL,
         password: parsed.USER_SUPPORT_PASSWORD,
       },

@@ -9,6 +9,6 @@ export const USER_STATUSES = [
   "pending",
 ] as const;
 export const USER_TYPES = [
-  'people',
-  'organization'
-]
+  'system',
+  'domain'
+] as const

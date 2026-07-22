@@ -1,4 +1,4 @@
-import z, { email } from "zod";
+import z from "zod";
 import { APP_PERMISSIONS, USER_STATUSES, USER_TYPES } from "../constants";
 
 export const BaseLoginSchema = z.object({
@@ -22,17 +22,12 @@ export const UserInputSchema = UserInfoInputSchema.extend({
   permissions: z.array(z.enum(APP_PERMISSIONS)),
 });
 
-export const OrganizationInputSchema = UserInputSchema.omit({
-  email: true,
-  password: true,
-  type: true,
+export const UpdateUserInput = UserInputSchema.extend({}).partial();
+
+export const DomainInputSchema = z.object({
+  name: z.string(),
+  active: z.boolean().default(true),
+  permissions: z.array(z.enum(APP_PERMISSIONS)),
 });
 
-export const OrganizationMemberInputSchema = UserInputSchema.omit({
-  type: true,
-  email: true,
-}).extend({
-  email: z.string(),
-});
-
-export const UserUpdateInput = UserInputSchema.extend({});
+export const UpdateDomainInputSchema = DomainInputSchema.extend({}).partial();

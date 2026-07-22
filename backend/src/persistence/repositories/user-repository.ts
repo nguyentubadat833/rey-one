@@ -5,6 +5,7 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class UserRepository extends EntityRepository<User> {
+  
   static toObject(user: User) {
     return wrap(user).toObject(['password']);
   }
@@ -14,7 +15,7 @@ export class UserRepository extends EntityRepository<User> {
       { id },
       {
         populate: ['info.name'],
-        // failHandler: () => new AppError('USER_NOT_FOUND'),
+        failHandler: () => AppError.withMessage('OBJECT_NOT_FOUND', 'User not found'),
       },
     );
   }
@@ -24,13 +25,13 @@ export class UserRepository extends EntityRepository<User> {
     const user = await this.findOneOrFail(
       { email },
       {
-        populate: ['auth.failedLoginAttempts', 'auth.lastFailedLoginAttemptAt', 'auth.lastSuccessfulLoginAt', 'auth.token', 'info.name'],
+        populate: ['auth.failedLoginAttempts', 'auth.lastFailedLoginAttemptAt', 'auth.lastSuccessfulLoginAt', 'auth.token', 'info.name', 'members'],
         failHandler: () => err,
       },
     );
 
     if (await user.verifyPassword(password)) {
-      return user;
+      return user as User & { email: string };
     } else {
       await this.recordFailedAuthentication(user);
     }

@@ -1,0 +1,28 @@
+import { EntityManager } from '@mikro-orm/core';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { RequireAdmin, RequireAuth, RequirePermission } from '@/utils/decorators/auth.decorator';
+import { UserRepository } from '@/persistence/repositories/user-repository';
+import { DomainInputDto } from '../dtos/domain-dto';
+import { Domain } from '@/persistence/entities/iam.domain-entity';
+import { DomainRepository } from '@/persistence/repositories/domain-repository';
+
+@RequireAuth()
+@ApiTags('IAM / Domain')
+@Controller('domain')
+export class OrganizationController {
+  constructor(
+    private readonly domainRepo: DomainRepository,
+    private readonly em: EntityManager
+  ) {}
+
+  @RequireAdmin()
+  @ApiOperation({ summary: 'Create domain' })
+  @Post()
+  async createDomain(@Body() dto: DomainInputDto) {
+    const domain = this.em.create(Domain, dto);
+
+    
+    
+  }
+}

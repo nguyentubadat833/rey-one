@@ -1,9 +1,10 @@
 import { UserRepository } from '@/persistence/repositories/user-repository';
-import { UserObject } from '@/persistence/types/user.type';
+import { UserAuth } from '@/utils/types/system';
 import { IS_PUBLIC_KEY, REQUEST_USER_KEY } from '@/utils/types/tokens';
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
+import { UserType } from '@rey-one/shared';
 import { FastifyRequest } from 'fastify';
 
 @Injectable()
@@ -27,7 +28,7 @@ export class AuthGuard implements CanActivate {
     if (accessTokenFromCookie || authHeader?.startsWith('Bearer ')) {
       const accessToken = accessTokenFromCookie ?? authHeader!.replace('Bearer ', '');
 
-      const user: UserObject = await this.jwtService.verifyAsync(accessToken);
+      const user: UserAuth = await this.jwtService.verifyAsync(accessToken);
       request[REQUEST_USER_KEY] = user;
 
       return true;
@@ -39,7 +40,12 @@ export class AuthGuard implements CanActivate {
       const user = await this.userRepo.authenticateByPassword(email, password);
       await this.userRepo.recordSuccessfulAuthentication(user);
 
-      request[REQUEST_USER_KEY] = UserRepository.toObject(user);
+      request[REQUEST_USER_KEY] = {
+        id: user.id,
+        type: user.type as UserType,
+        email: user.email,
+        domainAccess: await user.loadDomainAccess(),
+      } satisfies UserAuth;
       return true;
     }
 

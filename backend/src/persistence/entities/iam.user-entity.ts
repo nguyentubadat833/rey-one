@@ -4,11 +4,7 @@ import { AppError } from '@/utils/errors/app.error';
 import { OAuthCredential } from './iam.oauth-credential-entity';
 import { hash, verify } from 'argon2';
 import { UserRepository } from '../repositories/user-repository';
-import { Product } from './catalog.product-entity';
-import { Domain } from './iam.domain-entity';
-import { DomainRole } from './iam.domain-role-entity';
-
-const org = 'organization' satisfies UserType;
+import { DomainMember } from './iam.domain-member-entity';
 
 // User Info
 export const UserInfoSchema = defineEntity({
@@ -23,7 +19,7 @@ export const UserInfoSchema = defineEntity({
   },
 });
 
-export class UserInfo extends UserInfoSchema.class { }
+export class UserInfo extends UserInfoSchema.class {}
 UserInfoSchema.setClass(UserInfo);
 
 // User Auth
@@ -38,7 +34,7 @@ const UserAuthSchema = defineEntity({
   },
 });
 
-export class UserAuth extends UserAuthSchema.class { }
+export class UserAuth extends UserAuthSchema.class {}
 UserAuthSchema.setClass(UserAuth);
 
 // User Entity
@@ -48,7 +44,7 @@ const UserEntitySchema = defineEntity({
   repository: () => UserRepository,
   properties: {
     id: p.uuid().primary().defaultRaw('gen_random_uuid()'),
-    type: p.enum(USER_TYPES),
+    type: p.enum(() => USER_TYPES),
     oauthCredentials: () =>
       p
         .oneToMany(OAuthCredential)
@@ -59,14 +55,19 @@ const UserEntitySchema = defineEntity({
     password: p.string().length(255).nullable().hidden().lazy().ref(),
     status: p.enum(USER_STATUSES).default('active' satisfies UserStatus),
     isVerified: p.boolean().default(false).fieldName('is_verified'),
-    permissions: p.enum(APP_PERMISSIONS).array().default([]),
     auth: () =>
       p
         .embedded(UserAuthSchema)
         .onCreate(() => new UserAuth())
         .lazy(),
     info: () => p.embedded(UserInfoSchema).lazy(),
-    domainRole: () => p.manyToOne(DomainRole).fieldName('domain_role_id').nullable().ref()
+    members: () =>
+      p
+        .oneToMany(DomainMember)
+        .mappedBy((member) => member.user)
+        .orphanRemoval()
+        .lazy()
+        .ref(),
   },
 });
 export class User extends UserEntitySchema.class {
@@ -80,13 +81,13 @@ export class User extends UserEntitySchema.class {
 
   static ensureExists(user: User | null): asserts user is User {
     if (!user) {
-      throw AppError.withMessage('OBJECT_NOT_FOUND', "User not found");
+      throw AppError.withMessage('OBJECT_NOT_FOUND', 'User not found');
     }
   }
 
   static ensureActive(user: User) {
     if (user.status !== 'active') {
-      throw AppError.withMessage('INVALID_STATUS', "Invalid user status");
+      throw AppError.withMessage('INVALID_STATUS', 'Invalid user status');
     }
   }
 
@@ -98,10 +99,22 @@ export class User extends UserEntitySchema.class {
     const passwordHashed = await this.password.load();
 
     if (!passwordHashed) {
-      throw new AppError("PROPERTY_NOT_INITIALIZED", "Password not initialized");
+      throw new AppError('PROPERTY_NOT_INITIALIZED', 'Password not initialized');
     }
 
     return verify(passwordHashed, password);
+  }
+
+  async loadDomainAccess() {
+    const members = await this.members.load();
+
+    const result: Record<string, AppPermission[]> = {};
+
+    members.getItems().forEach((item) => {
+      result[item.domain.id] = item.role?.permissions ?? [];
+    });
+
+    return result
   }
 }
 
@@ -111,27 +124,19 @@ UserEntitySchema.addHook('beforeCreate', saveHandler);
 UserEntitySchema.addHook('beforeUpdate', saveHandler);
 
 async function saveHandler(args: EventArgs<User>) {
-  const changeSetType: ChangeSetType | undefined = args.changeSet?.type
+  const changeSetType: ChangeSetType | undefined = args.changeSet?.type;
 
-  if (!changeSetType) return
+  if (!changeSetType) return;
 
-  const password = args.changeSet?.payload.password;
-  if (typeof password === 'string') {
-    const hashed = await hash(password);
+  const changeSetPassword = args.changeSet?.payload.password;
+  if (typeof changeSetPassword === 'string') {
+    const hashed = await hash(changeSetPassword);
     args.entity.password.set(hashed);
   }
 
-  if (args.entity.domainRole) {
-    const role = await args.entity.domainRole.loadOrFail()
-    const domain = await role.domain.loadOrFail()
-
-    domain.ensurePermissionsValid(args.entity.permissions)
-  }
-
   if (changeSetType === ChangeSetType.UPDATE) {
-
-    if (args.changeSet?.payload.email) {
-      throw AppError.withMessage('PROPERTY_IMMUTABLE', "Email immutable");
+    if (args.changeSet?.payload.email && args.changeSet.originalEntity?.email) {
+      throw AppError.withMessage('PROPERTY_IMMUTABLE', 'Email immutable');
     }
   }
 }

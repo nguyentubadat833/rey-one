@@ -27,18 +27,18 @@ async function bootstrap() {
   if (appEnv !== 'production' || autoUpdateDatabase) {
     const orm = app.get(MikroORM);
 
-    // await orm.em.getConnection().execute(`
-    // DROP SCHEMA public CASCADE;
-    // CREATE SCHEMA public;
-    // `);
+    await orm.em.getConnection().execute(`
+    DROP SCHEMA public CASCADE;
+    CREATE SCHEMA public;
+    `);
 
-    // await orm.schema.refresh();
+    await orm.schema.refresh();
 
-    const diff = await orm.schema.getUpdateSchemaSQL();
-    if (diff.length) {
-      console.log(diff);
-      await orm.schema.update();
-    }
+    // const diff = await orm.schema.getUpdateSchemaSQL();
+    // if (diff.length) {
+    //   console.log(diff);
+    //   await orm.schema.update();
+    // }
 
     // await orm.seeder.seed(DatabaseSeeder);
   }

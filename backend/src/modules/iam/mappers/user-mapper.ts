@@ -18,7 +18,6 @@ export class UserMapper {
       email: user.email ?? undefined,
       isVerified: user.isVerified,
       type: user.type as UserType,
-      permissions: user.permissions,
       ...UserMapper.toUserInfo(user.info),
     } satisfies UserResponse;
   }

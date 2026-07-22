@@ -3,12 +3,13 @@ import { Body, Controller, Get, Inject, Post, Res } from '@nestjs/common';
 import { BaseLoginDto } from '../dtos/auth-dto';
 import { JwtService } from '@nestjs/jwt';
 import { authConfig } from '@/configs/auth.config';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, RequireAuth } from '@/utils/decorators/auth.decorator';
-import { LoginResponse, UserType } from '@rey-one/shared';
+import { LoginResponse, UserResponse, UserType } from '@rey-one/shared';
 import { UserMapper } from '../mappers/user-mapper';
 import type { ConfigType } from '@nestjs/config';
 import type { FastifyReply } from 'fastify';
+import { UserAuth } from '@/utils/types/system';
 
 @ApiTags('IAM / Auth')
 @Controller('auth')
@@ -19,6 +20,7 @@ export class AuthController {
     private readonly jwtService: JwtService,
   ) {}
 
+  @ApiOperation({summary: "Get user auth"})
   @RequireAuth()
   @Get()
   async getAuth(@CurrentUser('id') userId: string) {
@@ -26,12 +28,20 @@ export class AuthController {
     return UserMapper.toUserResponse(user);
   }
 
+  @ApiOperation({ summary: 'Base login' })
   @Post('login')
   async baseLogin(@Body() dto: BaseLoginDto, @Res({ passthrough: true }) reply: FastifyReply) {
     const user = await this.userRepo.authenticateByPassword(dto.email, dto.password);
 
+    const userAuth = {
+      id: user.id,
+      type: user.type as UserType,
+      email: user.email,
+      domainAccess: await user.loadDomainAccess(),
+    } satisfies UserAuth;
+
     const tokenExp = this.config.jwtAccessExpiresIn;
-    const accessToken = await this.jwtService.signAsync(UserRepository.toObject(user), {
+    const accessToken = await this.jwtService.signAsync(userAuth, {
       expiresIn: `${tokenExp}M`,
     });
 
@@ -49,7 +59,12 @@ export class AuthController {
 
     return {
       token: accessToken,
-      user: UserMapper.toUserResponse(user),
+      user: {
+        name: user.info.name,
+        id: user.id,
+        isVerified: user.isVerified,
+        type: user.type as UserType,
+      } satisfies UserResponse,
     } satisfies LoginResponse;
   }
 }

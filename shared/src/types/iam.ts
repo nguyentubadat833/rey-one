@@ -24,13 +24,6 @@ export type UserResponse = UserInfoResponse & {
   email?: string;
   isVerified: boolean;
   type: UserType;
-  permissions: AppPermission[];
-}
-
-export type OrganizationResponse = UserInfoResponse & {
-  id: string;
-  permissions: AppPermission[];
-  status: UserStatus;
 }
 
 export interface LoginResponse {

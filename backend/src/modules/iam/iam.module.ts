@@ -7,7 +7,7 @@ import { ModuleRef } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './controllers/auth-controller';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { OrganizationController } from './controllers/org-controller';
+import { OrganizationController } from './controllers/domain-controller';
 
 @Global()
 @Module({
@@ -39,7 +39,7 @@ export class IAMModule implements OnModuleInit {
     await RequestContext.create(this.orm.em, async () => {
       const em = RequestContext.getEntityManager()!;
 
-      const users = [this.config.userDefault.admin, this.config.userDefault.support];
+      const users = [this.config.systemUser.admin, this.config.systemUser.support];
 
       // for (const item of users) {
       //   const user = await em.findOne(User, {
