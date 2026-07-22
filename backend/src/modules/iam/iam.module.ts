@@ -1,5 +1,5 @@
 import { authConfig } from '@/configs/auth.config';
-import { User } from '@/persistence/entities/iam.user-entity';
+import { User } from '@/persistence/entities/iam-user.entity';
 import { MikroORM, RequestContext } from '@mikro-orm/core';
 import { Global, Inject, Module, OnModuleInit } from '@nestjs/common';
 import { ConfigModule, type ConfigType } from '@nestjs/config';

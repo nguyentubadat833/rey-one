@@ -1,6 +1,6 @@
 import { defineEntity, p } from "@mikro-orm/core";
 import { OAUTH_PROVIDERS } from "@rey-one/shared";
-import { User } from "./iam.user-entity";
+import { User } from "./iam-user.entity";
 
 const OAuthCredentialEntitySchema = defineEntity({
     name: 'IAMOAuthCredential',

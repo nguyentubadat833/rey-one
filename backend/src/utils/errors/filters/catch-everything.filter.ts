@@ -82,6 +82,7 @@ const AppErrorHttpStatus: Record<ErrorKey, HttpStatus> = {
   INVALID_STATUS: HttpStatus.CONFLICT,
   PROPERTY_IMMUTABLE: HttpStatus.CONFLICT,
   PROPERTY_NOT_INITIALIZED: HttpStatus.CONFLICT,
+  PROPERTY_REQUIRED: HttpStatus.BAD_REQUEST,
   OBJECT_NOT_FOUND: HttpStatus.NOT_FOUND,
 };
 

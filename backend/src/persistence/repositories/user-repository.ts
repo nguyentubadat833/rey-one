@@ -1,4 +1,4 @@
-import { User } from '@/persistence/entities/iam.user-entity';
+import { User } from '@/persistence/entities/iam-user.entity';
 import { AppError } from '@/utils/errors/app.error';
 import { EntityRepository, wrap } from '@mikro-orm/core';
 import { Injectable } from '@nestjs/common';

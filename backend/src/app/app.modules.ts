@@ -7,7 +7,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
-import { User } from '@/persistence/entities/iam.user-entity';
+import { User } from '@/persistence/entities/iam-user.entity';
 import { IAMModule } from '@/modules/iam/iam.module';
 import { CatalogModule } from '@/modules/catalog/catalog.module';
 

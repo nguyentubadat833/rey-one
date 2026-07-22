@@ -1,4 +1,4 @@
-import { User } from '@/persistence/entities/iam.user-entity';
+import { User } from '@/persistence/entities/iam-user.entity';
 import { UserResponse, UserType, UserInfoResponse } from '@rey-one/shared';
 
 export class UserMapper {

@@ -1,7 +1,7 @@
 import { defineEntity, EventArgs, p } from '@mikro-orm/core';
 import { CURRENCIES } from '@rey-one/shared';
-import { User } from './iam.user-entity';
-import { ProductPricing } from './catalog.product-pricing-entity';
+import { User } from './iam-user.entity';
+import { ProductPricing } from './catalog-product.pricing.entity';
 import slugify from 'slugify';
 import { AppError } from '@/utils/errors/app.error';
 

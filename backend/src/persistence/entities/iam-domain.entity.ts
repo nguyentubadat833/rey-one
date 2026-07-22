@@ -1,8 +1,8 @@
 import { AppError } from '@/utils/errors/app.error';
 import { defineEntity, p } from '@mikro-orm/core';
 import { APP_PERMISSIONS, AppPermission } from '@rey-one/shared';
-import { DomainRole } from './iam.domain-role-entity';
-import { DomainMember } from './iam.domain-member-entity';
+import { DomainRole } from './iam-domain.role.entity';
+import { DomainMember } from './iam-domain.member.entity';
 import { DomainRepository } from '../repositories/domain-repository'  
 
 const DomainEntitySchema = defineEntity({

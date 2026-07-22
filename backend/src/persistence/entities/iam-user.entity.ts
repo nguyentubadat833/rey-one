@@ -1,10 +1,11 @@
 import { ChangeSetType, defineEntity, EntityDTO, EventArgs, p } from '@mikro-orm/core';
 import { APP_PERMISSIONS, AppPermission, USER_STATUSES, USER_TYPES, UserStatus, UserType } from '@rey-one/shared';
 import { AppError } from '@/utils/errors/app.error';
-import { OAuthCredential } from './iam.oauth-credential-entity';
+import { OAuthCredential } from './iam-user.oauth-credential.entity';
 import { hash, verify } from 'argon2';
 import { UserRepository } from '../repositories/user-repository';
-import { DomainMember } from './iam.domain-member-entity';
+import { DomainMember } from './iam-domain.member.entity';
+import { BaseCredential } from './iam-user.base-credential.entity';
 
 // User Info
 export const UserInfoSchema = defineEntity({
@@ -19,7 +20,7 @@ export const UserInfoSchema = defineEntity({
   },
 });
 
-export class UserInfo extends UserInfoSchema.class {}
+export class UserInfo extends UserInfoSchema.class { }
 UserInfoSchema.setClass(UserInfo);
 
 // User Auth
@@ -34,7 +35,7 @@ const UserAuthSchema = defineEntity({
   },
 });
 
-export class UserAuth extends UserAuthSchema.class {}
+export class UserAuth extends UserAuthSchema.class { }
 UserAuthSchema.setClass(UserAuth);
 
 // User Entity
@@ -45,14 +46,17 @@ const UserEntitySchema = defineEntity({
   properties: {
     id: p.uuid().primary().defaultRaw('gen_random_uuid()'),
     type: p.enum(() => USER_TYPES),
+    baseCredential: () => p.oneToOne(BaseCredential).owner()
+      .nullable()
+      .joinColumn('base_credential_id')
+      .orphanRemoval()
+      .ref(),
     oauthCredentials: () =>
       p
         .oneToMany(OAuthCredential)
         .mappedBy((c) => c.user)
         .orphanRemoval()
-        .lazyRef(),
-    email: p.string().length(255).unique().nullable(),
-    password: p.string().length(255).nullable().hidden().lazy().ref(),
+        .ref(),
     status: p.enum(USER_STATUSES).default('active' satisfies UserStatus),
     isVerified: p.boolean().default(false).fieldName('is_verified'),
     auth: () =>
@@ -95,16 +99,6 @@ export class User extends UserEntitySchema.class {
     return this.status === 'active';
   }
 
-  async verifyPassword(password: string) {
-    const passwordHashed = await this.password.load();
-
-    if (!passwordHashed) {
-      throw new AppError('PROPERTY_NOT_INITIALIZED', 'Password not initialized');
-    }
-
-    return verify(passwordHashed, password);
-  }
-
   async loadDomainAccess() {
     const members = await this.members.load();
 
@@ -124,19 +118,19 @@ UserEntitySchema.addHook('beforeCreate', saveHandler);
 UserEntitySchema.addHook('beforeUpdate', saveHandler);
 
 async function saveHandler(args: EventArgs<User>) {
-  const changeSetType: ChangeSetType | undefined = args.changeSet?.type;
+  // const changeSetType: ChangeSetType | undefined = args.changeSet?.type;
 
-  if (!changeSetType) return;
+  // if (!changeSetType) return;
 
-  const changeSetPassword = args.changeSet?.payload.password;
-  if (typeof changeSetPassword === 'string') {
-    const hashed = await hash(changeSetPassword);
-    args.entity.password.set(hashed);
-  }
+  // const changeSetPassword = args.changeSet?.payload.password;
+  // if (typeof changeSetPassword === 'string') {
+  //   const hashed = await hash(changeSetPassword);
+  //   args.entity.password.set(hashed);
+  // }
 
-  if (changeSetType === ChangeSetType.UPDATE) {
-    if (args.changeSet?.payload.email && args.changeSet.originalEntity?.email) {
-      throw AppError.withMessage('PROPERTY_IMMUTABLE', 'Email immutable');
-    }
-  }
+  // if (changeSetType === ChangeSetType.UPDATE) {
+  //   if (args.changeSet?.payload.email && args.changeSet.originalEntity?.email) {
+  //     throw AppError.withMessage('PROPERTY_IMMUTABLE', 'Email immutable');
+  //   }
+  // }
 }

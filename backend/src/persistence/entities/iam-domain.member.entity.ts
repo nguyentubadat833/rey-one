@@ -1,7 +1,7 @@
 import { defineEntity, p } from '@mikro-orm/core';
-import { Domain } from './iam.domain-entity';
-import { User } from './iam.user-entity';
-import { DomainRole } from './iam.domain-role-entity';
+import { Domain } from './iam-domain.entity';
+import { User } from './iam-user.entity';
+import { DomainRole } from './iam-domain.role.entity';
 
 const DomainMemberEntitySchema = defineEntity({
   name: 'IAMDomainMember',
