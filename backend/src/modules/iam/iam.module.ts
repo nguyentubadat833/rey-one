@@ -8,6 +8,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './controllers/auth-controller';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { OrganizationController } from './controllers/domain-controller';
+import { AuthService } from './services/auth-service';
 
 @Global()
 @Module({
@@ -26,7 +27,7 @@ import { OrganizationController } from './controllers/domain-controller';
     }),
   ],
   controllers: [AuthController, OrganizationController],
-  providers: [],
+  providers: [AuthService],
 })
 export class IAMModule implements OnModuleInit {
   constructor(
@@ -41,33 +42,23 @@ export class IAMModule implements OnModuleInit {
 
       const users = [this.config.systemUser.admin, this.config.systemUser.support];
 
-      // for (const item of users) {
-      //   const user = await em.findOne(User, {
-      //     email: item.email,
-      //   });
+      for (const item of users) {
+        const identity = AuthService.IdentityDetect(item.identity);
+        const user = await em.findOne(User, identity);
 
-      //   if (!user) {
-      //     let userGroup = await em.findOne(UserGroup, {
-      //       name: item.group,
-      //     });
+        if (!user) {
+          em.create(User, {
+            ...identity,
+            type: item.type,
+            password: item.password,
+            party: {
+              name: item.identity,
+            },
+          });
+        }
+      }
 
-      //     userGroup ??= em.create(UserGroup, {
-      //       name: item.group,
-      //     });
-
-      //     em.create(User, {
-      //       type: 'people',
-      //       group: userGroup,
-      //       email: item.email,
-      //       password: item.password,
-      //       info: {
-      //         name: item.email,
-      //       },
-      //     });
-      //   }
-      // }
-
-      // await em.flush();
+      await em.flush();
     });
   }
 }

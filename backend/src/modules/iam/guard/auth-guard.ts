@@ -6,11 +6,12 @@ import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { UserType } from '@rey-one/shared';
 import { FastifyRequest } from 'fastify';
+import { AuthService } from '../services/auth-service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
-    private readonly userRepo: UserRepository,
+    private readonly authService: AuthService,
     private readonly jwtService: JwtService,
     private reflector: Reflector,
   ) {}
@@ -35,17 +36,16 @@ export class AuthGuard implements CanActivate {
     }
 
     if (authHeader?.startsWith('Basic ')) {
-      const [email, password] = Buffer.from(authHeader.slice(6), 'base64').toString().split(':');
+      const [identity, password] = Buffer.from(authHeader.slice(6), 'base64').toString().split(':');
 
-      const user = await this.userRepo.authenticateByPassword(email, password);
-      await this.userRepo.recordSuccessfulAuthentication(user);
+      const { user } = await this.authService.baseAuthentication({ identity, password });
 
       request[REQUEST_USER_KEY] = {
         id: user.id,
         type: user.type as UserType,
-        email: user.email,
         domainAccess: await user.loadDomainAccess(),
       } satisfies UserAuth;
+      
       return true;
     }
 

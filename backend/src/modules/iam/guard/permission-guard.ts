@@ -40,7 +40,7 @@ export class RequirePermissionGuard implements CanActivate {
       throw new UnauthorizedException();
     }
 
-    if (user.email === this.config.systemUser.admin.email) {
+    if (user.type === 'admin_user') {
       return true;
     }
 

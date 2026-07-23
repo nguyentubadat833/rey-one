@@ -1,6 +1,7 @@
 import { registerAs } from '@nestjs/config';
 import { NodeEnvSchema } from './app.config';
 import z from 'zod';
+import { USER_ADMIN_TYPE, USER_NORMAL_TYPE } from '@rey-one/shared';
 
 const schema = z
   .object({
@@ -9,9 +10,9 @@ const schema = z
     JWT_SECRET: z.string().min(10).default('123456789a'),
     JWT_ACCESS_EXPIRES_IN_MINUTES: z.coerce.number().positive().int().default(15),
     JWT_REFRESH_EXPIRES_IN_MINUTES: z.coerce.number().positive().int().default(10080), // 7d
-    USER_ADMIN_EMAIL: z.string().default('sysadmin@gmail.com'),
-    USER_ADMIN_PASSWORD: z.string().default('sysadmin'),
-    USER_SUPPORT_EMAIL: z.string().default('support@gmail.com'),
+    USER_ADMIN_IDENTITY: z.string().default('admin'),
+    USER_ADMIN_PASSWORD: z.string().default('admin'),
+    USER_SUPPORT_IDENTITY: z.string().default('support'),
     USER_SUPPORT_PASSWORD: z.string().default('support'),
   })
   .superRefine((val, ctx) => {
@@ -34,11 +35,13 @@ export const authConfig = registerAs('auth', () => {
     jwtRefreshExpiresIn: parsed.JWT_REFRESH_EXPIRES_IN_MINUTES,
     systemUser: {
       admin: {
-        email: parsed.USER_ADMIN_EMAIL,
+        type: USER_ADMIN_TYPE,
+        identity: parsed.USER_ADMIN_IDENTITY,
         password: parsed.USER_ADMIN_PASSWORD,
       },
       support: {
-        email: parsed.USER_SUPPORT_EMAIL,
+        type: USER_NORMAL_TYPE,
+        identity: parsed.USER_SUPPORT_IDENTITY,
         password: parsed.USER_SUPPORT_PASSWORD,
       },
     },

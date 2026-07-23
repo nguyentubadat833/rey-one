@@ -6,12 +6,9 @@ import type { ConfigType } from '@nestjs/config';
 
 @Injectable()
 export class RequireAdminGuard implements CanActivate {
-  constructor(
-    @Inject(authConfig.KEY) private readonly config: ConfigType<typeof authConfig>,
-  ) {}
+  constructor(@Inject(authConfig.KEY) private readonly config: ConfigType<typeof authConfig>) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-
     const request = context.switchToHttp().getRequest();
     const user = request[REQUEST_USER_KEY] as UserAuth;
 
@@ -19,10 +16,10 @@ export class RequireAdminGuard implements CanActivate {
       throw new UnauthorizedException();
     }
 
-    if (user.email === this.config.systemUser.admin.email) {
+    if (user.type === 'admin_user') {
       return true;
     }
 
-    throw new ForbiddenException()
+    throw new ForbiddenException();
   }
 }

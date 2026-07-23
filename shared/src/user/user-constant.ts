@@ -8,7 +8,12 @@ export const USER_STATUSES = [
   "inactive",
   "pending",
 ] as const;
+
+export const USER_ADMIN_TYPE = "admin_user" as const;
+export const USER_NORMAL_TYPE = "user" as const;
+export const USER_DOMAIN_TYPE = "domain_user" as const;
 export const USER_TYPES = [
-  'system',
-  'domain'
-] as const
+  USER_ADMIN_TYPE,
+  USER_NORMAL_TYPE,
+  USER_DOMAIN_TYPE,
+] as const;

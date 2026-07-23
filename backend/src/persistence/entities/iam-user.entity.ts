@@ -1,42 +1,10 @@
 import { ChangeSetType, defineEntity, EntityDTO, EventArgs, p } from '@mikro-orm/core';
-import { APP_PERMISSIONS, AppPermission, USER_STATUSES, USER_TYPES, UserStatus, UserType } from '@rey-one/shared';
+import { AppPermission, USER_STATUSES, USER_TYPES, UserStatus, UserType } from '@rey-one/shared';
 import { AppError } from '@/utils/errors/app.error';
-import { OAuthCredential } from './iam-user.oauth-credential.entity';
-import { hash, verify } from 'argon2';
 import { UserRepository } from '../repositories/user-repository';
 import { DomainMember } from './iam-domain.member.entity';
-import { BaseCredential } from './iam-user.base-credential.entity';
-
-// User Info
-export const UserInfoSchema = defineEntity({
-  name: 'IAMUserInfo',
-  embeddable: true,
-  properties: {
-    name: p.string().length(255),
-    taxCode: p.string().length(50).fieldName('tax_code').nullable(),
-    phone: p.string().length(30).nullable(),
-    website: p.string().length(255).nullable(),
-    address: p.string().length(255).nullable(),
-  },
-});
-
-export class UserInfo extends UserInfoSchema.class { }
-UserInfoSchema.setClass(UserInfo);
-
-// User Auth
-const UserAuthSchema = defineEntity({
-  name: 'IAMUserAuth',
-  embeddable: true,
-  properties: {
-    failedLoginAttempts: p.integer().nullable().fieldName('failed_login_attempts'),
-    lastFailedLoginAttemptAt: p.datetime().nullable().fieldName('last_failed_login_attempt_at'),
-    lastSuccessfulLoginAt: p.datetime().nullable().fieldName('last_successful_login_at'),
-    token: p.string().persist(false).nullable(),
-  },
-});
-
-export class UserAuth extends UserAuthSchema.class { }
-UserAuthSchema.setClass(UserAuth);
+import { hash } from 'argon2';
+import { Party } from './iam-party.entity';
 
 // User Entity
 const UserEntitySchema = defineEntity({
@@ -45,38 +13,30 @@ const UserEntitySchema = defineEntity({
   repository: () => UserRepository,
   properties: {
     id: p.uuid().primary().defaultRaw('gen_random_uuid()'),
-    type: p.enum(() => USER_TYPES),
-    baseCredential: () => p.oneToOne(BaseCredential).owner()
-      .nullable()
-      .joinColumn('base_credential_id')
-      .orphanRemoval()
-      .ref(),
-    oauthCredentials: () =>
-      p
-        .oneToMany(OAuthCredential)
-        .mappedBy((c) => c.user)
-        .orphanRemoval()
-        .ref(),
+    type: p.enum(USER_TYPES),
+    username: p.string().unique().nullable(),
+    email: p.string().unique().nullable(),
+    phone: p.string().unique().nullable(),
+    password: p.string().hidden().lazy().ref(),
     status: p.enum(USER_STATUSES).default('active' satisfies UserStatus),
-    isVerified: p.boolean().default(false).fieldName('is_verified'),
-    auth: () =>
-      p
-        .embedded(UserAuthSchema)
-        .onCreate(() => new UserAuth())
-        .lazy(),
-    info: () => p.embedded(UserInfoSchema).lazy(),
+    emailVerified: p.boolean().default(false).fieldName('email_verified'),
+    phoneVerified: p.boolean().default(false).fieldName('phone_verified'),
+    failedLoginAttempts: p.integer().nullable().fieldName('failed_login_attempts'),
+    lastFailedLoginAttemptAt: p.datetime().nullable().fieldName('last_failed_login_attempt_at'),
+    lastSuccessfulLoginAt: p.datetime().nullable().fieldName('last_successful_login_at'),
+    token: p.string().persist(false).nullable(),
+    party: () => p.oneToOne(Party).ref(),
     members: () =>
       p
         .oneToMany(DomainMember)
         .mappedBy((member) => member.user)
         .orphanRemoval()
-        .lazy()
         .ref(),
   },
 });
 export class User extends UserEntitySchema.class {
   static statusAllowedTransitions: Record<UserStatus, UserStatus[]> = {
-    pending: ['active', 'deleted'], // verify email hoặc tự xóa
+    pending: ['active', 'deleted'], // verify hoặc tự xóa
     active: ['inactive', 'banned', 'deleted'],
     inactive: ['active', 'deleted'], // có thể quay lại active
     banned: ['deleted'], // banned không thể active lại
@@ -95,10 +55,6 @@ export class User extends UserEntitySchema.class {
     }
   }
 
-  isActive() {
-    return this.status === 'active';
-  }
-
   async loadDomainAccess() {
     const members = await this.members.load();
 
@@ -108,7 +64,11 @@ export class User extends UserEntitySchema.class {
       result[item.domain.id] = item.role?.permissions ?? [];
     });
 
-    return result
+    return result;
+  }
+
+  isActive() {
+    return this.status === 'active';
   }
 }
 
@@ -118,19 +78,40 @@ UserEntitySchema.addHook('beforeCreate', saveHandler);
 UserEntitySchema.addHook('beforeUpdate', saveHandler);
 
 async function saveHandler(args: EventArgs<User>) {
-  // const changeSetType: ChangeSetType | undefined = args.changeSet?.type;
+  const changeSetType: ChangeSetType | undefined = args.changeSet?.type;
 
-  // if (!changeSetType) return;
+  if (!changeSetType) return;
 
-  // const changeSetPassword = args.changeSet?.payload.password;
-  // if (typeof changeSetPassword === 'string') {
-  //   const hashed = await hash(changeSetPassword);
-  //   args.entity.password.set(hashed);
-  // }
+  const entity = args.entity;
+  const changeSet = args.changeSet?.payload;
 
-  // if (changeSetType === ChangeSetType.UPDATE) {
-  //   if (args.changeSet?.payload.email && args.changeSet.originalEntity?.email) {
-  //     throw AppError.withMessage('PROPERTY_IMMUTABLE', 'Email immutable');
-  //   }
-  // }
+  const changeEmail = changeSet?.email;
+  const changeUsername = changeSet?.username;
+  const changePhone = changeSet?.phone;
+  const changePassword = args.changeSet?.payload.password;
+
+  if (changeSetType === ChangeSetType.CREATE) {
+    if (!changeEmail && !changeUsername && !changePhone) {
+      throw AppError.withMessage('PROPERTY_REQUIRED', 'At least one of email, username, or phone is required');
+    }
+  }
+
+  if (changeSetType === ChangeSetType.UPDATE) {
+    if (changeEmail && entity.emailVerified) {
+      throw AppError.withMessage('PROPERTY_IMMUTABLE', 'Verified email cannot be changed');
+    }
+
+    if (changePhone && entity.phone) {
+      throw AppError.withMessage('PROPERTY_IMMUTABLE', 'Verified phone cannot be changed');
+    }
+
+    if (changeUsername) {
+      throw AppError.withMessage('PROPERTY_IMMUTABLE', 'Username cannot be changed');
+    }
+  }
+
+  if (typeof changePassword === 'string') {
+    const hashed = await hash(changePassword);
+    entity.password.set(hashed);
+  }
 }

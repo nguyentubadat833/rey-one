@@ -1,3 +1,7 @@
+import { APP_PERMISSIONS } from "./app-constant";
+
+export type AppPermission = (typeof APP_PERMISSIONS)[number];
+
 export type ErrorKey =
   | "UNKNOWN_ERROR"
   | "PROPERTY_IMMUTABLE"

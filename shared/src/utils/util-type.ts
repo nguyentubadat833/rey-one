@@ -1,0 +1,1 @@
+export const CURRENCIES = ['VND', 'USD'] as const
