@@ -8,8 +8,8 @@ const DomainMemberEntitySchema = defineEntity({
   tableName: 'iam_domain_member',
   properties: {
     id: p.bigint().primary().autoincrement(),
-    domain: () => p.manyToOne(Domain).eager(),
-    user: () => p.manyToOne(User).eager(),
+    domain: () => p.manyToOne(Domain).ref(),
+    user: () => p.manyToOne(User).ref(),
     role: () => p.manyToOne(DomainRole).eager().nullable().deleteRule('set null'),
   },
 });

@@ -1,5 +1,11 @@
 import z from "zod";
-import { DomainDetailShema, DomainSchema } from "./domain-schema";
+import { DomainRoleSchema, DomainSchema } from "./domain-schema";
 
-export type DomainView = z.infer<typeof DomainSchema>
-export type DomainDetailView = z.infer<typeof DomainDetailShema>
+export type DomainView = z.infer<typeof DomainSchema>;
+export type DomainSummaryView = DomainView & {
+  roleCount: number;
+  memberCount: number;
+  productCount: number
+};
+
+export type DomainRoleView = z.infer<typeof DomainRoleSchema>;

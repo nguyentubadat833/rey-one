@@ -2,10 +2,10 @@ import { authConfig } from '@/configs/auth.config';
 import { AppError } from '@/utils/errors/app.error';
 import { UserAuth } from '@/utils/types/system';
 import { REQUEST_USER_KEY, REQUIRE_PERMISSION_KEY } from '@/utils/types/tokens';
-import { DOMAIN_ID_PARAM } from '@/utils/types/utils';
+import { DOMAIN_ID_PARAMETER, DOMAIN_ID_HEADER } from '@/utils/types/utils';
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, ForbiddenException, Inject, BadRequestException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { AppPermission } from '@rey-one/shared';
+import { AppPermission, hasPermission } from '@rey-one/shared';
 import { FastifyRequest } from 'fastify';
 import type { ConfigType } from '@nestjs/config';
 
@@ -24,13 +24,13 @@ export class RequirePermissionGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<
       FastifyRequest<{
         Params: {
-          [DOMAIN_ID_PARAM]?: string;
+          [DOMAIN_ID_PARAMETER]?: string;
         };
         Querystring: {
-          [DOMAIN_ID_PARAM]?: string;
+          [DOMAIN_ID_PARAMETER]?: string;
         };
         Headers: {
-          'x-domain-id'?: string;
+          [DOMAIN_ID_HEADER]?: string;
         };
       }>
     >();
@@ -51,7 +51,7 @@ export class RequirePermissionGuard implements CanActivate {
       throw new BadRequestException('Domain ID is required');
     }
 
-    if (!user.domainAccess[domainId] || !user.domainAccess[domainId].includes(requiredPermission)) {
+    if (!user.domainAccess[domainId] || !hasPermission(user.domainAccess[domainId], requiredPermission)) {
       throw new ForbiddenException(new AppError('INSUFFICIENT_PERMISSION'));
     }
 

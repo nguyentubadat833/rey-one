@@ -49,9 +49,3 @@ export const UpdateDomainMemberSchema = DomainMemberSchema.omit({
   email: true,
   phone: true,
 });
-
-// domain view
-export const DomainDetailShema = DomainSchema.extend({
-  roles: z.array(DomainRoleSchema),
-  members: z.array(DomainMemberSchema),
-});

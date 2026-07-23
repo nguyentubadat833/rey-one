@@ -14,7 +14,7 @@ export const DomainRoleEntitySchema = defineEntity({
       .length(20)
       .primary()
       .onCreate((domain) => generateId(domain.name)),
-    domain: () => p.manyToOne(Domain).eager(),
+    domain: () => p.manyToOne(Domain).ref(),
     members: () =>
       p
         .oneToMany(DomainMember)
@@ -40,7 +40,7 @@ export function generateId(name: string) {
     trim: true,
   });
 
-  const suffix = crypto.randomUUID().slice(0, 5);
+  const suffix = crypto.randomUUID().slice(0, 7);
   return `DMR-${slug}-${suffix}`.toUpperCase();
 }
 
@@ -54,8 +54,9 @@ async function handlerSave(args: EventArgs<DomainRole>) {
   }
 
   if (args.changeSet?.payload.permissions) {
+    await args.entity.domain.loadOrFail()
     const permissions = args.entity.permissions;
     args.entity.permissions = Array.from(new Set(permissions));
-    args.entity.domain.ensurePermissionsValid(args.entity.permissions);
+    args.entity.domain.getEntity().ensurePermissionsValid(args.entity.permissions);
   }
 }

@@ -9,12 +9,13 @@ import { AuthController } from './controllers/auth-controller';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { OrganizationController } from './controllers/domain-controller';
 import { AuthService } from './services/auth-service';
+import { Domain } from '@/persistence/entities/iam-domain.entity';
 
 @Global()
 @Module({
   imports: [
     MikroOrmModule.forFeature({
-      entities: [User],
+      entities: [User, Domain],
     }),
     ConfigModule.forFeature(authConfig),
     JwtModule.registerAsync({
