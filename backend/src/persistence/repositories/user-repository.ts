@@ -10,7 +10,7 @@ export class UserRepository extends EntityRepository<User> {
   }
 
   async findByIdentity(identity: IdentifierType) {
-    return this.findOne(identity, { populate: ['password'] });
+    return this.findOne(identity);
   }
 
   async recordFailedAuthentication(user: User) {

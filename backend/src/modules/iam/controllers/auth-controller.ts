@@ -7,12 +7,12 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, RequireAuth } from '@/utils/decorators/auth.decorator';
 import { UserLoginResponse, UserType } from '@rey-one/shared';
 import { UserMapper } from '../mappers/user-mapper';
-import type { ConfigType } from '@nestjs/config';
-import type { FastifyReply } from 'fastify';
 import { UserAuth } from '@/utils/types/system';
 import { AuthService } from '../services/auth-service';
-import { UserLoadedParty } from '@/persistence/types/user-type';
 import { EntityManager } from '@mikro-orm/core';
+import { User } from '@/persistence/entities/iam-user.entity';
+import type { ConfigType } from '@nestjs/config';
+import type { FastifyReply } from 'fastify';
 
 @ApiTags('IAM / Auth')
 @Controller('auth')
@@ -20,17 +20,21 @@ export class AuthController {
   constructor(
     @Inject(authConfig.KEY) private readonly config: ConfigType<typeof authConfig>,
     private readonly em: EntityManager,
+    private readonly userRepo: UserRepository,
     private readonly jwtService: JwtService,
     private readonly authService: AuthService,
   ) {}
 
-  // @ApiOperation({summary: "Get user auth"})
-  // @RequireAuth()
-  // @Get()
-  // async getAuth(@CurrentUser('id') userId: string) {
-  //   const user = await this.userRepo.getProfileById(userId);
-  //   return UserMapper.toUserResponse(user);
-  // }
+  @ApiOperation({ summary: 'Get user auth' })
+  @RequireAuth()
+  @Get()
+  async getUserAuth(@CurrentUser('id') userId: string) {
+    const user = await this.userRepo.findByIdentity({ id: userId });
+    User.ensureExists(user)
+
+    const loadedUser = await this.em.populate(user, ['party']);
+    return UserMapper.toUserView(loadedUser);
+  }
 
   @ApiOperation({ summary: 'Base login' })
   @Post('login')
@@ -59,8 +63,8 @@ export class AuthController {
     });
 
     const loadedUser = await this.em.populate(user, ['party']);
-    await onSuccess()
-    
+    await onSuccess();
+
     return {
       accessToken: accessToken,
       user: UserMapper.toUserView(loadedUser),

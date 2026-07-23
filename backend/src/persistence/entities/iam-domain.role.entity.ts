@@ -19,7 +19,6 @@ export const DomainRoleEntitySchema = defineEntity({
       p
         .oneToMany(DomainMember)
         .mappedBy((member) => member.role)
-        .lazy()
         .ref(),
     name: p.string(),
     active: p.boolean().default(true),
@@ -55,6 +54,8 @@ async function handlerSave(args: EventArgs<DomainRole>) {
   }
 
   if (args.changeSet?.payload.permissions) {
+    const permissions = args.entity.permissions;
+    args.entity.permissions = Array.from(new Set(permissions));
     args.entity.domain.ensurePermissionsValid(args.entity.permissions);
   }
 }

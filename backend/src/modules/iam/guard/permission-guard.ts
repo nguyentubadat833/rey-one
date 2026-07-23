@@ -2,11 +2,12 @@ import { authConfig } from '@/configs/auth.config';
 import { AppError } from '@/utils/errors/app.error';
 import { UserAuth } from '@/utils/types/system';
 import { REQUEST_USER_KEY, REQUIRE_PERMISSION_KEY } from '@/utils/types/tokens';
+import { DOMAIN_ID_PARAM } from '@/utils/types/utils';
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, ForbiddenException, Inject, BadRequestException } from '@nestjs/common';
-import type { ConfigType } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { AppPermission } from '@rey-one/shared';
 import { FastifyRequest } from 'fastify';
+import type { ConfigType } from '@nestjs/config';
 
 @Injectable()
 export class RequirePermissionGuard implements CanActivate {
@@ -23,10 +24,10 @@ export class RequirePermissionGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<
       FastifyRequest<{
         Params: {
-          domainId?: string;
+          [DOMAIN_ID_PARAM]?: string;
         };
         Querystring: {
-          domainId?: string;
+          [DOMAIN_ID_PARAM]?: string;
         };
         Headers: {
           'x-domain-id'?: string;

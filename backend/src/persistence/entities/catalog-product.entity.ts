@@ -1,9 +1,8 @@
 import { defineEntity, EventArgs, p } from '@mikro-orm/core';
 import { CURRENCIES } from '@rey-one/shared';
-import { User } from './iam-user.entity';
 import { ProductPricing } from './catalog-product.pricing.entity';
+import { Domain } from './iam-domain.entity';
 import slugify from 'slugify';
-import { AppError } from '@/utils/errors/app.error';
 
 const ProductInfoSchema = defineEntity({
   name: 'CatalogProductInfo',
@@ -27,11 +26,7 @@ const ProductEntitySchema = defineEntity({
     currency: p.enum(() => CURRENCIES).default('VND'),
     info: p.embedded(ProductInfoSchema),
     trackInventory: p.boolean().default(false).fieldName('track_inventory'),
-    // owner: () =>
-    //   p
-    //     .manyToOne(User)
-    //     .inversedBy((user) => user.products)
-    //     .ref(),
+    owner: () => p.manyToOne(Domain),
     pricing: () => p.oneToOne(ProductPricing).mappedBy((pricing) => pricing.product),
   },
 });
@@ -53,11 +48,9 @@ export function updateHandler(args: EventArgs<Product>) {
   // if(args.changeSet?.payload.sku){
   //   throw new AppError('PRODUCT_SKU_IMMUTABLE')
   // }
-
   // if(args.changeSet?.payload.currency){
   //   throw new AppError('PRODUCT_CURRENCY_IMMUTABLE')
   // }
-
   // if(args.changeSet?.payload.owner){
   //   throw new AppError('PRODUCT_OWNER_IMMUTABLE')
   // }
@@ -70,7 +63,7 @@ export function generateSku(name: string) {
     .slice(0, 15)
     .trim()
     .replace(/-+$/, '')
-    .toUpperCase()
+    .toUpperCase();
 
   const suffix = crypto.randomUUID().slice(0, 8).toUpperCase();
 

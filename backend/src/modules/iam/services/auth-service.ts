@@ -21,6 +21,10 @@ export class AuthService {
     const phone = parsePhoneNumberFromString(raw, 'VN');
     if (phone?.isValid()) return { phone: phone.number };
 
+    if (z.uuid().safeParse(raw).success) {
+      return { id: raw };
+    }
+
     return { username: raw };
   }
 

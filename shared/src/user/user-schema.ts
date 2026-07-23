@@ -12,7 +12,7 @@ export const BaseLoginSchema = z.object({
   password: z.string(),
 });
 
-export const UserViewSchema = z.object({
+export const UserSchema = z.object({
   id: z.string(),
   type: z.enum(USER_TYPES),
   status: z.enum(USER_STATUSES),
