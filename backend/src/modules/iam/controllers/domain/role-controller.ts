@@ -68,9 +68,9 @@ export class DomainRoleController {
   }
 
   @RequirePermission('domain:manage:read')
-  @ApiOperation({ summary: 'Domain role with members' })
-  @Get(':roleId/detail')
+  @ApiOperation({ summary: 'Domain role detail' })
+  @Get(':roleId')
   async getDomainRoleDetail(@Param('roleId') roleId: string) {
-    return this.domainService.getDomainRoleAndMembers(roleId).then(DomainMapper.toDomainRoleWithMembers);
+    return this.domainService.getDomainRoleWithMembers(roleId).then(DomainMapper.toDomainRoleWithMembers);
   }
 }

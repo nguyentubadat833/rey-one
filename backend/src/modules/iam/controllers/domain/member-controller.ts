@@ -19,8 +19,7 @@ export class DomainMemberController {
   @ApiOperation({ summary: 'Domain members' })
   @Get()
   async members(@CurrentHeader(DOMAIN_ID_HEADER) domainId: string): Promise<DomainMemberView[]> {
-    return this.domainService.getMembers(domainId)
-    .then(rs => rs.map(DomainMapper.toDomainMemberView))
+    return this.domainService.getMembers(domainId).then((rs) => rs.map(DomainMapper.toDomainMemberView));
   }
 
   @RequirePermission('domain:member:manage')
@@ -37,5 +36,12 @@ export class DomainMemberController {
   async updateMember(@Param('id') memberId: string, @Body() dto: UpdateDomainMemberDto) {
     const member = await this.domainService.updateMember(memberId, dto);
     return DomainMapper.toDomainMemberView(member);
+  }
+
+  @RequirePermission('domain:member:read')
+  @ApiOperation({ summary: 'Domain member detail' })
+  @Get(':id')
+  async getMemberDetail(@Param('id') memberId: string) {
+    return this.domainService.getDomainMemberDetail(memberId).then(DomainMapper.toDomainMemberDetailView)
   }
 }

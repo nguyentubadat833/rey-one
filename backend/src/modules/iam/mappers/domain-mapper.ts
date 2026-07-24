@@ -1,8 +1,22 @@
 import { Domain } from '@/persistence/entities/iam-domain.entity';
 import { DomainRole } from '@/persistence/entities/iam-domain.role.entity';
 import { IDomainSummary } from '@/persistence/queries/domain-query';
-import { DomainLoadedRolesAndMembers, DomainMemberLoadedUserAndRole, DomainRoleLoadedMembers } from '@/persistence/types/domain-type';
-import { DomainMemberView, DomainRoleView, DomainRoleWithMembersView, DomainSummaryView, DomainView, DomainWithIAMView, UserView } from '@rey-one/shared';
+import {
+  DomainLoadedRolesAndMembers,
+  DomainMemberLoadedUserAndRole,
+  DomainMemberLoadedUserAndRoleAndDomain,
+  DomainRoleLoadedMembers,
+} from '@/persistence/types/domain-type';
+import {
+  DomainMemberDetailView,
+  DomainMemberView,
+  DomainRoleView,
+  DomainRoleWithMembersView,
+  DomainSummaryView,
+  DomainView,
+  DomainWithIAMView,
+  UserView,
+} from '@rey-one/shared';
 import { UserMapper } from './user-mapper';
 
 export class DomainMapper {
@@ -75,5 +89,15 @@ export class DomainMapper {
       status: member.user.$.status,
       role: member.role ? DomainMapper.toDomainRoleView(member.role) : null,
     } satisfies DomainMemberView;
+  }
+
+  static toDomainMemberDetailView(member: DomainMemberLoadedUserAndRoleAndDomain) {
+    return {
+      ...DomainMapper.toDomainMemberView(member),
+      domain: {
+        id: member.user.getProperty('id'),
+        name: member.domain.getProperty('name'),
+      },
+    } satisfies DomainMemberDetailView;
   }
 }

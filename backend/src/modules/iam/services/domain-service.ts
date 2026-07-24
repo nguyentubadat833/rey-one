@@ -4,7 +4,12 @@ import { CreateDomainMemberDto, UpdateDomainMemberDto } from '../dtos/domain-dto
 import { UserRepository } from '@/persistence/repositories/user-repository';
 import { EntityManager } from '@mikro-orm/core';
 import { DomainMember } from '@/persistence/entities/iam-domain.member.entity';
-import { DomainLoadedRolesAndMembers, DomainMemberLoadedUserAndRole, DomainRoleLoadedMembers } from '@/persistence/types/domain-type';
+import {
+  DomainLoadedRolesAndMembers,
+  DomainMemberLoadedUserAndRole,
+  DomainMemberLoadedUserAndRoleAndDomain,
+  DomainRoleLoadedMembers,
+} from '@/persistence/types/domain-type';
 import { authConfig } from '@/configs/auth.config';
 import { DomainRole } from '@/persistence/entities/iam-domain.role.entity';
 import { AppError } from '@/utils/errors/app.error';
@@ -127,7 +132,7 @@ export class DomainService {
     );
   }
 
-  getDomainRoleAndMembers(roleId: string): Promise<DomainRoleLoadedMembers> {
+  getDomainRoleWithMembers(roleId: string): Promise<DomainRoleLoadedMembers> {
     return this.em.findOneOrFail(
       DomainRole,
       {
@@ -136,6 +141,21 @@ export class DomainService {
       {
         failHandler: () => new AppError('OBJECT_NOT_FOUND', 'Domain role not found'),
         populate: ['members.user.party'],
+      },
+    );
+  }
+
+  getDomainMemberDetail(userId: string): Promise<DomainMemberLoadedUserAndRoleAndDomain> {
+    return this.em.findOneOrFail(
+      DomainMember,
+      {
+        user: {
+          id: userId,
+        },
+      },
+      {
+        failHandler: () => new AppError('OBJECT_NOT_FOUND', 'Domain member not found'),
+        populate: ['user.party', 'domain'],
       },
     );
   }
