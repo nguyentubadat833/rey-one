@@ -4,7 +4,7 @@ import { CreateDomainMemberDto, UpdateDomainMemberDto } from '../dtos/domain-dto
 import { UserRepository } from '@/persistence/repositories/user-repository';
 import { EntityManager } from '@mikro-orm/core';
 import { DomainMember } from '@/persistence/entities/iam-domain.member.entity';
-import { DomainMemberLoadedUser } from '@/persistence/types/domain-type';
+import { DomainMemberLoadedUserAndRole } from '@/persistence/types/domain-type';
 import { authConfig } from '@/configs/auth.config';
 import type { ConfigType } from '@nestjs/config';
 import { DomainRole } from '@/persistence/entities/iam-domain.role.entity';
@@ -25,7 +25,6 @@ export class DomainService {
     domain.ensureStatus();
 
     const role = dto.roleId ? this.em.getReference(DomainRole, dto.roleId) : null;
-
     const member = this.em.create(DomainMember, {
       role,
       domain,
@@ -42,9 +41,13 @@ export class DomainService {
     });
 
     domain.members.add(member);
-
     await this.domainRepo.save(domain);
-    return member as DomainMemberLoadedUser;
+
+    if (role) {
+      await this.em.populate(member, ['role']);
+    }
+
+    return member as DomainMemberLoadedUserAndRole;
   }
 
   async updateMember(userId: string, dto: UpdateDomainMemberDto) {
@@ -92,6 +95,20 @@ export class DomainService {
     );
 
     await this.em.flush();
-    return member;
+    return member as DomainMemberLoadedUserAndRole;
+  }
+
+  async getSummaries(domainId: string) {
+    return this.em.find(
+      DomainMember,
+      {
+        domain: {
+          id: domainId,
+        },
+      },
+      {
+        populate: ['user.party', 'role'],
+      },
+    );
   }
 }

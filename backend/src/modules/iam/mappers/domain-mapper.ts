@@ -2,7 +2,7 @@ import { Domain } from '@/persistence/entities/iam-domain.entity';
 import { DomainMember } from '@/persistence/entities/iam-domain.member.entity';
 import { DomainRole } from '@/persistence/entities/iam-domain.role.entity';
 import { IDomainSummary } from '@/persistence/queries/domain-query';
-import { DomainMemberLoadedUser } from '@/persistence/types/domain-type';
+import { DomainMemberLoadedUserAndRole } from '@/persistence/types/domain-type';
 import { DomainMemberView, DomainRoleView, DomainSummaryView, DomainView } from '@rey-one/shared';
 
 export class DomainMapper {
@@ -36,7 +36,7 @@ export class DomainMapper {
     } satisfies DomainRoleView;
   }
 
-  static toDomainMemberView(member: DomainMemberLoadedUser){
+  static toDomainMemberView(member: DomainMemberLoadedUserAndRole) {
     return {
       id: member.user.$.id,
       name: member.user.$.party.$.name,
@@ -44,7 +44,7 @@ export class DomainMapper {
       email: member.user.$.email,
       phone: member.user.$.phone,
       status: member.user.$.status,
-      roleId: member.role?.id
-    } satisfies DomainMemberView
+      role: member.role ? DomainMapper.toDomainRoleView(member.role) : null,
+    } satisfies DomainMemberView;
   }
 }

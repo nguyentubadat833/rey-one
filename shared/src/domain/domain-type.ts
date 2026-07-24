@@ -1,6 +1,6 @@
 import z from "zod";
 import {
-  DomainMemberSchema,
+  DomainMemberViewSchema,
   DomainRoleSchema,
   DomainSchema,
 } from "./domain-schema";
@@ -17,4 +17,4 @@ export type DomainSummaryView = DomainView & {
 export type DomainRoleView = z.infer<typeof DomainRoleSchema>;
 
 // Domain member
-export type DomainMemberView = z.infer<typeof DomainMemberSchema>;
+export type DomainMemberView = z.infer<typeof DomainMemberViewSchema> 

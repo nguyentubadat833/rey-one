@@ -7,6 +7,7 @@ import { Domain } from '@/persistence/entities/iam-domain.entity';
 import { DomainMapper } from '../../mappers/domain-mapper';
 import { DOMAIN_ID_PARAMETER } from '@/utils/types/utils';
 import { DomainSummary } from '@/persistence/queries/domain-query';
+import { DomainSummaryView } from '@rey-one/shared';
 
 @RequireAuth()
 @ApiTags('IAM / Domains')
@@ -17,7 +18,7 @@ export class DomainController {
   @RequireAdmin()
   @ApiOperation({ summary: 'Domain summaries' })
   @Get('summaries')
-  async getSummaries() {
+  async getSummaries(): Promise<DomainSummaryView[]> {
     return this.em.findAll(DomainSummary);
   }
 
@@ -47,7 +48,7 @@ export class DomainController {
   @RequirePermission('domain:manage:read')
   @ApiOperation({ summary: 'Domain summary' })
   @Get(`:${DOMAIN_ID_PARAMETER}`)
-  async getSummary(@Param(DOMAIN_ID_PARAMETER) id: string) {
+  async getSummary(@Param(DOMAIN_ID_PARAMETER) id: string): Promise<DomainSummaryView> {
     return this.em.findOneOrFail(
       DomainSummary,
       {

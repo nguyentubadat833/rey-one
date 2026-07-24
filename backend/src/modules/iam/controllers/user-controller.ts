@@ -3,6 +3,7 @@ import { RequireAdmin, RequireAuth } from '@/utils/decorators/auth.decorator';
 import { EntityManager } from '@mikro-orm/core';
 import { Controller, Get, NotFoundException, Param } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { UserSummaryView } from '@rey-one/shared';
 
 @RequireAuth()
 @ApiTags('IAM / Users')
@@ -13,14 +14,14 @@ export class UserController {
   @RequireAdmin()
   @ApiOperation({ summary: 'User summaries' })
   @Get('summaries')
-  async summaries() {
+  async summaries(): Promise<UserSummaryView[]> {
     return this.em.findAll(UserSummary);
   }
 
   @RequireAdmin()
   @ApiOperation({ summary: 'User summary' })
   @Get(':id')
-  async summary(@Param('id') userId: string) {
+  async summary(@Param('id') userId: string): Promise<UserSummaryView> {
     return this.em.findOneOrFail(
       UserSummary,
       {

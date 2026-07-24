@@ -54,3 +54,9 @@ export const UpdateDomainMemberSchema = DomainMemberSchema.omit({
     password: z.string(),
   })
   .partial();
+
+export const DomainMemberViewSchema = DomainMemberSchema.omit({
+  roleId: true,
+}).extend({
+  role: DomainRoleSchema.nullable(),
+});
