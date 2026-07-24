@@ -8,13 +8,17 @@ import { CreateDomainRoleDto, UpdateDomainRoleDto } from '../../dtos/domain-dto'
 import { DomainMapper } from '../../mappers/domain-mapper';
 import { DOMAIN_ID_HEADER } from '@/utils/types/utils';
 import { Domain } from '@/persistence/entities/iam-domain.entity';
+import { DomainService } from '../../services/domain-service';
 
 @RequireAuth()
 @ApiDomainHeader()
 @ApiTags('IAM / Domains / Roles')
 @Controller('domain-roles')
 export class DomainRoleController {
-  constructor(private readonly em: EntityManager) {}
+  constructor(
+    private readonly em: EntityManager,
+    private readonly domainService: DomainService,
+  ) {}
 
   @RequirePermission('domain:role:read')
   @ApiOperation({ summary: 'Domain roles' })
@@ -61,5 +65,12 @@ export class DomainRoleController {
     await this.em.flush();
 
     return DomainMapper.toDomainRoleView(role);
+  }
+
+  @RequirePermission('domain:manage:read')
+  @ApiOperation({ summary: 'Domain role with members' })
+  @Get(':roleId/detail')
+  async getDomainRoleDetail(@Param('roleId') roleId: string) {
+    return this.domainService.getDomainRoleAndMembers(roleId).then(DomainMapper.toDomainRoleWithMembers);
   }
 }
