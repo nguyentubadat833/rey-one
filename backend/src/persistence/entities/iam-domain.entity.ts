@@ -6,15 +6,23 @@ import { DomainMember } from './iam-domain.member.entity';
 import { DomainRepository } from '../repositories/domain-repository';
 import { Product } from './catalog-product.entity';
 
+const BaseDomainSchema = defineEntity({
+  name: 'IAMBaseDomain',
+  abstract: true,
+  properties: (p) => ({
+    name: p.string().unique(),
+    active: p.boolean().default(true),
+    permissions: p.enum(APP_PERMISSIONS).array().default([]),
+  }),
+});
+
 const DomainEntitySchema = defineEntity({
   name: 'IAMDomain',
   tableName: 'iam_domain',
   repository: () => DomainRepository,
+  extends: BaseDomainSchema,
   properties: {
     id: p.uuid().primary().defaultRaw('gen_random_uuid()'),
-    name: p.string().unique(),
-    active: p.boolean().default(true),
-    permissions: p.enum(APP_PERMISSIONS).array().default([]),
     roles: () =>
       p
         .oneToMany(DomainRole)
@@ -36,6 +44,8 @@ const DomainEntitySchema = defineEntity({
   },
 });
 
+export class BaseDomain extends BaseDomainSchema.class {}
+BaseDomainSchema.setClass(BaseDomain);
 export class Domain extends DomainEntitySchema.class {
   static ensureStatus(domain: Domain) {
     if (!domain.active) {

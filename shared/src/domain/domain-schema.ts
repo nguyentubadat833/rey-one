@@ -1,6 +1,5 @@
 import z from "zod";
 import { APP_PERMISSIONS } from "../app";
-import { UserSchema } from "../user";
 
 // domain
 export const DomainSchema = z.object({
@@ -35,17 +34,17 @@ export const UpdateDomainRoleSchema = DomainRoleSchema.omit({
 }).partial();
 
 // domain member
-export const DomainMemberSchema = UserSchema.omit({
-  type: true,
-});
+// export const DomainMemberSchema = UserSchema.omit({
+//   type: true,
+// });
 
-export const DomainMemberDetailSchema = DomainMemberSchema.extend({
-  permissions: z.array(z.enum(APP_PERMISSIONS)),
-});
+// export const DomainMemberDetailSchema = DomainMemberSchema.extend({
+//   permissions: z.array(z.enum(APP_PERMISSIONS)),
+// });
 
-export const UpdateDomainMemberSchema = DomainMemberSchema.omit({
-  id: true,
-  username: true,
-  email: true,
-  phone: true,
-});
+// export const UpdateDomainMemberSchema = DomainMemberSchema.omit({
+//   id: true,
+//   username: true,
+//   email: true,
+//   phone: true,
+// });

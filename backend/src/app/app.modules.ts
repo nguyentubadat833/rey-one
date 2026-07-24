@@ -10,6 +10,7 @@ import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { User } from '@/persistence/entities/iam-user.entity';
 import { IAMModule } from '@/modules/iam/iam.module';
 import { CatalogModule } from '@/modules/catalog/catalog.module';
+import { UserSummary } from '@/persistence/queries/user-query';
 
 @Module({
   imports: [
@@ -30,8 +31,8 @@ import { CatalogModule } from '@/modules/catalog/catalog.module';
         password: config.dbPassword,
         dbName: config.dbName,
         debug: true,
-        entities: [User],
-        // autoLoadEntities: true,
+        // entities: [User, UserSummary],
+        autoLoadEntities: true,
         // entities: ['./dist/**/*.entity.js'],
         // entitiesTs: ['./src/**/*.entity.ts'],
       }),

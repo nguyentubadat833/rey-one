@@ -62,6 +62,7 @@ export class AuthController {
       maxAge: tokenExp * 60,
     });
 
+    user.token = accessToken
     const loadedUser = await this.em.populate(user, ['party']);
     await onSuccess();
 

@@ -2,28 +2,25 @@ import { EntityManager } from '@mikro-orm/core';
 import { Body, Controller, Get, NotFoundException, Param, Patch, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RequireAdmin, RequireAuth, RequirePermission } from '@/utils/decorators/auth.decorator';
-import { CreateDomainDto, CreateDomainRoleDto, UpdateDomainDto, UpdateDomainRoleDto } from '../dtos/domain-dto';
+import { CreateDomainDto, CreateDomainRoleDto, UpdateDomainDto, UpdateDomainRoleDto } from '../../dtos/domain-dto';
 import { Domain } from '@/persistence/entities/iam-domain.entity';
-import { DomainMapper } from '../mappers/domain-mapper';
+import { DomainMapper } from '../../mappers/domain-mapper';
 import { DOMAIN_ID_PARAMETER } from '@/utils/types/utils';
 import { DomainRole } from '@/persistence/entities/iam-domain.role.entity';
-import { ApiDomainHeader } from '@/utils/decorators/utils.decorator';
 import { DomainRepository } from '@/persistence/repositories/domain-repository';
+import { DomainSummary } from '@/persistence/queries/domain-query';
 
 @RequireAuth()
-@ApiTags('IAM / Domain')
-@Controller('domain')
-export class OrganizationController {
-  constructor(
-    private readonly em: EntityManager,
-    private readonly domainRepo: DomainRepository,
-  ) {}
+@ApiTags('IAM / Domains')
+@Controller('domains')
+export class DomainController {
+  constructor(private readonly em: EntityManager) {}
 
   @RequireAdmin()
   @ApiOperation({ summary: 'Domain summaries' })
   @Get('summaries')
   async getSummaries() {
-    return this.domainRepo.getSummaries();
+    return this.em.findAll(DomainSummary);
   }
 
   @RequireAdmin()
@@ -50,10 +47,16 @@ export class OrganizationController {
   }
 
   @RequirePermission('domain:manage:read')
-  @ApiOperation({ summary: 'Get domain summary' })
+  @ApiOperation({ summary: 'Domain summary' })
   @Get(`:${DOMAIN_ID_PARAMETER}`)
   async getSummary(@Param(DOMAIN_ID_PARAMETER) id: string) {
-    return this.domainRepo.getSummaryById(id);
+    return this.em.findOneOrFail(
+      DomainSummary,
+      {
+        id,
+      },
+      { failHandler: () => new NotFoundException() },
+    );
   }
 
   @RequirePermission('domain:role:manage')
@@ -74,20 +77,14 @@ export class OrganizationController {
     return DomainMapper.toDomainRoleView(role);
   }
 
-  @RequirePermission('domain:role:manage')
-  @ApiDomainHeader()
-  @ApiOperation({ summary: 'Update domain role' })
-  @Patch(`roles/:roleId`)
-  async updateDomainRole(@Param('roleId') roleId: string, @Body() dto: UpdateDomainRoleDto) {
-    const role = await this.em.findOneOrFail(DomainRole, roleId, {
-      failHandler: () => new NotFoundException(),
-      populate: ['domain'],
+  @RequirePermission('domain:role:read')
+  @ApiOperation({ summary: 'Domain roles' })
+  @Get(`:${DOMAIN_ID_PARAMETER}/roles`)
+  async domainRoles(@Param(DOMAIN_ID_PARAMETER) domainId: string) {
+    return this.em.find(DomainRole, {
+      domain: {
+        id: domainId,
+      },
     });
-    role.domain.getEntity().ensureStatus();
-
-    this.em.assign(role, dto, { ignoreUndefined: true });
-    await this.em.flush();
-
-    return DomainMapper.toDomainRoleView(role);
   }
 }

@@ -7,15 +7,20 @@ import { ModuleRef } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './controllers/auth-controller';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { OrganizationController } from './controllers/domain-controller';
+import { DomainController } from './controllers/domain/domain-controller';
 import { AuthService } from './services/auth-service';
 import { Domain } from '@/persistence/entities/iam-domain.entity';
+import { UserController } from './controllers/user-controller';
+import { DomainRoleController } from './controllers/domain/role-controller';
+import { UserSummary } from '@/persistence/queries/user-query';
+import { DomainMember } from '@/persistence/entities/iam-domain.member.entity';
+import { DomainSummary } from '@/persistence/queries/domain-query';
 
 @Global()
 @Module({
   imports: [
     MikroOrmModule.forFeature({
-      entities: [User, Domain],
+      entities: [User, UserSummary, Domain, DomainMember, DomainSummary],
     }),
     ConfigModule.forFeature(authConfig),
     JwtModule.registerAsync({
@@ -27,7 +32,7 @@ import { Domain } from '@/persistence/entities/iam-domain.entity';
       }),
     }),
   ],
-  controllers: [AuthController, OrganizationController],
+  controllers: [AuthController, DomainController, DomainRoleController, UserController],
   providers: [AuthService],
 })
 export class IAMModule implements OnModuleInit {

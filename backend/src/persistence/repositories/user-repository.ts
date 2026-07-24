@@ -30,6 +30,8 @@ export class UserRepository extends EntityRepository<User> {
 
   async save(user: User) {
     this.em.persist(user);
-    return this.em.flush();
+    await this.em.flush();
+    return user;
   }
+
 }
