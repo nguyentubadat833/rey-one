@@ -7,13 +7,14 @@ import { Domain } from '@/persistence/entities/iam-domain.entity';
 import { DomainMapper } from '../../mappers/domain-mapper';
 import { DOMAIN_ID_PARAMETER } from '@/utils/types/utils';
 import { DomainSummary } from '@/persistence/queries/domain-query';
-import { DomainSummaryView } from '@rey-one/shared';
+import { DomainSummaryView, DomainWithIAMView } from '@rey-one/shared';
+import { DomainService } from '../../services/domain-service';
 
 @RequireAuth()
 @ApiTags('IAM / Domains')
 @Controller('domains')
 export class DomainController {
-  constructor(private readonly em: EntityManager) {}
+  constructor(private readonly em: EntityManager, private readonly domainService: DomainService) {}
 
   @RequireAdmin()
   @ApiOperation({ summary: 'Domain summaries' })
@@ -56,5 +57,12 @@ export class DomainController {
       },
       { failHandler: () => new NotFoundException() },
     );
+  }
+
+  @RequirePermission('domain:manage:read')
+  @ApiOperation({ summary: 'Domain detail' })
+  @Get(`:${DOMAIN_ID_PARAMETER}/detail`)
+  async getDetail(@Param(DOMAIN_ID_PARAMETER) id: string): Promise<DomainWithIAMView> {
+    return this.domainService.getDomainDetailWithIAM(id).then(DomainMapper.toDomainWithIAMView)
   }
 }

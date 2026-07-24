@@ -4,10 +4,12 @@ import { CreateDomainMemberDto, UpdateDomainMemberDto } from '../dtos/domain-dto
 import { UserRepository } from '@/persistence/repositories/user-repository';
 import { EntityManager } from '@mikro-orm/core';
 import { DomainMember } from '@/persistence/entities/iam-domain.member.entity';
-import { DomainMemberLoadedUserAndRole } from '@/persistence/types/domain-type';
+import { DomainLoadedRoleAndMember, DomainMemberLoadedUserAndRole } from '@/persistence/types/domain-type';
 import { authConfig } from '@/configs/auth.config';
 import type { ConfigType } from '@nestjs/config';
 import { DomainRole } from '@/persistence/entities/iam-domain.role.entity';
+import { AppError } from '@/utils/errors/app.error';
+import { Domain } from '@/persistence/entities/iam-domain.entity';
 
 @Injectable()
 export class DomainService {
@@ -98,7 +100,7 @@ export class DomainService {
     return member as DomainMemberLoadedUserAndRole;
   }
 
-  async getSummaries(domainId: string) {
+  async getMembers(domainId: string): Promise<DomainMemberLoadedUserAndRole[]> {
     return this.em.find(
       DomainMember,
       {
@@ -108,6 +110,19 @@ export class DomainService {
       },
       {
         populate: ['user.party', 'role'],
+      },
+    );
+  }
+
+  async getDomainDetailWithIAM(domainId: string): Promise<DomainLoadedRoleAndMember> {
+    return this.em.findOneOrFail(
+      Domain,
+      {
+        id: domainId,
+      },
+      {
+        populate: ['roles', 'members.user.party'],
+        failHandler: () => new AppError('OBJECT_NOT_FOUND', 'Domain not found'),
       },
     );
   }

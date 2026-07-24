@@ -18,3 +18,9 @@ export type DomainRoleView = z.infer<typeof DomainRoleSchema>;
 
 // Domain member
 export type DomainMemberView = z.infer<typeof DomainMemberViewSchema> 
+
+// Domain detail
+export type DomainWithIAMView =  DomainView & {
+  roles: DomainRoleView[],
+  members: DomainMemberView[],
+}

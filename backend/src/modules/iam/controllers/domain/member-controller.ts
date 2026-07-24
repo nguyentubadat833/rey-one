@@ -16,10 +16,10 @@ export class DomainMemberController {
   constructor(private readonly domainService: DomainService) {}
 
   @RequirePermission('domain:member:read')
-  @ApiOperation({ summary: 'Member summaries' })
+  @ApiOperation({ summary: 'Domain members' })
   @Get()
-  async summaries(@CurrentHeader(DOMAIN_ID_HEADER) domainId: string): Promise<DomainMemberView[]> {
-    return this.domainService.getSummaries(domainId)
+  async members(@CurrentHeader(DOMAIN_ID_HEADER) domainId: string): Promise<DomainMemberView[]> {
+    return this.domainService.getMembers(domainId)
     .then(rs => rs.map(DomainMapper.toDomainMemberView))
   }
 
