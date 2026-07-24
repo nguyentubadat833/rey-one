@@ -1,4 +1,4 @@
-import { IUserSummary } from '@/persistence/queries/user-query';
+import { IUserSummary } from '@/persistence/entities/query-entities/user-query';
 import { UserLoadedParty } from '@/persistence/types/user-type';
 import { UserSummaryView, UserView } from '@rey-one/shared';
 

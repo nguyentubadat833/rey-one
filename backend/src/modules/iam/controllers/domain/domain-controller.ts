@@ -6,7 +6,7 @@ import { CreateDomainDto, UpdateDomainDto } from '../../dtos/domain-dto';
 import { Domain } from '@/persistence/entities/iam-domain.entity';
 import { DomainMapper } from '../../mappers/domain-mapper';
 import { DOMAIN_ID_PARAMETER } from '@/utils/types/utils';
-import { DomainSummary } from '@/persistence/queries/domain-query';
+import { DomainSummary } from '@/persistence/entities/query-entities/domain-query';
 import { DomainSummaryView, DomainWithIAMView } from '@rey-one/shared';
 import { DomainService } from '../../services/domain-service';
 

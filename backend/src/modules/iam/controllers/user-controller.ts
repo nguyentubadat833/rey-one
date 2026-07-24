@@ -1,4 +1,4 @@
-import { UserSummary } from '@/persistence/queries/user-query';
+import { UserSummary } from '@/persistence/entities/query-entities/user-query';
 import { RequireAdmin, RequireAuth } from '@/utils/decorators/auth.decorator';
 import { EntityManager } from '@mikro-orm/core';
 import { Controller, Get, NotFoundException, Param } from '@nestjs/common';

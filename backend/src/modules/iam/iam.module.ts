@@ -12,13 +12,13 @@ import { AuthService } from './services/auth-service';
 import { Domain } from '@/persistence/entities/iam-domain.entity';
 import { UserController } from './controllers/user-controller';
 import { DomainRoleController } from './controllers/domain/role-controller';
-import { UserSummary } from '@/persistence/queries/user-query';
+import { UserSummary } from '@/persistence/entities/query-entities/user-query';
 import { DomainMember } from '@/persistence/entities/iam-domain.member.entity';
-import { DomainSummary } from '@/persistence/queries/domain-query';
+import { DomainSummary } from '@/persistence/entities/query-entities/domain-query';
 import { DomainService } from './services/domain-service';
 import { DomainMemberController } from './controllers/domain/member-controller';
 
-@Global()
+// @Global()
 @Module({
   imports: [
     MikroOrmModule.forFeature({

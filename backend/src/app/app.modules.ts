@@ -10,7 +10,7 @@ import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { User } from '@/persistence/entities/iam-user.entity';
 import { IAMModule } from '@/modules/iam/iam.module';
 import { CatalogModule } from '@/modules/catalog/catalog.module';
-import { UserSummary } from '@/persistence/queries/user-query';
+import { UserSummary } from '@/persistence/entities/query-entities/user-query';
 
 @Module({
   imports: [
