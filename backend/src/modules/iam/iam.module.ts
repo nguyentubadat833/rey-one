@@ -15,6 +15,8 @@ import { DomainRoleController } from './controllers/domain/role-controller';
 import { UserSummary } from '@/persistence/queries/user-query';
 import { DomainMember } from '@/persistence/entities/iam-domain.member.entity';
 import { DomainSummary } from '@/persistence/queries/domain-query';
+import { DomainService } from './services/domain-service';
+import { DomainMemberController } from './controllers/domain/member-controller';
 
 @Global()
 @Module({
@@ -32,8 +34,8 @@ import { DomainSummary } from '@/persistence/queries/domain-query';
       }),
     }),
   ],
-  controllers: [AuthController, DomainController, DomainRoleController, UserController],
-  providers: [AuthService],
+  controllers: [AuthController, DomainController, DomainRoleController, DomainMemberController, UserController],
+  providers: [AuthService, DomainService],
 })
 export class IAMModule implements OnModuleInit {
   constructor(
@@ -46,7 +48,7 @@ export class IAMModule implements OnModuleInit {
     await RequestContext.create(this.orm.em, async () => {
       const em = RequestContext.getEntityManager()!;
 
-      const users = [this.config.systemUser.admin, this.config.systemUser.support];
+      const users = [this.config.user.admin, this.config.user.support];
 
       for (const item of users) {
         const identity = AuthService.IdentityDetect(item.identity);

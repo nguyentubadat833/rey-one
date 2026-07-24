@@ -14,6 +14,7 @@ const schema = z
     USER_ADMIN_PASSWORD: z.string().default('admin'),
     USER_SUPPORT_IDENTITY: z.string().default('support'),
     USER_SUPPORT_PASSWORD: z.string().default('support'),
+    DOMAIN_MEMBER_PASSWORD: z.string().default('member'),
   })
   .superRefine((val, ctx) => {
     if (process.env.NODE_ENV === 'production' && val.JWT_SECRET === '123456789a') {
@@ -33,7 +34,7 @@ export const authConfig = registerAs('auth', () => {
     jwtSecret: parsed.JWT_SECRET,
     jwtAccessExpiresIn: parsed.JWT_ACCESS_EXPIRES_IN_MINUTES,
     jwtRefreshExpiresIn: parsed.JWT_REFRESH_EXPIRES_IN_MINUTES,
-    systemUser: {
+    user: {
       admin: {
         type: USER_ADMIN_TYPE,
         identity: parsed.USER_ADMIN_IDENTITY,
@@ -43,6 +44,13 @@ export const authConfig = registerAs('auth', () => {
         type: USER_NORMAL_TYPE,
         identity: parsed.USER_SUPPORT_IDENTITY,
         password: parsed.USER_SUPPORT_PASSWORD,
+      },
+    },
+    domain: {
+      member: {
+        password: {
+          default: parsed.DOMAIN_MEMBER_PASSWORD,
+        },
       },
     },
   };

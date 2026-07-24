@@ -2,12 +2,10 @@ import { EntityManager } from '@mikro-orm/core';
 import { Body, Controller, Get, NotFoundException, Param, Patch, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RequireAdmin, RequireAuth, RequirePermission } from '@/utils/decorators/auth.decorator';
-import { CreateDomainDto, CreateDomainRoleDto, UpdateDomainDto, UpdateDomainRoleDto } from '../../dtos/domain-dto';
+import { CreateDomainDto, UpdateDomainDto } from '../../dtos/domain-dto';
 import { Domain } from '@/persistence/entities/iam-domain.entity';
 import { DomainMapper } from '../../mappers/domain-mapper';
 import { DOMAIN_ID_PARAMETER } from '@/utils/types/utils';
-import { DomainRole } from '@/persistence/entities/iam-domain.role.entity';
-import { DomainRepository } from '@/persistence/repositories/domain-repository';
 import { DomainSummary } from '@/persistence/queries/domain-query';
 
 @RequireAuth()
@@ -57,34 +55,5 @@ export class DomainController {
       },
       { failHandler: () => new NotFoundException() },
     );
-  }
-
-  @RequirePermission('domain:role:manage')
-  @ApiOperation({ summary: 'Add domain role' })
-  @Post(`:${DOMAIN_ID_PARAMETER}/roles`)
-  async addDomainRole(@Param(DOMAIN_ID_PARAMETER) domainId: string, @Body() dto: CreateDomainRoleDto) {
-    const domain = await this.em.findOneOrFail(Domain, domainId, {
-      failHandler: () => new NotFoundException(),
-    });
-    domain.ensureStatus();
-
-    const role = this.em.create(DomainRole, {
-      domain,
-      ...dto,
-    });
-
-    await this.em.flush();
-    return DomainMapper.toDomainRoleView(role);
-  }
-
-  @RequirePermission('domain:role:read')
-  @ApiOperation({ summary: 'Domain roles' })
-  @Get(`:${DOMAIN_ID_PARAMETER}/roles`)
-  async domainRoles(@Param(DOMAIN_ID_PARAMETER) domainId: string) {
-    return this.em.find(DomainRole, {
-      domain: {
-        id: domainId,
-      },
-    });
   }
 }

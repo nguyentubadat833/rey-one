@@ -4,7 +4,7 @@ import { BaseLoginDto } from '../dtos/auth-dto';
 import { JwtService } from '@nestjs/jwt';
 import { authConfig } from '@/configs/auth.config';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, RequireAuth } from '@/utils/decorators/auth.decorator';
+import { RequireAuth } from '@/utils/decorators/auth.decorator';
 import { UserLoginResponse, UserType } from '@rey-one/shared';
 import { UserMapper } from '../mappers/user-mapper';
 import { UserAuth } from '@/utils/types/system';
@@ -13,6 +13,7 @@ import { EntityManager } from '@mikro-orm/core';
 import { User } from '@/persistence/entities/iam-user.entity';
 import type { ConfigType } from '@nestjs/config';
 import type { FastifyReply } from 'fastify';
+import { CurrentUser } from '@/utils/decorators/utils.decorator';
 
 @ApiTags('IAM / Auth')
 @Controller('auth')
