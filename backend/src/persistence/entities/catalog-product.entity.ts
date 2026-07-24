@@ -1,8 +1,9 @@
-import { defineEntity, EventArgs, p } from '@mikro-orm/core';
+import { ChangeSetType, defineEntity, EventArgs, p } from '@mikro-orm/core';
 import { CURRENCIES } from '@rey-one/shared';
 import { ProductPricing } from './catalog-product.pricing.entity';
 import { Domain } from './iam-domain.entity';
 import slugify from 'slugify';
+import { AppError } from '@/utils/errors/app.error';
 
 const ProductInfoSchema = defineEntity({
   name: 'CatalogProductInfo',
@@ -35,25 +36,26 @@ export class Product extends ProductEntitySchema.class {}
 
 ProductEntitySchema.setClass(Product);
 
-ProductEntitySchema.addHook('beforeCreate', createHandler);
-ProductEntitySchema.addHook('beforeUpdate', updateHandler);
+ProductEntitySchema.addHook('beforeCreate', saveHandler);
+ProductEntitySchema.addHook('beforeUpdate', saveHandler);
 
-async function createHandler(args: EventArgs<Product>) {
-  // const owner = await args.entity.owner.load();
-  // User.ensureExists(owner);
-  // User.ensureActive(owner);
-}
+export function saveHandler(args: EventArgs<Product>) {
+  const changeSetType = args.changeSet?.type;
+  const changeSetPayload = args.changeSet?.payload;
 
-export function updateHandler(args: EventArgs<Product>) {
-  // if(args.changeSet?.payload.sku){
-  //   throw new AppError('PRODUCT_SKU_IMMUTABLE')
-  // }
-  // if(args.changeSet?.payload.currency){
-  //   throw new AppError('PRODUCT_CURRENCY_IMMUTABLE')
-  // }
-  // if(args.changeSet?.payload.owner){
-  //   throw new AppError('PRODUCT_OWNER_IMMUTABLE')
-  // }
+  if (changeSetType === ChangeSetType.UPDATE) {
+    const originalEntity = args.changeSet?.originalEntity;
+
+    if (changeSetPayload?.sku && originalEntity!.sku !== changeSetPayload.sku) {
+      throw new AppError('PROPERTY_IMMUTABLE', 'Product sku immutable');
+    }
+    if (changeSetPayload?.currency && originalEntity!.currency !== changeSetPayload.currency) {
+      throw new AppError('PROPERTY_IMMUTABLE', 'Product currency immutable');
+    }
+    if (changeSetPayload?.owner && originalEntity!.owner !== changeSetPayload.owner) {
+      throw new AppError('PROPERTY_IMMUTABLE', 'Product owner immutable');
+    }
+  }
 }
 
 export function generateSku(name: string) {
