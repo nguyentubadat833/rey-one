@@ -17,7 +17,6 @@ import {
   DomainWithIAMView,
   UserView,
 } from '@rey-one/shared';
-import { UserMapper } from './user-mapper';
 
 export class DomainMapper {
   static toDomainSummary(domain: IDomainSummary) {

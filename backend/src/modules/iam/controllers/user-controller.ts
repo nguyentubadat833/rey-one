@@ -13,7 +13,7 @@ export class UserController {
 
   @RequireAdmin()
   @ApiOperation({ summary: 'User summaries' })
-  @Get('summaries')
+  @Get()
   async summaries(): Promise<UserSummaryView[]> {
     return this.em.findAll(UserSummary);
   }

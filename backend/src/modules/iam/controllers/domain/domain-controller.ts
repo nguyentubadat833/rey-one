@@ -18,7 +18,7 @@ export class DomainController {
 
   @RequireAdmin()
   @ApiOperation({ summary: 'Domain summaries' })
-  @Get('summaries')
+  @Get()
   async getSummaries(): Promise<DomainSummaryView[]> {
     return this.em.findAll(DomainSummary);
   }
