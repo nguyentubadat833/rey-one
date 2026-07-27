@@ -17,6 +17,10 @@ import { DomainMember } from '@/persistence/entities/iam-domain.member.entity';
 import { DomainSummary } from '@/persistence/entities/query-entities/domain-query';
 import { DomainService } from './services/domain-service';
 import { DomainMemberController } from './controllers/domain/member-controller';
+import { AuthGuard } from './guard/auth-guard';
+import { RequireAdminGuard } from './guard/admin-guard';
+import { RequirePermissionGuard } from './guard/permission-guard';
+import { AUTH_SERVICE } from '@/utils/types/tokens';
 
 @Global()
 @Module({
@@ -35,15 +39,17 @@ import { DomainMemberController } from './controllers/domain/member-controller';
     }),
   ],
   controllers: [AuthController, DomainController, DomainRoleController, DomainMemberController, UserController],
-  providers: [AuthService, DomainService],
-  exports: [AuthService]
+  providers: [
+    AuthService, DomainService, AuthGuard, RequireAdminGuard, RequirePermissionGuard
+  ],
+  exports: [AuthGuard, RequireAdminGuard, RequirePermissionGuard]
 })
 export class IAMModule implements OnModuleInit {
   constructor(
     private readonly orm: MikroORM,
     private readonly moduleRef: ModuleRef,
     @Inject(authConfig.KEY) private readonly config: ConfigType<typeof authConfig>,
-  ) {}
+  ) { }
 
   async onModuleInit() {
     await RequestContext.create(this.orm.em, async () => {

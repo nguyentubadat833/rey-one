@@ -14,6 +14,7 @@ import { User } from '@/persistence/entities/iam-user.entity';
 import type { ConfigType } from '@nestjs/config';
 import type { FastifyReply } from 'fastify';
 import { CurrentUser } from '@/utils/decorators/utils.decorator';
+import { AUTH_SERVICE } from '@/utils/types/tokens';
 
 @ApiTags('IAM / Auth')
 @Controller('auth')

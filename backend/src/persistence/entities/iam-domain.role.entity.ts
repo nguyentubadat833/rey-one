@@ -41,7 +41,7 @@ export function generateId(name: string) {
   });
 
   const suffix = crypto.randomUUID().slice(0, 7);
-  return `DMR-${slug}-${suffix}`.toUpperCase();
+  return `${slug}-${suffix}`.toUpperCase();
 }
 
 async function handlerSave(args: EventArgs<DomainRole>) {

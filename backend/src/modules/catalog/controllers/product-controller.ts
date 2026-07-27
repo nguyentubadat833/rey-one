@@ -14,7 +14,7 @@ import { ProductMapper } from '../mappers/product-mapper';
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
-  @RequirePermission('product:manage')
+  @RequirePermission('domain:product:manage')
   @ApiOperation({ summary: 'Create product' })
   @Post()
   async createProduct(@CurrentHeader(DOMAIN_ID_HEADER) domainId: string, @Body() dto: CreateProductDto) {

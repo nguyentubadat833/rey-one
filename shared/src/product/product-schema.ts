@@ -5,7 +5,7 @@ import { PRODUCT_STATUSES, PRODUCT_TYPES } from "./product-constant";
 export const ProductSchema = z.object({
   id: z.uuid(),
   sku: z.string().optional(),
-  defaultCost: z.number(),
+  defaultCost: z.number().nullable().optional(),
   currency: z.enum(CURRENCIES).default("VND"),
   trackingInventory: z.boolean().default(false),
   name: z.string(),

@@ -1,7 +1,7 @@
 import { UserRepository } from '@/persistence/repositories/user-repository';
 import { UserAuth } from '@/utils/types/system';
-import { IS_PUBLIC_KEY, REQUEST_USER_KEY } from '@/utils/types/tokens';
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { AUTH_SERVICE, IS_PUBLIC_KEY, REQUEST_USER_KEY } from '@/utils/types/tokens';
+import { CanActivate, ExecutionContext, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { UserType } from '@rey-one/shared';
@@ -14,7 +14,7 @@ export class AuthGuard implements CanActivate {
     private readonly authService: AuthService,
     private readonly jwtService: JwtService,
     private reflector: Reflector,
-  ) {}
+  ) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [context.getHandler(), context.getClass()]);
@@ -45,7 +45,7 @@ export class AuthGuard implements CanActivate {
         type: user.type as UserType,
         domainAccess: await user.loadDomainAccess(),
       } satisfies UserAuth;
-      
+
       return true;
     }
 

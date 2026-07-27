@@ -25,7 +25,7 @@ const ProductEntitySchema = defineEntity({
       .unique()
       .onCreate((product) => generateSku(product.info.name)),
     currency: p.enum(CURRENCIES).default('VND'),
-    defaultCost: p.bigint().fieldName('default_cost'),
+    defaultCost: p.bigint().fieldName('default_cost').nullable(),
     info: p.embedded(ProductInfoSchema),
     trackInventory: p.boolean().default(false).fieldName('track_inventory'),
     status: p.enum(PRODUCT_STATUSES).default('draft'),
@@ -41,7 +41,7 @@ const ProductEntitySchema = defineEntity({
 
 export class Product extends ProductEntitySchema.class {
 
-  isDraft(){
+  isDraft() {
     return this.status === 'draft'
   }
 
@@ -76,12 +76,20 @@ export function saveHandler(args: EventArgs<Product>) {
       throw new AppError('PROPERTY_IMMUTABLE', 'Product sku immutable');
     }
 
+    if (changeSetPayload?.type && entity!.type !== changeSetPayload.type) {
+      throw new AppError('PROPERTY_IMMUTABLE', 'Product type immutable');
+    }
+
     if (changeSetPayload?.owner && entity!.owner !== changeSetPayload.owner) {
       throw new AppError('PROPERTY_IMMUTABLE', 'Product owner immutable');
     }
 
-    if (changeSetPayload?.currency && entity.isDraft() && entity!.currency !== changeSetPayload.currency) {
+    if (changeSetPayload?.currency && !entity.isDraft() && entity!.currency !== changeSetPayload.currency) {
       throw new AppError('PROPERTY_IMMUTABLE', 'Product currency immutable');
+    }
+
+    if (changeSetPayload?.trackInventory && !entity.isDraft() && entity!.trackInventory !== changeSetPayload.trackInventory) {
+      throw new AppError('PROPERTY_IMMUTABLE', 'Product track inventory immutable');
     }
   }
 }
