@@ -20,6 +20,8 @@ export const APP_PERMISSIONS = [
   // "academy:course:manage",
   // "academy:enrollment:view",
 
+  'domain:product:read',
+  'domain:product:manage',
   "domain:role:read",
   "domain:role:manage",
   "domain:member:read",

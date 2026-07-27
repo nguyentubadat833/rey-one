@@ -18,7 +18,7 @@ import { DomainSummary } from '@/persistence/entities/query-entities/domain-quer
 import { DomainService } from './services/domain-service';
 import { DomainMemberController } from './controllers/domain/member-controller';
 
-// @Global()
+@Global()
 @Module({
   imports: [
     MikroOrmModule.forFeature({
@@ -36,6 +36,7 @@ import { DomainMemberController } from './controllers/domain/member-controller';
   ],
   controllers: [AuthController, DomainController, DomainRoleController, DomainMemberController, UserController],
   providers: [AuthService, DomainService],
+  exports: [AuthService]
 })
 export class IAMModule implements OnModuleInit {
   constructor(

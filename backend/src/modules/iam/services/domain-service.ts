@@ -76,15 +76,6 @@ export class DomainService {
       member,
       {
         role: dto.roleId,
-      },
-      {
-        ignoreUndefined: true,
-      },
-    );
-
-    this.em.assign(
-      member,
-      {
         user: {
           username: dto.username,
           email: dto.email,
@@ -100,6 +91,25 @@ export class DomainService {
         ignoreUndefined: true,
       },
     );
+
+    // this.em.assign(
+    //   member,
+    //   {
+    //     user: {
+    //       username: dto.username,
+    //       email: dto.email,
+    //       phone: dto.phone,
+    //       password: dto.password,
+    //       status: dto.status,
+    //       party: {
+    //         name: dto.name,
+    //       },
+    //     },
+    //   },
+    //   {
+    //     ignoreUndefined: true,
+    //   },
+    // );
 
     await this.em.flush();
     return member as DomainMemberLoadedUserAndRole;

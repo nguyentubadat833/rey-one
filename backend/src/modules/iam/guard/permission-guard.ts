@@ -1,4 +1,3 @@
-import { authConfig } from '@/configs/auth.config';
 import { AppError } from '@/utils/errors/app.error';
 import { UserAuth } from '@/utils/types/system';
 import { REQUEST_USER_KEY, REQUIRE_PERMISSION_KEY } from '@/utils/types/tokens';
@@ -7,13 +6,12 @@ import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, Forbi
 import { Reflector } from '@nestjs/core';
 import { AppPermission, hasPermission } from '@rey-one/shared';
 import { FastifyRequest } from 'fastify';
-import type { ConfigType } from '@nestjs/config';
 
 @Injectable()
 export class RequirePermissionGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
-    @Inject(authConfig.KEY) private readonly config: ConfigType<typeof authConfig>,
+    // @Inject(authConfig.KEY) private readonly config: ConfigType<typeof authConfig>,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {

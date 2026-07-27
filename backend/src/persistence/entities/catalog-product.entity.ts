@@ -1,6 +1,6 @@
 import { ChangeSetType, defineEntity, EventArgs, p } from '@mikro-orm/core';
-import { CURRENCIES } from '@rey-one/shared';
-import { ProductPricing } from './catalog-product.pricing.entity';
+import { CURRENCIES, PRODUCT_STATUSES, PRODUCT_TYPES } from '@rey-one/shared';
+import { ProductPricing } from './commerce-product-pricing.entity';
 import { Domain } from './iam-domain.entity';
 import slugify from 'slugify';
 import { AppError } from '@/utils/errors/app.error';
@@ -24,15 +24,39 @@ const ProductEntitySchema = defineEntity({
       .length(100)
       .unique()
       .onCreate((product) => generateSku(product.info.name)),
-    currency: p.enum(() => CURRENCIES).default('VND'),
+    currency: p.enum(CURRENCIES).default('VND'),
+    defaultCost: p.bigint().fieldName('default_cost'),
     info: p.embedded(ProductInfoSchema),
     trackInventory: p.boolean().default(false).fieldName('track_inventory'),
+    status: p.enum(PRODUCT_STATUSES).default('draft'),
+    type: p.enum(PRODUCT_TYPES),
     owner: () => p.manyToOne(Domain),
-    pricing: () => p.oneToOne(ProductPricing).mappedBy((pricing) => pricing.product),
+    pricing: () =>
+      p
+        .oneToOne(ProductPricing)
+        .mappedBy((pricing) => pricing.product)
+        .nullable(),
   },
 });
 
-export class Product extends ProductEntitySchema.class {}
+export class Product extends ProductEntitySchema.class {
+
+  isDraft(){
+    return this.status === 'draft'
+  }
+
+  ensureNotArchived() {
+    if (this.status === 'archived') {
+      throw new AppError('INVALID_STATUS', 'Invalid product status, required not archived');
+    }
+  }
+
+  ensureNotDraft() {
+    if (!this.isDraft()) {
+      throw new AppError('INVALID_STATUS', 'Invalid product status, required draf value');
+    }
+  }
+}
 
 ProductEntitySchema.setClass(Product);
 
@@ -44,16 +68,20 @@ export function saveHandler(args: EventArgs<Product>) {
   const changeSetPayload = args.changeSet?.payload;
 
   if (changeSetType === ChangeSetType.UPDATE) {
-    const originalEntity = args.changeSet?.originalEntity;
+    args.entity.ensureNotArchived();
 
-    if (changeSetPayload?.sku && originalEntity!.sku !== changeSetPayload.sku) {
+    const entity = args.entity;
+
+    if (changeSetPayload?.sku && entity!.sku !== changeSetPayload.sku) {
       throw new AppError('PROPERTY_IMMUTABLE', 'Product sku immutable');
     }
-    if (changeSetPayload?.currency && originalEntity!.currency !== changeSetPayload.currency) {
-      throw new AppError('PROPERTY_IMMUTABLE', 'Product currency immutable');
-    }
-    if (changeSetPayload?.owner && originalEntity!.owner !== changeSetPayload.owner) {
+
+    if (changeSetPayload?.owner && entity!.owner !== changeSetPayload.owner) {
       throw new AppError('PROPERTY_IMMUTABLE', 'Product owner immutable');
+    }
+
+    if (changeSetPayload?.currency && entity.isDraft() && entity!.currency !== changeSetPayload.currency) {
+      throw new AppError('PROPERTY_IMMUTABLE', 'Product currency immutable');
     }
   }
 }

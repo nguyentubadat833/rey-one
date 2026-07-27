@@ -7,7 +7,6 @@ const ProductPricingEntitySchema = defineEntity({
   properties: {
     id: p.bigint().primary().autoincrement(),
     product: () => p.oneToOne(Product),
-    defaultCost: p.integer().fieldName('default_cost')
   },
 });
 
