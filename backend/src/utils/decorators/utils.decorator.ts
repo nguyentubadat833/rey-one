@@ -1,13 +1,13 @@
 import { applyDecorators, createParamDecorator, ExecutionContext, SetMetadata } from '@nestjs/common';
-import { IS_PUBLIC_KEY, REQUIRE_PERMISSION_KEY } from '../types/tokens';
+import { AUTH_METADATA } from '../types/tokens';
 import { AppPermission } from '@rey-one/shared';
 import { ApiHeader } from '@nestjs/swagger';
 import { DOMAIN_ID_HEADER } from '../types/utils';
 import { FastifyRequest } from 'fastify';
 import { UserAuth } from '../types/system';
 
-export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
-export const Permission = (permission: AppPermission) => SetMetadata(REQUIRE_PERMISSION_KEY, permission);
+export const Public = () => SetMetadata(AUTH_METADATA.IS_PUBLIC, true);
+export const Permission = (permission: AppPermission) => SetMetadata(AUTH_METADATA.REQUIRE_PERMISSION, permission);
 
 export function ApiDomainHeader(required = true) {
   return applyDecorators(

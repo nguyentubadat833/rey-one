@@ -1,5 +1,5 @@
 import { UserAuth } from '@/utils/types/system';
-import { REQUEST_USER_KEY } from '@/utils/types/tokens';
+import { AUTH_METADATA } from '@/utils/types/tokens';
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, ForbiddenException, Inject } from '@nestjs/common';
 
 @Injectable()
@@ -8,7 +8,7 @@ export class RequireAdminGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const user = request[REQUEST_USER_KEY] as UserAuth;
+    const user = request[AUTH_METADATA.USER] as UserAuth;
 
     if (!user) {
       throw new UnauthorizedException();

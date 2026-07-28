@@ -1,6 +1,6 @@
 import { UserRepository } from '@/persistence/repositories/user-repository';
 import { UserAuth } from '@/utils/types/system';
-import { IS_PUBLIC_KEY, REQUEST_USER_KEY } from '@/utils/types/tokens';
+import { AUTH_METADATA } from '@/utils/types/tokens';
 import { CanActivate, ExecutionContext, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
@@ -17,7 +17,7 @@ export class AuthGuard implements CanActivate {
   ) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [context.getHandler(), context.getClass()]);
+    const isPublic = this.reflector.getAllAndOverride<boolean>(AUTH_METADATA.IS_PUBLIC, [context.getHandler(), context.getClass()]);
     if (isPublic) {
       return true;
     }
@@ -30,7 +30,7 @@ export class AuthGuard implements CanActivate {
       const accessToken = accessTokenFromCookie ?? authHeader!.replace('Bearer ', '');
 
       const user: UserAuth = await this.jwtService.verifyAsync(accessToken);
-      request[REQUEST_USER_KEY] = user;
+      request[AUTH_METADATA.USER] = user;
 
       return true;
     }
@@ -40,7 +40,7 @@ export class AuthGuard implements CanActivate {
 
       const { user } = await this.authService.baseAuthentication({ identity, password });
 
-      request[REQUEST_USER_KEY] = {
+      request[AUTH_METADATA.USER] = {
         id: user.id,
         type: user.type as UserType,
         domainAccess: await user.loadDomainAccess(),

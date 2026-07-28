@@ -7,10 +7,10 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
-import { User } from '@/persistence/entities/iam-user.entity';
 import { IAMModule } from '@/modules/iam/iam.module';
 import { CatalogModule } from '@/modules/catalog/catalog.module';
-import { UserSummary } from '@/persistence/entities/query-entities/user-query';
+import { ClsModule, ClsService } from 'nestjs-cls';
+import { DomainRelationSubscriber } from '@/modules/iam/events/domain-relation.subscriber';
 
 @Module({
   imports: [
@@ -24,7 +24,7 @@ import { UserSummary } from '@/persistence/entities/query-entities/user-query';
     MikroOrmModule.forRootAsync({
       driver: PostgreSqlDriver,
       inject: [databaseConfig.KEY],
-      useFactory: (config: ConfigType<typeof databaseConfig>) => ({
+      useFactory: (config: ConfigType<typeof databaseConfig>, cls: ClsService) => ({
         host: config.dbHost,
         port: config.dbPort,
         user: config.dbUser,
@@ -35,10 +35,15 @@ import { UserSummary } from '@/persistence/entities/query-entities/user-query';
         autoLoadEntities: true,
         // entities: ['./dist/**/*.entity.js'],
         // entitiesTs: ['./src/**/*.entity.ts'],
+        subscribers: [new DomainRelationSubscriber(cls)]
       }),
     }),
+    ClsModule.forRoot({
+      global: true,
+      middleware: { mount: true },
+    }),
     IAMModule,
-    CatalogModule
+    CatalogModule,
   ],
   controllers: [AppController],
   providers: [],

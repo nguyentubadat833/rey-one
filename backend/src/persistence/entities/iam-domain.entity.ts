@@ -46,6 +46,7 @@ const DomainEntitySchema = defineEntity({
 
 export class BaseDomain extends BaseDomainSchema.class {}
 BaseDomainSchema.setClass(BaseDomain);
+
 export class Domain extends DomainEntitySchema.class {
   static ensureStatus(domain: Domain) {
     if (!domain.active) {

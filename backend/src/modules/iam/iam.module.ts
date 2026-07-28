@@ -1,7 +1,7 @@
 import { authConfig } from '@/configs/auth.config';
 import { User } from '@/persistence/entities/iam-user.entity';
 import { MikroORM, RequestContext } from '@mikro-orm/core';
-import { Inject, Module, OnModuleInit } from '@nestjs/common';
+import { Inject, MiddlewareConsumer, Module, NestModule, OnModuleInit } from '@nestjs/common';
 import { ConfigModule, type ConfigType } from '@nestjs/config';
 import { APP_GUARD, ModuleRef } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
@@ -20,6 +20,8 @@ import { DomainMemberController } from './controllers/domain/member-controller';
 import { AuthGuard } from './guard/auth-guard';
 import { RequireAdminGuard } from './guard/admin-guard';
 import { RequirePermissionGuard } from './guard/permission-guard';
+import { DomainRelationSubscriber } from './events/domain-relation.subscriber';
+import { DomainMiddleware } from './middlewares/domain-middleware';
 
 @Module({
   imports: [
@@ -38,24 +40,31 @@ import { RequirePermissionGuard } from './guard/permission-guard';
   ],
   controllers: [AuthController, DomainController, DomainRoleController, DomainMemberController, UserController],
   providers: [
-    AuthService, 
-    DomainService, 
-    RequireAdminGuard, 
-    RequirePermissionGuard,
-    // Đăng ký AuthGuard làm Global Guard 
+    // Đăng ký AuthGuard làm Global Guard
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
     },
+    AuthService,
+    DomainService,
+    RequireAdminGuard,
+    RequirePermissionGuard,
+    //
+    DomainRelationSubscriber
   ],
-  exports: [RequireAdminGuard, RequirePermissionGuard]
+  exports: [RequireAdminGuard, RequirePermissionGuard],
 })
-export class IAMModule implements OnModuleInit {
+export class IAMModule implements OnModuleInit, NestModule {
   constructor(
     private readonly orm: MikroORM,
     private readonly moduleRef: ModuleRef,
     @Inject(authConfig.KEY) private readonly config: ConfigType<typeof authConfig>,
-  ) { }
+  ) {}
+
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(DomainMiddleware)
+    .forRoutes(DomainMemberController, DomainRoleController)
+  }
 
   async onModuleInit() {
     await RequestContext.create(this.orm.em, async () => {

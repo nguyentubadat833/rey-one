@@ -13,7 +13,7 @@ export const DomainRoleEntitySchema = defineEntity({
       .string()
       .length(20)
       .primary()
-      .onCreate((domain) => generateId(domain.name)),
+      .onCreate((role) => generateId(role.name)),
     domain: () => p.manyToOne(Domain).ref(),
     members: () =>
       p
@@ -54,9 +54,10 @@ async function handlerSave(args: EventArgs<DomainRole>) {
   }
 
   if (args.changeSet?.payload.permissions) {
-    await args.entity.domain.loadOrFail()
     const permissions = args.entity.permissions;
+
+    const domain = await args.entity.domain.loadOrFail();
     args.entity.permissions = Array.from(new Set(permissions));
-    args.entity.domain.getEntity().ensurePermissionsValid(args.entity.permissions);
+    domain.ensurePermissionsValid(args.entity.permissions);
   }
 }

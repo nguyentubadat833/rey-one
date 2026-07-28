@@ -1,3 +1,9 @@
-export const REQUEST_USER_KEY= 'user'
-export const REQUIRE_PERMISSION_KEY = 'require_permission'
-export const IS_PUBLIC_KEY = 'is_public';
+export const AUTH_METADATA = {
+  USER: 'user',
+  REQUIRE_PERMISSION: 'require_permission',
+  IS_PUBLIC: 'is_public',
+} as const;
+
+export const CLS_KEYS = {
+  DOMAIN_ID: 'domainId',
+} as const;

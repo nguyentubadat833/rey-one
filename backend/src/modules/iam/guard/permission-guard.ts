@@ -1,6 +1,6 @@
 import { AppError } from '@/utils/errors/app.error';
 import { UserAuth } from '@/utils/types/system';
-import { REQUEST_USER_KEY, REQUIRE_PERMISSION_KEY } from '@/utils/types/tokens';
+import { AUTH_METADATA } from '@/utils/types/tokens';
 import { DOMAIN_ID_PARAMETER, DOMAIN_ID_HEADER } from '@/utils/types/utils';
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
@@ -15,7 +15,7 @@ export class RequirePermissionGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const requiredPermission = this.reflector.getAllAndOverride<AppPermission>(REQUIRE_PERMISSION_KEY, [context.getHandler(), context.getClass()]);
+    const requiredPermission = this.reflector.getAllAndOverride<AppPermission>(AUTH_METADATA.REQUIRE_PERMISSION, [context.getHandler(), context.getClass()]);
 
     if (!requiredPermission) return true;
 
@@ -33,7 +33,7 @@ export class RequirePermissionGuard implements CanActivate {
       }>
     >();
 
-    const user = request[REQUEST_USER_KEY] as UserAuth;
+    const user = request[AUTH_METADATA.USER] as UserAuth;
 
     if (!user) {
       throw new UnauthorizedException();
