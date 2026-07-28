@@ -16,6 +16,7 @@ export class RequirePermissionGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const requiredPermission = this.reflector.getAllAndOverride<AppPermission>(AUTH_METADATA.REQUIRE_PERMISSION, [context.getHandler(), context.getClass()]);
+    // const requiredDomain = this.reflector.getAllAndOverride<boolean>(AUTH_METADATA.REQUIRE_DOAMIN, [context.getHandler(), context.getClass()]);
 
     if (!requiredPermission) return true;
 
@@ -43,10 +44,10 @@ export class RequirePermissionGuard implements CanActivate {
       return true;
     }
 
-    const domainId = request.params.domainId ?? request.query.domainId ?? request.headers['x-domain-id'];
+    const domainId = request.params.domainId ?? request.query.domainId ?? request.headers[DOMAIN_ID_HEADER];
 
     if (!domainId) {
-      throw new BadRequestException('Domain ID is required');
+      throw new BadRequestException("Domain is required")
     }
 
     if (!user.domainAccess[domainId] || !hasPermission(user.domainAccess[domainId], requiredPermission)) {

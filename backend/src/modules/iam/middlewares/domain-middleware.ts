@@ -12,10 +12,10 @@ export class DomainMiddleware implements NestMiddleware {
     const domainId = req.headers[DOMAIN_ID_HEADER] as string;
 
     if (!domainId) {
-      throw new BadRequestException('Domain ID is required')
+      throw new BadRequestException('Domain is required');
     }
 
-    this.cls.set('domainId', domainId)
+    this.cls.set('domainId', domainId);
     next();
   }
 }

@@ -9,7 +9,7 @@ import { tenantDomainFilterConfig } from './configs/doamin-tenant.filter';
 export const DomainRoleEntitySchema = defineEntity({
   name: 'IAMUserRole',
   tableName: 'iam_domain_role',
-  filters: tenantDomainFilterConfig,
+  // filters: tenantDomainFilterConfig,
   properties: {
     id: p
       .string()

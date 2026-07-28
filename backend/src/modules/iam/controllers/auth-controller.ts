@@ -13,7 +13,7 @@ import { EntityManager } from '@mikro-orm/core';
 import { User } from '@/persistence/entities/iam-user.entity';
 import type { ConfigType } from '@nestjs/config';
 import type { FastifyReply } from 'fastify';
-import { CurrentUser, Public } from '@/utils/decorators/utils.decorator';
+import { CurrentUser, MarkPublic } from '@/utils/decorators/utils.decorator';
 
 @RequireAuth()
 @ApiTags('IAM / Auth')
@@ -37,7 +37,7 @@ export class AuthController {
     return UserMapper.toUserView(loadedUser);
   }
 
-  @Public()
+  @MarkPublic()
   @ApiOperation({ summary: 'Base login' })
   @Post('login')
   async baseLogin(@Body() dto: BaseLoginDto, @Res({ passthrough: true }) reply: FastifyReply) {

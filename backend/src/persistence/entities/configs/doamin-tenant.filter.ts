@@ -6,17 +6,18 @@ import { ClsServiceManager } from 'nestjs-cls';
 export const tenantDomainFilterConfig: Dictionary<FilterDef> = {
   tenant: {
     name: 'tenant',
+    args: false,
     cond: (
       _args: Dictionary,
-      _type: 'read' | 'update' | 'delete', // FilterProcessOption bằng union type 
+      _type: 'read' | 'update' | 'delete', // FilterProcessOption bằng union type
       _em: EntityManager,
     ): Dictionary => {
       const cls = ClsServiceManager.getClsService<AppClsStore>();
       const domainId = cls.get('domainId');
 
       if (!domainId) {
-        throw new AppError('PROPERTY_REQUIRED', 'Tenant required domain id')
-        // return {};
+        // throw new AppError('PROPERTY_REQUIRED', 'Tenant required domain id');
+        return {};
       }
 
       return { domain: domainId };
