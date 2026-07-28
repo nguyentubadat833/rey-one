@@ -1,6 +1,6 @@
 import { UserRepository } from '@/persistence/repositories/user-repository';
 import { UserAuth } from '@/utils/types/system';
-import { AUTH_SERVICE, IS_PUBLIC_KEY, REQUEST_USER_KEY } from '@/utils/types/tokens';
+import { IS_PUBLIC_KEY, REQUEST_USER_KEY } from '@/utils/types/tokens';
 import { CanActivate, ExecutionContext, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';

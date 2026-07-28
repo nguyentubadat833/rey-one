@@ -1,9 +1,9 @@
 import { authConfig } from '@/configs/auth.config';
 import { User } from '@/persistence/entities/iam-user.entity';
 import { MikroORM, RequestContext } from '@mikro-orm/core';
-import { Global, Inject, Module, OnModuleInit } from '@nestjs/common';
+import { Inject, Module, OnModuleInit } from '@nestjs/common';
 import { ConfigModule, type ConfigType } from '@nestjs/config';
-import { ModuleRef } from '@nestjs/core';
+import { APP_GUARD, ModuleRef } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './controllers/auth-controller';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
@@ -20,9 +20,7 @@ import { DomainMemberController } from './controllers/domain/member-controller';
 import { AuthGuard } from './guard/auth-guard';
 import { RequireAdminGuard } from './guard/admin-guard';
 import { RequirePermissionGuard } from './guard/permission-guard';
-import { AUTH_SERVICE } from '@/utils/types/tokens';
 
-@Global()
 @Module({
   imports: [
     MikroOrmModule.forFeature({
@@ -40,9 +38,17 @@ import { AUTH_SERVICE } from '@/utils/types/tokens';
   ],
   controllers: [AuthController, DomainController, DomainRoleController, DomainMemberController, UserController],
   providers: [
-    AuthService, DomainService, AuthGuard, RequireAdminGuard, RequirePermissionGuard
+    AuthService, 
+    DomainService, 
+    RequireAdminGuard, 
+    RequirePermissionGuard,
+    // Đăng ký AuthGuard làm Global Guard 
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
   ],
-  exports: [AuthGuard, RequireAdminGuard, RequirePermissionGuard]
+  exports: [RequireAdminGuard, RequirePermissionGuard]
 })
 export class IAMModule implements OnModuleInit {
   constructor(

@@ -6,7 +6,8 @@ import { RequirePermissionGuard } from '@/modules/iam/guard/permission-guard';
 import { Permission } from './utils.decorator';
 import { RequireAdminGuard } from '@/modules/iam/guard/admin-guard';
 
-export const RequireAuth = () => applyDecorators(UseGuards(AuthGuard), ApiBearerAuth(), ApiBasicAuth());
+// export const RequireAuth = () => applyDecorators(UseGuards(AuthGuard), ApiBearerAuth(), ApiBasicAuth());
+export const RequireAuth = () => applyDecorators(ApiBearerAuth(), ApiBasicAuth());
 
 export const RequireAdmin = () => applyDecorators(UseGuards(RequireAdminGuard));
 export const RequirePermission = (permission: AppPermission) => applyDecorators(UseGuards(RequirePermissionGuard), Permission(permission));

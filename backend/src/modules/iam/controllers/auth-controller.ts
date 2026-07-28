@@ -13,9 +13,9 @@ import { EntityManager } from '@mikro-orm/core';
 import { User } from '@/persistence/entities/iam-user.entity';
 import type { ConfigType } from '@nestjs/config';
 import type { FastifyReply } from 'fastify';
-import { CurrentUser } from '@/utils/decorators/utils.decorator';
-import { AUTH_SERVICE } from '@/utils/types/tokens';
+import { CurrentUser, Public } from '@/utils/decorators/utils.decorator';
 
+@RequireAuth()
 @ApiTags('IAM / Auth')
 @Controller('auth')
 export class AuthController {
@@ -28,16 +28,16 @@ export class AuthController {
   ) {}
 
   @ApiOperation({ summary: 'Get user auth' })
-  @RequireAuth()
   @Get()
   async getUserAuth(@CurrentUser('id') userId: string) {
     const user = await this.userRepo.findByIdentity({ id: userId });
-    User.ensureExists(user)
+    User.ensureExists(user);
 
     const loadedUser = await this.em.populate(user, ['party']);
     return UserMapper.toUserView(loadedUser);
   }
 
+  @Public()
   @ApiOperation({ summary: 'Base login' })
   @Post('login')
   async baseLogin(@Body() dto: BaseLoginDto, @Res({ passthrough: true }) reply: FastifyReply) {
@@ -64,7 +64,7 @@ export class AuthController {
       maxAge: tokenExp * 60,
     });
 
-    user.token = accessToken
+    user.token = accessToken;
     const loadedUser = await this.em.populate(user, ['party']);
     await onSuccess();
 

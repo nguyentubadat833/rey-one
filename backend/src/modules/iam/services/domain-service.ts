@@ -119,9 +119,7 @@ export class DomainService {
     return this.em.find(
       DomainMember,
       {
-        domain: {
-          id: domainId,
-        },
+        domain: domainId
       },
       {
         populate: ['user.party', 'role'],

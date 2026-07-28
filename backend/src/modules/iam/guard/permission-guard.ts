@@ -2,7 +2,7 @@ import { AppError } from '@/utils/errors/app.error';
 import { UserAuth } from '@/utils/types/system';
 import { REQUEST_USER_KEY, REQUIRE_PERMISSION_KEY } from '@/utils/types/tokens';
 import { DOMAIN_ID_PARAMETER, DOMAIN_ID_HEADER } from '@/utils/types/utils';
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, ForbiddenException, Inject, BadRequestException } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AppPermission, hasPermission } from '@rey-one/shared';
 import { FastifyRequest } from 'fastify';
