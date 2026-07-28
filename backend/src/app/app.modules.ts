@@ -10,7 +10,7 @@ import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { IAMModule } from '@/modules/iam/iam.module';
 import { CatalogModule } from '@/modules/catalog/catalog.module';
 import { ClsModule, ClsService } from 'nestjs-cls';
-import { DomainRelationSubscriber } from '@/modules/iam/events/domain-relation.subscriber';
+import { AppClsStore } from '@/utils/types/system';
 
 @Module({
   imports: [
@@ -24,7 +24,7 @@ import { DomainRelationSubscriber } from '@/modules/iam/events/domain-relation.s
     MikroOrmModule.forRootAsync({
       driver: PostgreSqlDriver,
       inject: [databaseConfig.KEY],
-      useFactory: (config: ConfigType<typeof databaseConfig>, cls: ClsService) => ({
+      useFactory: (config: ConfigType<typeof databaseConfig>) => ({
         host: config.dbHost,
         port: config.dbPort,
         user: config.dbUser,
@@ -35,12 +35,14 @@ import { DomainRelationSubscriber } from '@/modules/iam/events/domain-relation.s
         autoLoadEntities: true,
         // entities: ['./dist/**/*.entity.js'],
         // entitiesTs: ['./src/**/*.entity.ts'],
-        subscribers: [new DomainRelationSubscriber(cls)]
+        // subscribers: [new DomainRelationSubscriber(cls)]
       }),
     }),
     ClsModule.forRoot({
       global: true,
-      middleware: { mount: true },
+      middleware: {
+        mount: true
+      },
     }),
     IAMModule,
     CatalogModule,

@@ -2,10 +2,12 @@ import { defineEntity, p } from '@mikro-orm/core';
 import { Domain } from './iam-domain.entity';
 import { User } from './iam-user.entity';
 import { DomainRole } from './iam-domain.role.entity';
+import { tenantDomainFilterConfig } from './configs/doamin-tenant.filter';
 
 const DomainMemberEntitySchema = defineEntity({
   name: 'IAMDomainMember',
   tableName: 'iam_domain_member',
+  filters: tenantDomainFilterConfig,
   properties: {
     id: p.bigint().primary().autoincrement(),
     domain: () => p.manyToOne(Domain).ref(),

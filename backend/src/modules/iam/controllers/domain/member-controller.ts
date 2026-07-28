@@ -1,6 +1,5 @@
 import { RequireAuth, RequirePermission } from '@/utils/decorators/auth.decorator';
 import { ApiDomainHeader, CurrentHeader } from '@/utils/decorators/utils.decorator';
-import { DOMAIN_ID_HEADER } from '@/utils/types/utils';
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateDomainMemberDto, UpdateDomainMemberDto } from '../../dtos/domain-dto';
@@ -18,15 +17,15 @@ export class DomainMemberController {
   @RequirePermission('domain:member:read')
   @ApiOperation({ summary: 'Domain members' })
   @Get()
-  async members(@CurrentHeader(DOMAIN_ID_HEADER) domainId: string): Promise<DomainMemberView[]> {
-    return this.domainService.getMembers(domainId).then((rs) => rs.map(DomainMapper.toDomainMemberView));
+  async members(): Promise<DomainMemberView[]> {
+    return this.domainService.getMembers().then((rs) => rs.map(DomainMapper.toDomainMemberView));
   }
 
   @RequirePermission('domain:member:manage')
   @ApiOperation({ summary: 'Create domain member' })
   @Post()
-  async createMember(@CurrentHeader(DOMAIN_ID_HEADER) domainId: string, @Body() dto: CreateDomainMemberDto) {
-    const member = await this.domainService.createMember(domainId, dto);
+  async createMember(@Body() dto: CreateDomainMemberDto) {
+    const member = await this.domainService.createMember(dto);
     return DomainMapper.toDomainMemberView(member);
   }
 
@@ -42,6 +41,6 @@ export class DomainMemberController {
   @ApiOperation({ summary: 'Domain member detail' })
   @Get(':id')
   async getMemberDetail(@Param('id') memberId: string) {
-    return this.domainService.getDomainMemberDetail(memberId).then(DomainMapper.toDomainMemberDetailView)
+    return this.domainService.getDomainMemberDetail(memberId).then(DomainMapper.toDomainMemberDetailView);
   }
 }

@@ -20,7 +20,6 @@ import { DomainMemberController } from './controllers/domain/member-controller';
 import { AuthGuard } from './guard/auth-guard';
 import { RequireAdminGuard } from './guard/admin-guard';
 import { RequirePermissionGuard } from './guard/permission-guard';
-import { DomainRelationSubscriber } from './events/domain-relation.subscriber';
 import { DomainMiddleware } from './middlewares/domain-middleware';
 
 @Module({
@@ -49,8 +48,6 @@ import { DomainMiddleware } from './middlewares/domain-middleware';
     DomainService,
     RequireAdminGuard,
     RequirePermissionGuard,
-    //
-    DomainRelationSubscriber
   ],
   exports: [RequireAdminGuard, RequirePermissionGuard],
 })

@@ -1,6 +1,6 @@
 import { DomainRepository } from '@/persistence/repositories/domain-repository';
 import { Inject, Injectable } from '@nestjs/common';
-import { CreateDomainMemberDto, UpdateDomainMemberDto } from '../dtos/domain-dto';
+import { CreateDomainMemberDto, CreateDomainRoleDto, UpdateDomainMemberDto, UpdateDomainRoleDto } from '../dtos/domain-dto';
 import { UserRepository } from '@/persistence/repositories/user-repository';
 import { EntityManager } from '@mikro-orm/core';
 import { DomainMember } from '@/persistence/entities/iam-domain.member.entity';
@@ -15,17 +15,24 @@ import { DomainRole } from '@/persistence/entities/iam-domain.role.entity';
 import { AppError } from '@/utils/errors/app.error';
 import { Domain } from '@/persistence/entities/iam-domain.entity';
 import type { ConfigType } from '@nestjs/config';
+import { ClsService } from 'nestjs-cls';
+import { AppClsStore } from '@/utils/types/system';
 
 @Injectable()
 export class DomainService {
   constructor(
+    private readonly clsService: ClsService<AppClsStore>,
     private readonly userRepo: UserRepository,
     private readonly domainRepo: DomainRepository,
     private readonly em: EntityManager,
     @Inject(authConfig.KEY) private readonly config: ConfigType<typeof authConfig>,
   ) {}
 
-  async createMember(domainId: string, dto: CreateDomainMemberDto) {
+  private getDomainId() {
+    return this.clsService.get('domainId');
+  }
+
+  async createMember(dto: CreateDomainMemberDto, domainId: string = this.getDomainId()) {
     const domain = await this.domainRepo.findOneOrFail({
       id: domainId,
     });
@@ -92,34 +99,15 @@ export class DomainService {
       },
     );
 
-    // this.em.assign(
-    //   member,
-    //   {
-    //     user: {
-    //       username: dto.username,
-    //       email: dto.email,
-    //       phone: dto.phone,
-    //       password: dto.password,
-    //       status: dto.status,
-    //       party: {
-    //         name: dto.name,
-    //       },
-    //     },
-    //   },
-    //   {
-    //     ignoreUndefined: true,
-    //   },
-    // );
-
     await this.em.flush();
     return member as DomainMemberLoadedUserAndRole;
   }
 
-  async getMembers(domainId: string): Promise<DomainMemberLoadedUserAndRole[]> {
+  async getMembers(domainId: string = this.getDomainId()): Promise<DomainMemberLoadedUserAndRole[]> {
     return this.em.find(
       DomainMember,
       {
-        domain: domainId
+        domain: domainId,
       },
       {
         populate: ['user.party', 'role'],
@@ -127,7 +115,7 @@ export class DomainService {
     );
   }
 
-  async getDomainDetailWithIAM(domainId: string): Promise<DomainLoadedRolesAndMembers> {
+  async getDomainDetailWithIAM(domainId: string = this.getDomainId()): Promise<DomainLoadedRolesAndMembers> {
     return this.em.findOneOrFail(
       Domain,
       {
@@ -162,9 +150,38 @@ export class DomainService {
         },
       },
       {
-        failHandler: () => new AppError('OBJECT_NOT_FOUND', 'Domain member not found'),
+        failHandler: () => AppError.withMessage('OBJECT_NOT_FOUND', 'Domain member not found'),
         populate: ['user.party', 'domain'],
       },
     );
+  }
+
+  async createRole(dto: CreateDomainRoleDto, domainId: string = this.getDomainId()) {
+    const domain = await this.em.findOneOrFail(Domain, domainId, {
+      failHandler: () => AppError.withMessage('OBJECT_NOT_FOUND', 'Domain not found'),
+    });
+    domain.ensureStatus();
+
+    const role = this.em.create(DomainRole, {
+      domain,
+      ...dto,
+    });
+
+    await this.em.flush();
+    return role;
+  }
+
+  async updateRole(roleId: string, dto: UpdateDomainRoleDto) {
+    const role = await this.em.findOneOrFail(DomainRole, roleId, {
+      failHandler: () => new AppError('OBJECT_NOT_FOUND', 'Role not found'),
+      populate: ['domain'],
+    });
+
+    role.domain.getEntity().ensureStatus();
+
+    this.em.assign(role, dto, { ignoreUndefined: true });
+    await this.em.flush();
+
+    return role;
   }
 }
