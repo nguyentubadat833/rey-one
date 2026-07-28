@@ -20,7 +20,7 @@ import { DomainMemberController } from './controllers/domain/member-controller';
 import { AuthGuard } from './guard/auth-guard';
 import { RequireAdminGuard } from './guard/admin-guard';
 import { RequirePermissionGuard } from './guard/permission-guard';
-import { DomainMiddleware } from './middlewares/domain-middleware';
+import { DomainMiddleware } from '../../utils/middlewares/domain-middleware';
 
 @Module({
   imports: [
@@ -37,7 +37,6 @@ import { DomainMiddleware } from './middlewares/domain-middleware';
       }),
     }),
   ],
-  controllers: [AuthController, DomainController, DomainRoleController, DomainMemberController, UserController],
   providers: [
     // Đăng ký AuthGuard làm Global Guard
     {
@@ -50,6 +49,7 @@ import { DomainMiddleware } from './middlewares/domain-middleware';
     RequirePermissionGuard,
   ],
   exports: [RequireAdminGuard, RequirePermissionGuard],
+  controllers: [AuthController, DomainController, DomainRoleController, DomainMemberController, UserController],
 })
 export class IAMModule implements OnModuleInit, NestModule {
   constructor(
@@ -59,8 +59,7 @@ export class IAMModule implements OnModuleInit, NestModule {
   ) {}
 
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(DomainMiddleware)
-    .forRoutes(DomainMemberController, DomainRoleController)
+    consumer.apply(DomainMiddleware).forRoutes(DomainMemberController, DomainRoleController);
   }
 
   async onModuleInit() {

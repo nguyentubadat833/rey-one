@@ -4,23 +4,32 @@ import { EntityManager } from '@mikro-orm/core';
 import { Product } from '@/persistence/entities/catalog-product.entity';
 import { Domain } from '@/persistence/entities/iam-domain.entity';
 import { AppError } from '@/utils/errors/app.error';
+import { ClsService } from 'nestjs-cls';
+import { AppClsStore } from '@/utils/types/system';
+import { ProductLoadedInfo } from '@/persistence/types/product-type';
 
 @Injectable()
 export class ProductService {
-  constructor(private readonly em: EntityManager) { }
+  constructor(
+    private readonly em: EntityManager,
+    private readonly clsService: ClsService<AppClsStore>,
+  ) {}
 
   private getDefaultCostFromInput(input?: number | null): bigint | null {
-    return input ? BigInt(input) : null
+    return input ? BigInt(input) : null;
   }
 
-  async createProduct(domainId: string, dto: CreateProductDto) {
-    
+  private getDomainIdFromStore() {
+    return this.clsService.get('domainId');
+  }
+
+  async createProduct(dto: CreateProductDto, domainId: string = this.getDomainIdFromStore()): Promise<ProductLoadedInfo> {
     const product = this.em.create(Product, {
       info: {
         name: dto.name,
         description: dto.description,
       },
-      owner: this.em.getReference(Domain, domainId),
+      domain: this.em.getReference(Domain, domainId),
       currency: dto.currency,
       defaultCost: this.getDefaultCostFromInput(dto.defaultCost),
       trackInventory: dto.trackingInventory,
@@ -37,19 +46,24 @@ export class ProductService {
       Product,
       { id: productId },
       {
-        failHandler: () => AppError.withMessage('OBJECT_NOT_FOUND', "Product not found")
-      }
-    )
+        failHandler: () => AppError.withMessage('OBJECT_NOT_FOUND', 'Product not found'),
+      },
+    );
 
     this.em.assign(product, {
       info: {
         name: dto.name,
-        description: dto.description
+        description: dto.description,
       },
       currency: dto.currency,
       defaultCost: this.getDefaultCostFromInput(dto.defaultCost),
       trackInventory: dto.trackingInventory,
-      status: dto.status
-    })
+      status: dto.status,
+    });
+
+    await this.em.populate(product, ['info']);
+    await this.em.flush();
+
+    return product as ProductLoadedInfo
   }
 }

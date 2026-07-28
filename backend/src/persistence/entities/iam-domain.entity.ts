@@ -38,7 +38,7 @@ const DomainEntitySchema = defineEntity({
     products: () =>
       p
         .oneToMany(Product)
-        .mappedBy((product) => product.owner)
+        .mappedBy((product) => product.domain)
         .orphanRemoval()
         .ref(),
   },

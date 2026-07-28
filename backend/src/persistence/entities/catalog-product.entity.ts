@@ -4,19 +4,21 @@ import { ProductPricing } from './commerce-product-pricing.entity';
 import { Domain } from './iam-domain.entity';
 import slugify from 'slugify';
 import { AppError } from '@/utils/errors/app.error';
+import { tenantDomainFilterConfig } from './configs/doamin-tenant.filter';
 
 const ProductInfoSchema = defineEntity({
   name: 'CatalogProductInfo',
   embeddable: true,
   properties: {
     name: p.string(),
-    description: p.text().lazy().ref().nullable(),
+    description: p.text().nullable(),
   },
 });
 
 const ProductEntitySchema = defineEntity({
   name: 'CatalogProduct',
   tableName: 'product',
+  filters: tenantDomainFilterConfig,
   properties: {
     id: p.uuid().primary().defaultRaw('gen_random_uuid()'),
     sku: p
@@ -26,11 +28,11 @@ const ProductEntitySchema = defineEntity({
       .onCreate((product) => generateSku(product.info.name)),
     currency: p.enum(CURRENCIES).default('VND'),
     defaultCost: p.bigint().fieldName('default_cost').nullable(),
-    info: p.embedded(ProductInfoSchema),
+    info: p.embedded(ProductInfoSchema).lazy(),
     trackInventory: p.boolean().default(false).fieldName('track_inventory'),
     status: p.enum(PRODUCT_STATUSES).default('draft'),
     type: p.enum(PRODUCT_TYPES),
-    owner: () => p.manyToOne(Domain),
+    domain: () => p.manyToOne(Domain),
     pricing: () =>
       p
         .oneToOne(ProductPricing)
@@ -80,7 +82,7 @@ export function saveHandler(args: EventArgs<Product>) {
       throw new AppError('PROPERTY_IMMUTABLE', 'Product type immutable');
     }
 
-    if (changeSetPayload?.owner && entity!.owner !== changeSetPayload.owner) {
+    if (changeSetPayload?.domain && entity!.domain !== changeSetPayload.domain) {
       throw new AppError('PROPERTY_IMMUTABLE', 'Product owner immutable');
     }
 

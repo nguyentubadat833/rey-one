@@ -10,7 +10,7 @@ export const ProductSchema = z.object({
   trackingInventory: z.boolean().default(false),
   name: z.string(),
   description: z.string().nullable().optional(),
-  status: z.enum(PRODUCT_STATUSES),
+  status: z.enum(PRODUCT_STATUSES).default('draft'),
   type: z.enum(PRODUCT_TYPES),
 });
 
@@ -22,4 +22,4 @@ export const UpdateProductSchema = ProductSchema.omit({
   id: true,
   sku: true,
   type: true,
-});
+}).partial()
