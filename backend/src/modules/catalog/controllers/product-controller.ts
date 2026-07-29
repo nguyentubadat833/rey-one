@@ -38,4 +38,11 @@ export class ProductController {
   async updateProduct(@Param('id') id: string, @Body() dto: CreateProductDto) {
     return await this.productService.updateProduct(id, dto).then(ProductMapper.toProductView);
   }
+
+  @RequirePermission('domain:product:read')
+  @ApiOperation({ summary: 'Get Product' })
+  @Get(':id')
+  async getProduct(@Param('id') id: string) {
+
+  }
 }

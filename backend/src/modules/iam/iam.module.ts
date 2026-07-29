@@ -21,6 +21,8 @@ import { AuthGuard } from './guard/auth-guard';
 import { RequireAdminGuard } from './guard/admin-guard';
 import { RequirePermissionGuard } from './guard/permission-guard';
 import { DomainMiddleware } from '../../utils/middlewares/domain-middleware';
+import { DomainCache } from '@/utils/cache/domain-cache';
+import { DomainSubscriber } from '@/persistence/subscribers/domain-subscriber';
 
 @Module({
   imports: [
@@ -47,6 +49,9 @@ import { DomainMiddleware } from '../../utils/middlewares/domain-middleware';
     DomainService,
     RequireAdminGuard,
     RequirePermissionGuard,
+    //
+    DomainCache,
+    DomainSubscriber
   ],
   exports: [RequireAdminGuard, RequirePermissionGuard],
   controllers: [AuthController, DomainController, DomainRoleController, DomainMemberController, UserController],

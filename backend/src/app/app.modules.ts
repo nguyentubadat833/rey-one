@@ -9,8 +9,8 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { IAMModule } from '@/modules/iam/iam.module';
 import { CatalogModule } from '@/modules/catalog/catalog.module';
-import { ClsModule, ClsService } from 'nestjs-cls';
-import { AppClsStore } from '@/utils/types/system';
+import { ClsModule } from 'nestjs-cls';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
@@ -41,8 +41,11 @@ import { AppClsStore } from '@/utils/types/system';
     ClsModule.forRoot({
       global: true,
       middleware: {
-        mount: true
+        mount: true,
       },
+    }),
+    CacheModule.register({
+      isGlobal: true,
     }),
     IAMModule,
     CatalogModule,

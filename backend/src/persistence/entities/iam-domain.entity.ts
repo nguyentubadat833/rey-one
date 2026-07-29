@@ -5,6 +5,7 @@ import { DomainRole } from './iam-domain.role.entity';
 import { DomainMember } from './iam-domain.member.entity';
 import { DomainRepository } from '../repositories/domain-repository';
 import { Product } from './catalog-product.entity';
+import { InvalidDomainStatus } from '@/utils/errors/domain.error';
 
 const BaseDomainSchema = defineEntity({
   name: 'IAMBaseDomain',
@@ -48,9 +49,16 @@ export class BaseDomain extends BaseDomainSchema.class {}
 BaseDomainSchema.setClass(BaseDomain);
 
 export class Domain extends DomainEntitySchema.class {
+  
+  static ensureStatusValue(active: boolean) {
+    if (!active) {
+      throw InvalidDomainStatus();
+    }
+  }
+
   static ensureStatus(domain: Domain) {
     if (!domain.active) {
-      throw AppError.withMessage('INVALID_STATUS', 'Invalid domain status');
+      throw InvalidDomainStatus();
     }
   }
 

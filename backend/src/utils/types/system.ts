@@ -4,7 +4,7 @@ import { ClsStore } from 'nestjs-cls';
 export type UserAuth = {
   id: string;
   type: UserType;
-  domainAccess: Record<string, AppPermission[]>;
+  domainAccess: Record<string, AppPermission[]>; // {domainId: AppPermissions[]}
 };
 
 export interface AppClsStore extends ClsStore {

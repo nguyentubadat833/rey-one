@@ -7,7 +7,7 @@ export const DomainSchema = z.object({
   id: z.string(),
   name: z.string(),
   active: z.boolean().default(true),
-  permissions: z.array(z.enum(APP_PERMISSIONS)),
+  permissions: z.array(z.enum(APP_PERMISSIONS)).default([]),
 });
 
 export const CreateDomainSchema = DomainSchema.omit({
@@ -23,7 +23,7 @@ export const DomainRoleSchema = z.object({
   id: z.string(),
   name: z.string(),
   active: z.boolean().default(true),
-  permissions: z.array(z.enum(APP_PERMISSIONS)),
+  permissions: z.array(z.enum(APP_PERMISSIONS)).default([]),
 });
 
 export const CreateDomainRoleSchema = DomainRoleSchema.omit({

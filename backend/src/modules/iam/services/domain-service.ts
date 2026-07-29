@@ -12,11 +12,11 @@ import {
 } from '@/persistence/types/domain-type';
 import { authConfig } from '@/configs/auth.config';
 import { DomainRole } from '@/persistence/entities/iam-domain.role.entity';
-import { AppError } from '@/utils/errors/app.error';
 import { Domain } from '@/persistence/entities/iam-domain.entity';
-import type { ConfigType } from '@nestjs/config';
 import { ClsService } from 'nestjs-cls';
 import { AppClsStore } from '@/utils/types/system';
+import { DomainMemberNotFound, DomainNotFound, DomainRoleNotFound } from '@/utils/errors/domain.error';
+import type { ConfigType } from '@nestjs/config';
 
 @Injectable()
 export class DomainService {
@@ -28,15 +28,22 @@ export class DomainService {
     @Inject(authConfig.KEY) private readonly config: ConfigType<typeof authConfig>,
   ) {}
 
-  private getDomainId() {
+  private getDomainIdFromStore() {
     return this.clsService.get('domainId');
   }
 
-  async createMember(dto: CreateDomainMemberDto, domainId: string = this.getDomainId()) {
-    const domain = await this.domainRepo.findOneOrFail({
-      id: domainId,
-    });
-    domain.ensureStatus();
+  async createMember(dto: CreateDomainMemberDto, domainId: string = this.getDomainIdFromStore()) {
+    const domain = await this.domainRepo.findOneOrFail(
+      {
+        id: domainId,
+      },
+      {
+        failHandler: DomainNotFound,
+      },
+    );
+
+    // Middleware checked
+    // domain.ensureStatus();
 
     const role = dto.roleId ? this.em.getReference(DomainRole, dto.roleId) : null;
     const member = this.em.create(DomainMember, {
@@ -68,16 +75,16 @@ export class DomainService {
     const member = await this.em.findOneOrFail(
       DomainMember,
       {
-        user: {
-          id: userId,
-        },
+        user: userId
       },
       {
-        populate: ['user.party', 'domain'],
+        populate: ['user.party'],
+        failHandler: DomainMemberNotFound,
       },
     );
 
-    member.domain.getEntity().ensureStatus();
+    // Middleware checked
+    // member.domain.getEntity().ensureStatus();
 
     this.em.assign(
       member,
@@ -103,7 +110,7 @@ export class DomainService {
     return member as DomainMemberLoadedUserAndRole;
   }
 
-  async getMembers(domainId: string = this.getDomainId()): Promise<DomainMemberLoadedUserAndRole[]> {
+  async getMembers(domainId: string = this.getDomainIdFromStore()): Promise<DomainMemberLoadedUserAndRole[]> {
     return this.em.find(
       DomainMember,
       {
@@ -115,7 +122,7 @@ export class DomainService {
     );
   }
 
-  async getDomainDetailWithIAM(domainId: string = this.getDomainId()): Promise<DomainLoadedRolesAndMembers> {
+  async getDomainDetailWithIAM(domainId: string = this.getDomainIdFromStore()): Promise<DomainLoadedRolesAndMembers> {
     return this.em.findOneOrFail(
       Domain,
       {
@@ -123,7 +130,7 @@ export class DomainService {
       },
       {
         populate: ['roles', 'members.user.party'],
-        failHandler: () => new AppError('OBJECT_NOT_FOUND', 'Domain not found'),
+        failHandler: DomainNotFound,
       },
     );
   }
@@ -135,8 +142,8 @@ export class DomainService {
         id: roleId,
       },
       {
-        failHandler: () => new AppError('OBJECT_NOT_FOUND', 'Domain role not found'),
         populate: ['members.user.party'],
+        failHandler: DomainRoleNotFound,
       },
     );
   }
@@ -145,22 +152,22 @@ export class DomainService {
     return this.em.findOneOrFail(
       DomainMember,
       {
-        user: {
-          id: userId,
-        },
+        user: userId
       },
       {
-        failHandler: () => AppError.withMessage('OBJECT_NOT_FOUND', 'Domain member not found'),
         populate: ['user.party', 'domain'],
+        failHandler: DomainMemberNotFound,
       },
     );
   }
 
-  async createRole(dto: CreateDomainRoleDto, domainId: string = this.getDomainId()) {
+  async createRole(dto: CreateDomainRoleDto, domainId: string = this.getDomainIdFromStore()) {
     const domain = await this.em.findOneOrFail(Domain, domainId, {
-      failHandler: () => AppError.withMessage('OBJECT_NOT_FOUND', 'Domain not found'),
+      failHandler: DomainNotFound,
     });
-    domain.ensureStatus();
+
+    // Middleware checked
+    // domain.ensureStatus();
 
     const role = this.em.create(DomainRole, {
       domain,
@@ -173,11 +180,11 @@ export class DomainService {
 
   async updateRole(roleId: string, dto: UpdateDomainRoleDto) {
     const role = await this.em.findOneOrFail(DomainRole, roleId, {
-      failHandler: () => new AppError('OBJECT_NOT_FOUND', 'Role not found'),
-      populate: ['domain'],
+      failHandler: DomainRoleNotFound,
     });
 
-    role.domain.getEntity().ensureStatus();
+    // Middleware checked
+    // role.domain.getEntity().ensureStatus();
 
     this.em.assign(role, dto, { ignoreUndefined: true });
     await this.em.flush();

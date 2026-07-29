@@ -1,5 +1,5 @@
 import { EntityManager } from '@mikro-orm/core';
-import { Body, Controller, Get, NotFoundException, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RequireAdmin, RequireAuth, RequirePermission } from '@/utils/decorators/auth.decorator';
 import { CreateDomainDto, UpdateDomainDto } from '../../dtos/domain-dto';
@@ -9,12 +9,16 @@ import { DOMAIN_ID_PARAMETER } from '@/utils/types/utils';
 import { DomainSummary } from '@/persistence/entities/query-entities/domain-query';
 import { DomainSummaryView, DomainWithIAMView } from '@rey-one/shared';
 import { DomainService } from '../../services/domain-service';
+import { DomainNotFound } from '@/utils/errors/domain.error';
 
 @RequireAuth()
 @ApiTags('IAM / Domains')
 @Controller('domains')
 export class DomainController {
-  constructor(private readonly em: EntityManager, private readonly domainService: DomainService) {}
+  constructor(
+    private readonly em: EntityManager,
+    private readonly domainService: DomainService,
+  ) {}
 
   @RequireAdmin()
   @ApiOperation({ summary: 'Domain summaries' })
@@ -38,7 +42,7 @@ export class DomainController {
   @Patch(`:${DOMAIN_ID_PARAMETER}`)
   async updateDomain(@Param(DOMAIN_ID_PARAMETER) id: string, @Body() dto: UpdateDomainDto) {
     const domain = await this.em.findOneOrFail(Domain, id, {
-      failHandler: () => new NotFoundException(),
+      failHandler: DomainNotFound,
     });
     this.em.assign(domain, dto, { ignoreUndefined: true });
 
@@ -55,7 +59,7 @@ export class DomainController {
       {
         id,
       },
-      { failHandler: () => new NotFoundException() },
+      { failHandler: DomainNotFound },
     );
   }
 
@@ -63,6 +67,6 @@ export class DomainController {
   @ApiOperation({ summary: 'Domain detail' })
   @Get(`:${DOMAIN_ID_PARAMETER}/detail`)
   async getDetail(@Param(DOMAIN_ID_PARAMETER) id: string): Promise<DomainWithIAMView> {
-    return this.domainService.getDomainDetailWithIAM(id).then(DomainMapper.toDomainWithIAMView)
+    return this.domainService.getDomainDetailWithIAM(id).then(DomainMapper.toDomainWithIAMView);
   }
 }

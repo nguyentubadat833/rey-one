@@ -7,6 +7,7 @@ import { AppError } from '@/utils/errors/app.error';
 import { ClsService } from 'nestjs-cls';
 import { AppClsStore } from '@/utils/types/system';
 import { ProductLoadedInfo } from '@/persistence/types/product-type';
+import { ProductNotFound } from '@/utils/errors/product.error';
 
 @Injectable()
 export class ProductService {
@@ -46,7 +47,7 @@ export class ProductService {
       Product,
       { id: productId },
       {
-        failHandler: () => AppError.withMessage('OBJECT_NOT_FOUND', 'Product not found'),
+        failHandler: ProductNotFound,
       },
     );
 
@@ -64,6 +65,17 @@ export class ProductService {
     await this.em.populate(product, ['info']);
     await this.em.flush();
 
-    return product as ProductLoadedInfo
+    return product as ProductLoadedInfo;
+  }
+
+  async getProductById(id: string) {
+    return await this.em.findOneOrFail(
+      Product,
+      { id },
+      {
+        populate: ['info'],
+        failHandler: ProductNotFound,
+      },
+    );
   }
 }

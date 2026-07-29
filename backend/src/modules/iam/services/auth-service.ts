@@ -1,5 +1,4 @@
 import { UserRepository } from '@/persistence/repositories/user-repository';
-import { EntityManager } from '@mikro-orm/core';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import { BaseLoginDto } from '../dtos/auth-dto';
