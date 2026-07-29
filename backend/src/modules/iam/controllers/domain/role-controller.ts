@@ -1,4 +1,4 @@
-import { DomainRole } from '@/persistence/entities/iam-domain.role.entity';
+import { DomainRole } from '@/persistence/entities/iam-domain-role.entity';
 import { RequireAuth, RequirePermission } from '@/utils/decorators/auth.decorator';
 import { ApiDomainHeader } from '@/utils/decorators/utils.decorator';
 import { EntityManager } from '@mikro-orm/core';

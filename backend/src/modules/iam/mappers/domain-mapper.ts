@@ -1,5 +1,5 @@
 import { Domain } from '@/persistence/entities/iam-domain.entity';
-import { DomainRole } from '@/persistence/entities/iam-domain.role.entity';
+import { DomainRole } from '@/persistence/entities/iam-domain-role.entity';
 import { IDomainSummary } from '@/persistence/entities/query-entities/domain-query';
 import {
   DomainLoadedRolesAndMembers,

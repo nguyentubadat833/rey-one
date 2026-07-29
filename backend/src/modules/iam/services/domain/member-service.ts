@@ -7,8 +7,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ClsService } from 'nestjs-cls';
 import { CreateDomainMemberDto, UpdateDomainMemberDto } from '../../dtos/domain-dto';
 import { DomainMemberNotFound, DomainNotFound } from '@/utils/errors/domain.error';
-import { DomainRole } from '@/persistence/entities/iam-domain.role.entity';
-import { DomainMember } from '@/persistence/entities/iam-domain.member.entity';
+import { DomainRole } from '@/persistence/entities/iam-domain-role.entity';
+import { DomainMember } from '@/persistence/entities/iam-domain-member.entity';
 import { DomainMemberLoadedUserAndRole, DomainMemberLoadedUserAndRoleAndDomain } from '@/persistence/types/domain-type';
 import type { ConfigType } from '@nestjs/config';
 

@@ -1,11 +1,13 @@
 import { AppError } from '@/utils/errors/app.error';
 import { defineEntity, EventArgs, p } from '@mikro-orm/core';
 import { APP_PERMISSIONS, AppPermission } from '@rey-one/shared';
-import { DomainRole } from './iam-domain.role.entity';
-import { DomainMember } from './iam-domain.member.entity';
+import { DomainRole } from './iam-domain-role.entity';
+import { DomainMember } from './iam-domain-member.entity';
 import { DomainRepository } from '../repositories/domain-repository';
 import { Product } from './catalog-product.entity';
 import { InvalidDomainStatus } from '@/utils/errors/domain.error';
+import { uuidv7 } from 'uuidv7';
+import { Promotion } from './catalog-promotion.entity';
 
 const BaseDomainSchema = defineEntity({
   name: 'IAMBaseDomain',
@@ -23,7 +25,7 @@ const DomainEntitySchema = defineEntity({
   repository: () => DomainRepository,
   extends: BaseDomainSchema,
   properties: {
-    id: p.uuid().primary().defaultRaw('gen_random_uuid()'),
+    id: p.uuid().primary().onCreate(uuidv7),
     roles: () =>
       p
         .oneToMany(DomainRole)
@@ -40,6 +42,12 @@ const DomainEntitySchema = defineEntity({
       p
         .oneToMany(Product)
         .mappedBy((product) => product.domain)
+        .orphanRemoval()
+        .ref(),
+    promotions: () =>
+      p
+        .oneToMany(Promotion)
+        .mappedBy((promotion) => promotion.domain)
         .orphanRemoval()
         .ref(),
   },

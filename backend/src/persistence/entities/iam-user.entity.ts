@@ -2,9 +2,10 @@ import { ChangeSetType, defineEntity, EventArgs, p } from '@mikro-orm/core';
 import { AppPermission, USER_STATUSES, USER_TYPES, UserStatus } from '@rey-one/shared';
 import { AppError } from '@/utils/errors/app.error';
 import { UserRepository } from '../repositories/user-repository';
-import { DomainMember } from './iam-domain.member.entity';
+import { DomainMember } from './iam-domain-member.entity';
 import { hash } from 'argon2';
 import { Party } from './iam-party.entity';
+import { uuidv7 } from 'uuidv7';
 
 // User Base Entity
 export const BaseUserEntitySchema = defineEntity({
@@ -26,7 +27,7 @@ const UserEntitySchema = defineEntity({
   extends: BaseUserEntitySchema,
   repository: () => UserRepository,
   properties: {
-    id: p.uuid().primary().defaultRaw('gen_random_uuid()'),
+    id: p.uuid().primary().onCreate(uuidv7),
     password: p.string().hidden().lazy().ref(),
     emailVerified: p.boolean().default(false).fieldName('email_verified'),
     phoneVerified: p.boolean().default(false).fieldName('phone_verified'),

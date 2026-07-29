@@ -13,7 +13,7 @@ import { Domain } from '@/persistence/entities/iam-domain.entity';
 import { UserController } from './controllers/user-controller';
 import { DomainRoleController } from './controllers/domain/role-controller';
 import { UserSummary } from '@/persistence/entities/query-entities/user-query';
-import { DomainMember } from '@/persistence/entities/iam-domain.member.entity';
+import { DomainMember } from '@/persistence/entities/iam-domain-member.entity';
 import { DomainSummary } from '@/persistence/entities/query-entities/domain-query';
 import { DomainService } from './services/domain/domain-service';
 import { DomainMemberController } from './controllers/domain/member-controller';

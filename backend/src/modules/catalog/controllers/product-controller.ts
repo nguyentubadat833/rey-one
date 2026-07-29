@@ -18,7 +18,7 @@ export class ProductController {
     private readonly productService: ProductService,
   ) {}
 
-  @RequirePermission('domain:product:read')
+  @RequirePermission('domain:product:read', false)
   @ApiOperation({ summary: 'Product summaries' })
   @Get()
   async summaries() {
@@ -39,10 +39,10 @@ export class ProductController {
     return await this.productService.updateProduct(id, dto).then(ProductMapper.toProductView);
   }
 
-  @RequirePermission('domain:product:read')
+  @RequirePermission('domain:product:read', false)
   @ApiOperation({ summary: 'Get Product' })
   @Get(':id')
   async getProduct(@Param('id') id: string) {
-
+    return await this.productService.getProductById(id).then(ProductMapper.toProductView);
   }
 }

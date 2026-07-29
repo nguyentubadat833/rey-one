@@ -2,9 +2,10 @@ import { ChangeSetType, defineEntity, EventArgs, p } from '@mikro-orm/core';
 import { CURRENCIES, PRODUCT_STATUSES, PRODUCT_TYPES } from '@rey-one/shared';
 import { ProductPricing } from './commerce-product-pricing.entity';
 import { Domain } from './iam-domain.entity';
-import slugify from 'slugify';
 import { AppError } from '@/utils/errors/app.error';
 import { tenantDomainFilterConfig } from './configs/doamin-tenant.filter';
+import { uuidv7 } from 'uuidv7';
+import slugify from 'slugify';
 
 const ProductInfoSchema = defineEntity({
   name: 'CatalogProductInfo',
@@ -20,7 +21,7 @@ const ProductEntitySchema = defineEntity({
   tableName: 'product',
   filters: tenantDomainFilterConfig,
   properties: {
-    id: p.uuid().primary().defaultRaw('gen_random_uuid()'),
+    id: p.uuid().primary().onCreate(uuidv7),
     sku: p
       .string()
       .length(100)
@@ -42,9 +43,8 @@ const ProductEntitySchema = defineEntity({
 });
 
 export class Product extends ProductEntitySchema.class {
-
   isDraft() {
-    return this.status === 'draft'
+    return this.status === 'draft';
   }
 
   ensureNotArchived() {

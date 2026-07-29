@@ -3,7 +3,6 @@ import { CreateProductDto, UpdateProductDto } from '../dtos/product-dto';
 import { EntityManager } from '@mikro-orm/core';
 import { Product } from '@/persistence/entities/catalog-product.entity';
 import { Domain } from '@/persistence/entities/iam-domain.entity';
-import { AppError } from '@/utils/errors/app.error';
 import { ClsService } from 'nestjs-cls';
 import { AppClsStore } from '@/utils/types/system';
 import { ProductLoadedInfo } from '@/persistence/types/product-type';
@@ -42,7 +41,7 @@ export class ProductService {
     return product;
   }
 
-  async updateProduct(productId: string, dto: UpdateProductDto) {
+  async updateProduct(productId: string, dto: UpdateProductDto): Promise<ProductLoadedInfo>  {
     const product = await this.em.findOneOrFail(
       Product,
       { id: productId },
@@ -68,7 +67,7 @@ export class ProductService {
     return product as ProductLoadedInfo;
   }
 
-  async getProductById(id: string) {
+  async getProductById(id: string): Promise<ProductLoadedInfo> {
     return await this.em.findOneOrFail(
       Product,
       { id },

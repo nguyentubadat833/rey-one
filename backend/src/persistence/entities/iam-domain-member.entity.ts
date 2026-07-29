@@ -1,7 +1,7 @@
 import { defineEntity, p } from '@mikro-orm/core';
 import { Domain } from './iam-domain.entity';
 import { User } from './iam-user.entity';
-import { DomainRole } from './iam-domain.role.entity';
+import { DomainRole } from './iam-domain-role.entity';
 import { tenantDomainFilterConfig } from './configs/doamin-tenant.filter';
 
 const DomainMemberEntitySchema = defineEntity({

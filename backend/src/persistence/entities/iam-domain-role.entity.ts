@@ -2,7 +2,7 @@ import { AppError } from '@/utils/errors/app.error';
 import { ChangeSetType, defineEntity, EventArgs, p } from '@mikro-orm/core';
 import { APP_PERMISSIONS } from '@rey-one/shared';
 import { Domain } from './iam-domain.entity';
-import { DomainMember } from './iam-domain.member.entity';
+import { DomainMember } from './iam-domain-member.entity';
 import slugify from 'slugify';
 import { tenantDomainFilterConfig } from './configs/doamin-tenant.filter';
 
