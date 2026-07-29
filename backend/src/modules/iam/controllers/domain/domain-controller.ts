@@ -50,7 +50,7 @@ export class DomainController {
     return DomainMapper.toDomainView(domain);
   }
 
-  @RequirePermission('domain:manage:read')
+  @RequirePermission('domain:manage:read', false)
   @ApiOperation({ summary: 'Domain summary' })
   @Get(`:${DOMAIN_ID_PARAMETER}`)
   async getSummary(@Param(DOMAIN_ID_PARAMETER) id: string): Promise<DomainSummaryView> {
@@ -63,7 +63,7 @@ export class DomainController {
     );
   }
 
-  @RequirePermission('domain:manage:read')
+  @RequirePermission('domain:manage:read', false)
   @ApiOperation({ summary: 'Domain detail' })
   @Get(`:${DOMAIN_ID_PARAMETER}/detail`)
   async getDetail(@Param(DOMAIN_ID_PARAMETER) id: string): Promise<DomainWithIAMView> {

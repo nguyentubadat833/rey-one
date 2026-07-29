@@ -11,7 +11,7 @@ export const RequireAuth = () => applyDecorators(ApiBearerAuth(), ApiBasicAuth()
 
 export const RequireAdmin = () => applyDecorators(UseGuards(RequireAdminGuard));
 
-export const RequirePermission = (permission: AppPermission, requireDomainActive = false) =>
+export const RequirePermission = (permission: AppPermission, requireDomainActive = true) =>
   applyDecorators(UseGuards(RequirePermissionGuard), MarkRequirePermission(permission), ...(requireDomainActive ? [MarkRequireDomainActive()] : []));
 // export const RequirePermission = (permission: AppPermission, requireDomain = true) =>
 //   applyDecorators(UseGuards(RequirePermissionGuard), MarkPermission(permission), ...(requireDomain ? [MarkDomain()] : []));

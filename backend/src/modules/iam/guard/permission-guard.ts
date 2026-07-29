@@ -54,7 +54,7 @@ export class RequirePermissionGuard implements CanActivate {
     }
 
     if (requiredDomainActive) {
-      const domainStatus = await this.domainCache.getDomainStatusValue(domainId)
+      const domainStatus = await this.domainCache.getDomainStatusValue(domainId);
       Domain.ensureStatusValue(domainStatus);
     }
 

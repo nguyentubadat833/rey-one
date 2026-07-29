@@ -1,9 +1,8 @@
 import { RequireAuth, RequirePermission } from '@/utils/decorators/auth.decorator';
-import { ApiDomainHeader, CurrentHeader } from '@/utils/decorators/utils.decorator';
+import { ApiDomainHeader } from '@/utils/decorators/utils.decorator';
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateDomainMemberDto, UpdateDomainMemberDto } from '../../dtos/domain-dto';
-import { DomainService } from '../../services/domain/domain-service';
 import { DomainMapper } from '../../mappers/domain-mapper';
 import { DomainMemberView } from '@rey-one/shared';
 import { DomainMemberService } from '../../services/domain/member-service';
@@ -15,7 +14,7 @@ import { DomainMemberService } from '../../services/domain/member-service';
 export class DomainMemberController {
   constructor(private readonly memberService: DomainMemberService) {}
 
-  @RequirePermission('domain:member:read')
+  @RequirePermission('domain:member:read', false)
   @ApiOperation({ summary: 'Domain members' })
   @Get()
   async members(): Promise<DomainMemberView[]> {
@@ -38,7 +37,7 @@ export class DomainMemberController {
     return DomainMapper.toDomainMemberView(member);
   }
 
-  @RequirePermission('domain:member:read')
+  @RequirePermission('domain:member:read', false)
   @ApiOperation({ summary: 'Domain member detail' })
   @Get(':id')
   async getMemberDetail(@Param('id') memberId: string) {

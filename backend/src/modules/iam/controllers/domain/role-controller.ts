@@ -6,8 +6,6 @@ import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateDomainRoleDto, UpdateDomainRoleDto } from '../../dtos/domain-dto';
 import { DomainMapper } from '../../mappers/domain-mapper';
-import { DomainService } from '../../services/domain/domain-service';
-import { ClsService } from 'nestjs-cls';
 import { DomainRoleService } from '../../services/domain/role-service';
 
 @RequireAuth()
@@ -20,7 +18,7 @@ export class DomainRoleController {
     private readonly roleService: DomainRoleService,
   ) {}
 
-  @RequirePermission('domain:role:read')
+  @RequirePermission('domain:role:read', false)
   @ApiOperation({ summary: 'Domain roles' })
   @Get()
   async domainRoles() {
@@ -43,7 +41,7 @@ export class DomainRoleController {
     return DomainMapper.toDomainRoleView(roleUpdated);
   }
 
-  @RequirePermission('domain:manage:read')
+  @RequirePermission('domain:manage:read', false)
   @ApiOperation({ summary: 'Domain role detail' })
   @Get(':roleId')
   async getDomainRoleDetail(@Param('roleId') roleId: string) {
