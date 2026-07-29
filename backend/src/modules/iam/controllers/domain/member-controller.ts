@@ -3,29 +3,30 @@ import { ApiDomainHeader, CurrentHeader } from '@/utils/decorators/utils.decorat
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateDomainMemberDto, UpdateDomainMemberDto } from '../../dtos/domain-dto';
-import { DomainService } from '../../services/domain-service';
+import { DomainService } from '../../services/domain/domain-service';
 import { DomainMapper } from '../../mappers/domain-mapper';
 import { DomainMemberView } from '@rey-one/shared';
+import { DomainMemberService } from '../../services/domain/member-service';
 
 @RequireAuth()
 @ApiDomainHeader()
 @ApiTags('IAM / Domains / Members')
 @Controller('domain-members')
 export class DomainMemberController {
-  constructor(private readonly domainService: DomainService) {}
+  constructor(private readonly memberService: DomainMemberService) {}
 
   @RequirePermission('domain:member:read')
   @ApiOperation({ summary: 'Domain members' })
   @Get()
   async members(): Promise<DomainMemberView[]> {
-    return this.domainService.getMembers().then((rs) => rs.map(DomainMapper.toDomainMemberView));
+    return this.memberService.getMembers().then((rs) => rs.map(DomainMapper.toDomainMemberView));
   }
 
   @RequirePermission('domain:member:manage')
   @ApiOperation({ summary: 'Create domain member' })
   @Post()
   async createMember(@Body() dto: CreateDomainMemberDto) {
-    const member = await this.domainService.createMember(dto);
+    const member = await this.memberService.createMember(dto);
     return DomainMapper.toDomainMemberView(member);
   }
 
@@ -33,7 +34,7 @@ export class DomainMemberController {
   @ApiOperation({ summary: 'Update domain member' })
   @Patch(':id')
   async updateMember(@Param('id') memberId: string, @Body() dto: UpdateDomainMemberDto) {
-    const member = await this.domainService.updateMember(memberId, dto);
+    const member = await this.memberService.updateMember(memberId, dto);
     return DomainMapper.toDomainMemberView(member);
   }
 
@@ -41,6 +42,6 @@ export class DomainMemberController {
   @ApiOperation({ summary: 'Domain member detail' })
   @Get(':id')
   async getMemberDetail(@Param('id') memberId: string) {
-    return this.domainService.getDomainMemberDetail(memberId).then(DomainMapper.toDomainMemberDetailView);
+    return this.memberService.getDomainMemberDetail(memberId).then(DomainMapper.toDomainMemberDetailView);
   }
 }

@@ -1,12 +1,16 @@
+import { DomainRepository } from '@/persistence/repositories/domain-repository';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
+import { DomainNotFound } from '../errors/domain.error';
 
 @Injectable()
 export class DomainCache {
-  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
+  constructor(
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private readonly domainRepo: DomainRepository,
+  ) {}
 
-  status(domainId: string) {
-    console.log(this.cacheManager.cacheId());
+  domainStatus(domainId: string) {
     const key = `domain:${domainId}:status`;
 
     const get = async (): Promise<boolean | undefined> => {
@@ -18,5 +22,26 @@ export class DomainCache {
     };
 
     return { get, set };
+  }
+
+  async getDomainStatusValue(domainId: string) {
+    let status = await this.domainStatus(domainId).get();
+
+    if (typeof status !== 'boolean') {
+      const domain = await this.domainRepo.findOneOrFail(
+        {
+          id: domainId,
+        },
+        {
+          fields: ['active'],
+          failHandler: DomainNotFound,
+        },
+      );
+
+      status = domain.active;
+      await this.domainStatus(domainId).set(status);
+    }
+
+    return status;
   }
 }

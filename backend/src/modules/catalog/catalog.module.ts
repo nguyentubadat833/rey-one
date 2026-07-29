@@ -12,7 +12,10 @@ import { DomainCache } from '@/utils/cache/domain-cache';
     }),
   ],
   controllers: [ProductController],
-  providers: [DomainCache, ProductService],
+  providers: [
+    DomainCache, 
+    ProductService
+  ],
 })
 export class CatalogModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

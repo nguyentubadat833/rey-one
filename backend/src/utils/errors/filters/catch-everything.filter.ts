@@ -8,7 +8,7 @@ import { DriverException, UniqueConstraintViolationException } from '@mikro-orm/
 export class AppCatchEverythingFilter implements ExceptionFilter {
   private readonly logger = new Logger(AppCatchEverythingFilter.name);
 
-  constructor(private readonly httpAdapterHost: HttpAdapterHost) { }
+  constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const { httpAdapter } = this.httpAdapterHost;
@@ -76,6 +76,7 @@ const MikroErrorHttpStatus: Record<string, HttpStatus> = {
 
 const AppErrorHttpStatus: Record<ErrorKey, HttpStatus> = {
   UNKNOWN_ERROR: HttpStatus.INTERNAL_SERVER_ERROR,
+  BUSINESS_RULE_VIOLATION: HttpStatus.CONFLICT,
   INSUFFICIENT_PERMISSION: HttpStatus.FORBIDDEN,
   INVALID_CREDENTIAL: HttpStatus.UNAUTHORIZED,
   INVALID_PERMISSION: HttpStatus.BAD_REQUEST,

@@ -15,7 +15,7 @@ import { DomainRoleController } from './controllers/domain/role-controller';
 import { UserSummary } from '@/persistence/entities/query-entities/user-query';
 import { DomainMember } from '@/persistence/entities/iam-domain.member.entity';
 import { DomainSummary } from '@/persistence/entities/query-entities/domain-query';
-import { DomainService } from './services/domain-service';
+import { DomainService } from './services/domain/domain-service';
 import { DomainMemberController } from './controllers/domain/member-controller';
 import { AuthGuard } from './guard/auth-guard';
 import { RequireAdminGuard } from './guard/admin-guard';
@@ -23,6 +23,9 @@ import { RequirePermissionGuard } from './guard/permission-guard';
 import { DomainMiddleware } from '../../utils/middlewares/domain-middleware';
 import { DomainCache } from '@/utils/cache/domain-cache';
 import { DomainSubscriber } from '@/persistence/subscribers/domain-subscriber';
+import { DomainMemberService } from './services/domain/member-service';
+import { DomainRoleService } from './services/domain/role-service';
+import { SERVICE_TOKENS } from '@/utils/types/tokens';
 
 @Module({
   imports: [
@@ -45,13 +48,21 @@ import { DomainSubscriber } from '@/persistence/subscribers/domain-subscriber';
       provide: APP_GUARD,
       useClass: AuthGuard,
     },
+    {
+      provide: SERVICE_TOKENS.DOAMIN_SERVICE,
+      useExisting: DomainService,
+    },
+    //
     AuthService,
     DomainService,
+    DomainMemberService,
+    DomainRoleService,
+    //
     RequireAdminGuard,
     RequirePermissionGuard,
     //
     DomainCache,
-    DomainSubscriber
+    DomainSubscriber,
   ],
   exports: [RequireAdminGuard, RequirePermissionGuard],
   controllers: [AuthController, DomainController, DomainRoleController, DomainMemberController, UserController],

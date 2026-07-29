@@ -5,6 +5,7 @@ export type AppPermission = (typeof APP_PERMISSIONS)[number];
 export type ErrorKey =
   | "UNKNOWN_ERROR"
   | "PROPERTY_IMMUTABLE"
+  | "BUSINESS_RULE_VIOLATION"
   | "PROPERTY_NOT_INITIALIZED"
   | "PROPERTY_REQUIRED"
   | "INVALID_PERMISSION"

@@ -6,17 +6,20 @@ import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, Forbi
 import { Reflector } from '@nestjs/core';
 import { AppPermission, hasPermission } from '@rey-one/shared';
 import { FastifyRequest } from 'fastify';
+import { Domain } from '@/persistence/entities/iam-domain.entity';
+import { DomainCache } from '@/utils/cache/domain-cache';
 
 @Injectable()
 export class RequirePermissionGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
+    private readonly domainCache: DomainCache,
     // @Inject(authConfig.KEY) private readonly config: ConfigType<typeof authConfig>,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const requiredPermission = this.reflector.getAllAndOverride<AppPermission>(AUTH_METADATA.REQUIRE_PERMISSION, [context.getHandler(), context.getClass()]);
-    // const requiredDomain = this.reflector.getAllAndOverride<boolean>(AUTH_METADATA.REQUIRE_DOAMIN, [context.getHandler(), context.getClass()]);
+    const requiredDomainActive = this.reflector.getAllAndOverride<boolean>(AUTH_METADATA.REQUIRE_DOAMIN_ACTIVE, [context.getHandler(), context.getClass()]);
 
     if (!requiredPermission) return true;
 
@@ -47,7 +50,12 @@ export class RequirePermissionGuard implements CanActivate {
     const domainId = request.params.domainId ?? request.query.domainId ?? request.headers[DOMAIN_ID_HEADER];
 
     if (!domainId) {
-      throw new BadRequestException("Domain is required")
+      throw new BadRequestException('Domain is required');
+    }
+
+    if (requiredDomainActive) {
+      const domainStatus = await this.domainCache.getDomainStatusValue(domainId)
+      Domain.ensureStatusValue(domainStatus);
     }
 
     if (!user.domainAccess[domainId] || !hasPermission(user.domainAccess[domainId], requiredPermission)) {

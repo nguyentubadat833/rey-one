@@ -6,8 +6,9 @@ import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateDomainRoleDto, UpdateDomainRoleDto } from '../../dtos/domain-dto';
 import { DomainMapper } from '../../mappers/domain-mapper';
-import { DomainService } from '../../services/domain-service';
+import { DomainService } from '../../services/domain/domain-service';
 import { ClsService } from 'nestjs-cls';
+import { DomainRoleService } from '../../services/domain/role-service';
 
 @RequireAuth()
 @ApiDomainHeader()
@@ -16,8 +17,7 @@ import { ClsService } from 'nestjs-cls';
 export class DomainRoleController {
   constructor(
     private readonly em: EntityManager,
-    private readonly domainService: DomainService,
-    private readonly cls: ClsService,
+    private readonly roleService: DomainRoleService,
   ) {}
 
   @RequirePermission('domain:role:read')
@@ -31,7 +31,7 @@ export class DomainRoleController {
   @ApiOperation({ summary: 'Add domain role' })
   @Post()
   async addDomainRole(@Body() dto: CreateDomainRoleDto) {
-    const roleCreated = await this.domainService.createRole(dto);
+    const roleCreated = await this.roleService.createRole(dto);
     return DomainMapper.toDomainRoleView(roleCreated);
   }
 
@@ -39,7 +39,7 @@ export class DomainRoleController {
   @ApiOperation({ summary: 'Update domain role' })
   @Patch(':roleId')
   async updateDomainRole(@Param('roleId') roleId: string, @Body() dto: UpdateDomainRoleDto) {
-    const roleUpdated = await this.domainService.updateRole(roleId, dto);
+    const roleUpdated = await this.roleService.updateRole(roleId, dto);
     return DomainMapper.toDomainRoleView(roleUpdated);
   }
 
@@ -47,6 +47,6 @@ export class DomainRoleController {
   @ApiOperation({ summary: 'Domain role detail' })
   @Get(':roleId')
   async getDomainRoleDetail(@Param('roleId') roleId: string) {
-    return this.domainService.getDomainRoleWithMembers(roleId).then(DomainMapper.toDomainRoleWithMembers);
+    return this.roleService.getRoleWithMembers(roleId).then(DomainMapper.toDomainRoleWithMembers);
   }
 }

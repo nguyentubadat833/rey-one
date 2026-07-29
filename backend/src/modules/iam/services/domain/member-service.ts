@@ -1,25 +1,19 @@
-import { DomainRepository } from '@/persistence/repositories/domain-repository';
-import { Inject, Injectable } from '@nestjs/common';
-import { CreateDomainMemberDto, CreateDomainRoleDto, UpdateDomainMemberDto, UpdateDomainRoleDto } from '../dtos/domain-dto';
-import { UserRepository } from '@/persistence/repositories/user-repository';
-import { EntityManager } from '@mikro-orm/core';
-import { DomainMember } from '@/persistence/entities/iam-domain.member.entity';
-import {
-  DomainLoadedRolesAndMembers,
-  DomainMemberLoadedUserAndRole,
-  DomainMemberLoadedUserAndRoleAndDomain,
-  DomainRoleLoadedMembers,
-} from '@/persistence/types/domain-type';
 import { authConfig } from '@/configs/auth.config';
-import { DomainRole } from '@/persistence/entities/iam-domain.role.entity';
-import { Domain } from '@/persistence/entities/iam-domain.entity';
-import { ClsService } from 'nestjs-cls';
+import { DomainRepository } from '@/persistence/repositories/domain-repository';
+import { UserRepository } from '@/persistence/repositories/user-repository';
 import { AppClsStore } from '@/utils/types/system';
-import { DomainMemberNotFound, DomainNotFound, DomainRoleNotFound } from '@/utils/errors/domain.error';
+import { EntityManager } from '@mikro-orm/core';
+import { Inject, Injectable } from '@nestjs/common';
+import { ClsService } from 'nestjs-cls';
+import { CreateDomainMemberDto, UpdateDomainMemberDto } from '../../dtos/domain-dto';
+import { DomainMemberNotFound, DomainNotFound } from '@/utils/errors/domain.error';
+import { DomainRole } from '@/persistence/entities/iam-domain.role.entity';
+import { DomainMember } from '@/persistence/entities/iam-domain.member.entity';
+import { DomainMemberLoadedUserAndRole, DomainMemberLoadedUserAndRoleAndDomain } from '@/persistence/types/domain-type';
 import type { ConfigType } from '@nestjs/config';
 
 @Injectable()
-export class DomainService {
+export class DomainMemberService {
   constructor(
     private readonly clsService: ClsService<AppClsStore>,
     private readonly userRepo: UserRepository,
@@ -75,7 +69,7 @@ export class DomainService {
     const member = await this.em.findOneOrFail(
       DomainMember,
       {
-        user: userId
+        user: userId,
       },
       {
         populate: ['user.party'],
@@ -122,73 +116,16 @@ export class DomainService {
     );
   }
 
-  async getDomainDetailWithIAM(domainId: string = this.getDomainIdFromStore()): Promise<DomainLoadedRolesAndMembers> {
-    return this.em.findOneOrFail(
-      Domain,
-      {
-        id: domainId,
-      },
-      {
-        populate: ['roles', 'members.user.party'],
-        failHandler: DomainNotFound,
-      },
-    );
-  }
-
-  getDomainRoleWithMembers(roleId: string): Promise<DomainRoleLoadedMembers> {
-    return this.em.findOneOrFail(
-      DomainRole,
-      {
-        id: roleId,
-      },
-      {
-        populate: ['members.user.party'],
-        failHandler: DomainRoleNotFound,
-      },
-    );
-  }
-
   getDomainMemberDetail(userId: string): Promise<DomainMemberLoadedUserAndRoleAndDomain> {
     return this.em.findOneOrFail(
       DomainMember,
       {
-        user: userId
+        user: userId,
       },
       {
         populate: ['user.party', 'domain'],
         failHandler: DomainMemberNotFound,
       },
     );
-  }
-
-  async createRole(dto: CreateDomainRoleDto, domainId: string = this.getDomainIdFromStore()) {
-    const domain = await this.em.findOneOrFail(Domain, domainId, {
-      failHandler: DomainNotFound,
-    });
-
-    // Middleware checked
-    // domain.ensureStatus();
-
-    const role = this.em.create(DomainRole, {
-      domain,
-      ...dto,
-    });
-
-    await this.em.flush();
-    return role;
-  }
-
-  async updateRole(roleId: string, dto: UpdateDomainRoleDto) {
-    const role = await this.em.findOneOrFail(DomainRole, roleId, {
-      failHandler: DomainRoleNotFound,
-    });
-
-    // Middleware checked
-    // role.domain.getEntity().ensureStatus();
-
-    this.em.assign(role, dto, { ignoreUndefined: true });
-    await this.em.flush();
-
-    return role;
   }
 }

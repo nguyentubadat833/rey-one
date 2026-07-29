@@ -8,7 +8,7 @@ import { DomainMapper } from '../../mappers/domain-mapper';
 import { DOMAIN_ID_PARAMETER } from '@/utils/types/utils';
 import { DomainSummary } from '@/persistence/entities/query-entities/domain-query';
 import { DomainSummaryView, DomainWithIAMView } from '@rey-one/shared';
-import { DomainService } from '../../services/domain-service';
+import { DomainService } from '../../services/domain/domain-service';
 import { DomainNotFound } from '@/utils/errors/domain.error';
 
 @RequireAuth()

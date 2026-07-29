@@ -7,8 +7,8 @@ import { FastifyRequest } from 'fastify';
 import { UserAuth } from '../types/system';
 
 export const MarkPublic = () => SetMetadata(AUTH_METADATA.IS_PUBLIC, true);
-export const MarkDomain = () => SetMetadata(AUTH_METADATA.REQUIRE_DOAMIN, true)
-export const MarkPermission = (permission: AppPermission) => SetMetadata(AUTH_METADATA.REQUIRE_PERMISSION, permission);
+export const MarkRequireDomainActive = () => SetMetadata(AUTH_METADATA.REQUIRE_DOAMIN_ACTIVE, true) // Require domain is active
+export const MarkRequirePermission = (permission: AppPermission) => SetMetadata(AUTH_METADATA.REQUIRE_PERMISSION, permission);
 
 export function ApiDomainHeader(required = true) {
   return applyDecorators(

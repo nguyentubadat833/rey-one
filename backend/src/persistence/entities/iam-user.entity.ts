@@ -79,6 +79,10 @@ export class User extends UserEntitySchema.class {
   isActive() {
     return this.status === 'active';
   }
+
+  isDomainUser() {
+    return this.type === 'domain_user';
+  }
 }
 
 UserEntitySchema.setClass(User);
@@ -122,5 +126,11 @@ async function saveHandler(args: EventArgs<User>) {
   if (typeof changePassword === 'string') {
     const hashed = await hash(changePassword);
     entity.password.set(hashed);
+  }
+
+  if (entity.type === 'domain_user') {
+    if (entity.members.count() > 1) {
+      throw AppError.withMessage('BUSINESS_RULE_VIOLATION', 'A domain user cannot belong to more than one domain.');
+    }
   }
 }

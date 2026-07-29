@@ -21,7 +21,7 @@ export class DomainSubscriber implements EventSubscriber<Domain> {
     const newStatus = args.entity.active;
 
     if (oldStatus !== newStatus) {
-      await this.domainCache.status(args.entity.id.toString()).set(Boolean(newStatus));
+      await this.domainCache.domainStatus(args.entity.id.toString()).set(Boolean(newStatus));
     }
   }
 

@@ -11,9 +11,9 @@ import { UserAuth } from '@/utils/types/system';
 import { AuthService } from '../services/auth-service';
 import { EntityManager } from '@mikro-orm/core';
 import { User } from '@/persistence/entities/iam-user.entity';
+import { CurrentUser, MarkPublic } from '@/utils/decorators/utils.decorator';
 import type { ConfigType } from '@nestjs/config';
 import type { FastifyReply } from 'fastify';
-import { CurrentUser, MarkPublic } from '@/utils/decorators/utils.decorator';
 
 @RequireAuth()
 @ApiTags('IAM / Auth')
@@ -42,6 +42,14 @@ export class AuthController {
   @Post('login')
   async baseLogin(@Body() dto: BaseLoginDto, @Res({ passthrough: true }) reply: FastifyReply) {
     const { user, onSuccess } = await this.authService.baseAuthentication(dto);
+
+    if (user.isDomainUser()) {
+      await this.em.populate(user, ['members.domain'])
+      const members = user.members.getItems()
+      if (members.length) {
+        members[0].domain.getEntity().ensureStatus();
+      }
+    }
 
     const userAuth = {
       id: user.id,
