@@ -1,5 +1,5 @@
 import z from "zod";
-import { PRODUCT_TYPES } from "../product";
+import { PRODUCT_TYPES } from "../../product";
 import { PROMOTION_TARGET_TYPES } from "./promotion.constant";
 
 const PromotionSchema = z.object({

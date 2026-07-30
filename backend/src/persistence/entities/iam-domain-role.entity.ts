@@ -5,11 +5,13 @@ import { Domain } from './iam-domain.entity';
 import { DomainMember } from './iam-domain-member.entity';
 import slugify from 'slugify';
 import { tenantDomainFilterConfig } from './configs/doamin-tenant.filter';
+import { BaseEntitySchema } from './base.entity';
 
 export const DomainRoleEntitySchema = defineEntity({
   name: 'IAMUserRole',
   tableName: 'iam_domain_role',
   filters: tenantDomainFilterConfig,
+  extends: BaseEntitySchema,
   properties: {
     id: p
       .string()

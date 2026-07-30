@@ -4,6 +4,8 @@ import { Domain } from './iam-domain.entity';
 import { AppError } from '@/utils/errors/app.error';
 import { tenantDomainFilterConfig } from './configs/doamin-tenant.filter';
 import { uuidv7 } from 'uuidv7';
+import { BaseEntitySchema } from './base.entity';
+import { OrderItem } from './commerce-order.entity';
 import slugify from 'slugify';
 
 const ProductInfoSchema = defineEntity({
@@ -19,6 +21,7 @@ const ProductEntitySchema = defineEntity({
   name: 'CatalogProduct',
   tableName: 'product',
   filters: tenantDomainFilterConfig,
+  extends: BaseEntitySchema,
   properties: {
     id: p.uuid().primary().onCreate(uuidv7),
     sku: p
@@ -32,7 +35,8 @@ const ProductEntitySchema = defineEntity({
     trackInventory: p.boolean().default(false).fieldName('track_inventory'),
     status: p.enum(PRODUCT_STATUSES).default('draft'),
     type: p.enum(PRODUCT_TYPES),
-    domain: () => p.manyToOne(Domain)
+    domain: () => p.manyToOne(Domain),
+    orderItems: () => p.oneToMany(OrderItem).mappedBy((orderItem) => orderItem.product),
   },
 });
 

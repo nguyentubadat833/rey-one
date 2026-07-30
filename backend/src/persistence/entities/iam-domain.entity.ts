@@ -1,5 +1,5 @@
 import { AppError } from '@/utils/errors/app.error';
-import { defineEntity, EventArgs, p } from '@mikro-orm/core';
+import { defineEntity, EventArgs } from '@mikro-orm/core';
 import { APP_PERMISSIONS, AppPermission } from '@rey-one/shared';
 import { DomainRole } from './iam-domain-role.entity';
 import { DomainMember } from './iam-domain-member.entity';
@@ -7,10 +7,13 @@ import { DomainRepository } from '../repositories/domain-repository';
 import { Product } from './catalog-product.entity';
 import { InvalidDomainStatus } from '@/utils/errors/domain.error';
 import { uuidv7 } from 'uuidv7';
+import { BaseEntitySchema } from './base.entity';
+import { Order } from './commerce-order.entity';
 
 const BaseDomainSchema = defineEntity({
   name: 'IAMBaseDomain',
   abstract: true,
+  extends: BaseEntitySchema,
   properties: (p) => ({
     name: p.string().unique(),
     active: p.boolean().default(true),
@@ -23,7 +26,7 @@ const DomainEntitySchema = defineEntity({
   tableName: 'iam_domain',
   repository: () => DomainRepository,
   extends: BaseDomainSchema,
-  properties: {
+  properties: (p) => ({
     id: p.uuid().primary().onCreate(uuidv7),
     roles: () =>
       p
@@ -42,15 +45,20 @@ const DomainEntitySchema = defineEntity({
         .oneToMany(Product)
         .mappedBy((product) => product.domain)
         .orphanRemoval()
-        .ref()
-  },
+        .ref(),
+    orders: () =>
+      p
+        .oneToMany(Order)
+        .mappedBy((order) => order.domain)
+        .orphanRemoval()
+        .ref(),
+  }),
 });
 
 export class BaseDomain extends BaseDomainSchema.class {}
 BaseDomainSchema.setClass(BaseDomain);
 
 export class Domain extends DomainEntitySchema.class {
-  
   static ensureStatusValue(active: boolean) {
     if (!active) {
       throw InvalidDomainStatus();
@@ -80,6 +88,7 @@ DomainEntitySchema.addHook('beforeCreate', saveHandler);
 DomainEntitySchema.addHook('beforeUpdate', saveHandler);
 
 async function saveHandler(args: EventArgs<Domain>) {
+
   const changeSetPayload = args.changeSet?.payload;
 
   if (changeSetPayload?.permissions) {

@@ -6,11 +6,14 @@ import { DomainMember } from './iam-domain-member.entity';
 import { hash } from 'argon2';
 import { Party } from './iam-party.entity';
 import { uuidv7 } from 'uuidv7';
+import { BaseEntitySchema } from './base.entity';
+import { InvalidUserStatus, UserNotFound } from '@/utils/errors/user.error';
 
 // User Base Entity
 export const BaseUserEntitySchema = defineEntity({
   name: 'IAMBaseUser',
   abstract: true,
+  extends: BaseEntitySchema,
   properties: {
     type: p.enum(USER_TYPES),
     username: p.string().unique().nullable(),
@@ -55,13 +58,13 @@ export class User extends UserEntitySchema.class {
 
   static ensureExists(user: User | null): asserts user is User {
     if (!user) {
-      throw AppError.withMessage('OBJECT_NOT_FOUND', 'User not found');
+      throw UserNotFound()
     }
   }
 
   static ensureActive(user: User) {
     if (user.status !== 'active') {
-      throw AppError.withMessage('INVALID_STATUS', 'Invalid user status');
+      throw InvalidUserStatus()
     }
   }
 
@@ -92,6 +95,7 @@ UserEntitySchema.addHook('beforeCreate', saveHandler);
 UserEntitySchema.addHook('beforeUpdate', saveHandler);
 
 async function saveHandler(args: EventArgs<User>) {
+
   const changeSetType: ChangeSetType | undefined = args.changeSet?.type;
 
   if (!changeSetType) return;

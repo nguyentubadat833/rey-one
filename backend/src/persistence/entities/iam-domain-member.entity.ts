@@ -3,11 +3,13 @@ import { Domain } from './iam-domain.entity';
 import { User } from './iam-user.entity';
 import { DomainRole } from './iam-domain-role.entity';
 import { tenantDomainFilterConfig } from './configs/doamin-tenant.filter';
+import { BaseEntitySchema } from './base.entity';
 
 const DomainMemberEntitySchema = defineEntity({
   name: 'IAMDomainMember',
   tableName: 'iam_domain_member',
   filters: tenantDomainFilterConfig,
+  extends: BaseEntitySchema,
   properties: {
     id: p.bigint().primary().autoincrement(),
     domain: () => p.manyToOne(Domain).ref(),
