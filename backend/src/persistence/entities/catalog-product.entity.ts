@@ -1,6 +1,5 @@
 import { ChangeSetType, defineEntity, EventArgs, p } from '@mikro-orm/core';
 import { CURRENCIES, PRODUCT_STATUSES, PRODUCT_TYPES } from '@rey-one/shared';
-import { ProductPricing } from './commerce-product-pricing.entity';
 import { Domain } from './iam-domain.entity';
 import { AppError } from '@/utils/errors/app.error';
 import { tenantDomainFilterConfig } from './configs/doamin-tenant.filter';
@@ -33,12 +32,7 @@ const ProductEntitySchema = defineEntity({
     trackInventory: p.boolean().default(false).fieldName('track_inventory'),
     status: p.enum(PRODUCT_STATUSES).default('draft'),
     type: p.enum(PRODUCT_TYPES),
-    domain: () => p.manyToOne(Domain),
-    pricing: () =>
-      p
-        .oneToOne(ProductPricing)
-        .mappedBy((pricing) => pricing.product)
-        .nullable(),
+    domain: () => p.manyToOne(Domain)
   },
 });
 

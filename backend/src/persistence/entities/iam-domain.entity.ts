@@ -7,7 +7,6 @@ import { DomainRepository } from '../repositories/domain-repository';
 import { Product } from './catalog-product.entity';
 import { InvalidDomainStatus } from '@/utils/errors/domain.error';
 import { uuidv7 } from 'uuidv7';
-import { Promotion } from './catalog-promotion.entity';
 
 const BaseDomainSchema = defineEntity({
   name: 'IAMBaseDomain',
@@ -43,13 +42,7 @@ const DomainEntitySchema = defineEntity({
         .oneToMany(Product)
         .mappedBy((product) => product.domain)
         .orphanRemoval()
-        .ref(),
-    promotions: () =>
-      p
-        .oneToMany(Promotion)
-        .mappedBy((promotion) => promotion.domain)
-        .orphanRemoval()
-        .ref(),
+        .ref()
   },
 });
 
