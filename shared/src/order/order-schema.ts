@@ -4,51 +4,69 @@ import { CURRENCIES } from "../utils";
 
 export const OrderItemSchema = z.object({
   id: z.uuid(),
-  productId: z.uuid(),
+  product: z.object({
+    id: z.uuid(),
+    name: z.string(),
+  }),
   quantity: z.number(),
-  subtotal: z.number().transform(BigInt),
-  metadata: z.json().nullable(),
+  subtotal: z.number(),
+  metadata: z.any().nullable(),
 });
 
 export const AddOrderItemSchema = OrderItemSchema.omit({
   id: true,
+  product: true,
+  subtotal: true,
+}).extend({
+  productId: z.string(),
+  subtotal: z.number().transform(BigInt),
 });
 
 export const OrderSchema = z.object({
   id: z.uuid(),
-  partyId: z.uuid(),
   paymentType: z.enum(ORDER_PAYMENT_TYPES).default("one_time"),
   status: z.enum(ORDER_STATUSES),
   currency: z.enum(CURRENCIES).default("VND"),
-  totalAmount: z.number().transform((v) => BigInt(v)),
-  paidAmount: z.number().default(0).transform(BigInt),
-  metadata: z.json().nullable(),
+  totalAmount: z.number(),
+  paidAmount: z.number(),
+  metadata: z.any().nullable(),
   expiresAt: z.date().nullable(),
   completedAt: z.date().nullable(),
   cancelledAt: z.date().nullable(),
   items: z.array(OrderItemSchema),
+  customer: z.object({
+    id: z.uuid(),
+    name: z.string(),
+  }),
+  createdBy: z.object({
+    id: z.uuid(),
+    name: z.string(),
+  }),
+});
+
+export const CreateOrderQuerySchema = z.object({
+  paymentType: z.enum(ORDER_PAYMENT_TYPES),
+  // partyId: z.uuid(),
 });
 
 export const CreateOrderSchema = OrderSchema.pick({
-  partyId: true,
   currency: true,
-  totalAmount: true,
   metadata: true,
 }).extend({
+  customerId: z.uuid(),
+  totalAmount: z.number().transform((v) => BigInt(v)),
   items: z.array(AddOrderItemSchema),
 });
 
 export const CustomerCreateOrderSchema = CreateOrderSchema.omit({
-  partyId: true
-})
+  customerId: true,
+});
 
 export const UpdateOrderSchema = OrderSchema.pick({
-  partyId: true,
-  currency: true,
-  totalAmount: true,
   metadata: true,
 })
   .extend({
     items: z.array(AddOrderItemSchema),
+    totalAmount: z.number().transform((v) => BigInt(v)),
   })
   .partial();

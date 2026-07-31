@@ -43,7 +43,7 @@ const OrderEntitySchema = defineEntity({
     completedAt: p.datetime().nullable().fieldName('completed_at'),
     cancelledAt: p.datetime().nullable().fieldName('cancelled_at'),
 
-    createdBy: () => p.manyToOne(Party).fieldName('created_by'),
+    createdBy: () => p.manyToOne(User).fieldName('created_by'),
     customer: () => p.manyToOne(Party),
     domain: () => p.manyToOne(Domain),
     items: () =>

@@ -13,7 +13,7 @@ const PartyEntitySchema = defineEntity({
     name: p.string(),
     taxCode: p.string().unique().nullable().fieldName('tax_code'),
     user: () => p.oneToOne(User).nullable(),
-    orders: () => p.oneToMany(Order).mappedBy((order) => order.createdBy),
+    orders: () => p.oneToMany(Order).mappedBy((order) => order.customer),
   },
 });
 

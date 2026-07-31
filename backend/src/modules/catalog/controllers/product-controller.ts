@@ -18,28 +18,28 @@ export class ProductController {
     private readonly productService: ProductService,
   ) {}
 
-  @RequirePermission('domain:product:read', false)
+  @RequirePermission('product:read', false)
   @ApiOperation({ summary: 'Product summaries' })
   @Get()
   async summaries() {
     return await this.em.find(Product, {}, { populate: ['info'] }).then((rs) => rs.map((item) => ProductMapper.toProductSummary(item)));
   }
 
-  @RequirePermission('domain:product:manage')
+  @RequirePermission('product:manage')
   @ApiOperation({ summary: 'Create product' })
   @Post()
   async createProduct(@Body() dto: CreateProductDto) {
     return await this.productService.createProduct(dto).then(ProductMapper.toProductView);
   }
 
-  @RequirePermission('domain:product:manage')
+  @RequirePermission('product:manage')
   @ApiOperation({ summary: 'Update product' })
   @Patch(':id')
   async updateProduct(@Param('id') id: string, @Body() dto: CreateProductDto) {
     return await this.productService.updateProduct(id, dto).then(ProductMapper.toProductView);
   }
 
-  @RequirePermission('domain:product:read', false)
+  @RequirePermission('product:read', false)
   @ApiOperation({ summary: 'Get Product' })
   @Get(':id')
   async getProduct(@Param('id') id: string) {

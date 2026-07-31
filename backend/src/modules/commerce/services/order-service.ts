@@ -11,10 +11,14 @@ import { OrderNotFoundError } from '@/utils/errors/order.error';
 import { CommerceService } from './commerce-service';
 import { AppError } from '@/utils/errors/app.error';
 import { OrderPaymentType } from '@rey-one/shared';
+import { PartyNotFoundError } from '@/utils/errors/party.error';
+import { User } from '@/persistence/entities/iam-user.entity';
+import { OrderLoadedCustomerAndCreatedByAndItems } from '@/persistence/types/order-type';
 
 @Injectable()
 export class OrderService {
   constructor(
+    private readonly commerceService: CommerceService,
     private readonly em: EntityManager,
     private readonly clsService: ClsService<AppClsStore>,
   ) {}
@@ -30,7 +34,7 @@ export class OrderService {
 
     const productIds = [...new Set(items.map((item) => item.productId))];
 
-    const products = await this.em.find(Product, { id: { $in: productIds } });
+    const products = await this.em.find(Product, { id: { $in: productIds } }, { populate: ['info'] });
     if (products.length !== productIds.length) {
       const foundIds = new Set(products.map((product) => product.id));
       const missingIds = productIds.filter((id) => !foundIds.has(id));
@@ -42,7 +46,7 @@ export class OrderService {
     return items.map((item) => {
       const product = productById.get(item.productId)!;
 
-      CommerceService.ensureProductSellable(product);
+      this.commerceService.ensureProductSellable(product);
       return this.em.create(OrderItem, {
         order,
         product,
@@ -52,22 +56,33 @@ export class OrderService {
     });
   }
 
-  async createOrder(paymentType: OrderPaymentType, createById: string, dto: CreateOrderDto, domainId = this.getDomainIdFromStore()) {
+  async createOrder(paymentType: OrderPaymentType, createByUserId: string, dto: CreateOrderDto, domainId = this.getDomainIdFromStore()) {
+    const customer = await this.em.findOneOrFail(
+      Party,
+      { id: dto.customerId },
+      {
+        failHandler: PartyNotFoundError,
+      },
+    );
+    this.commerceService.ensurePartyCanOrder(customer);
+
     const order = this.em.create(Order, {
       paymentType: paymentType,
       totalAmount: dto.totalAmount,
       metadata: dto.metadata,
-      customer: this.em.getReference(Party, dto.partyId),
       domain: this.em.getReference(Domain, domainId),
-      createdBy: this.em.getReference(Party, createById),
+      createdBy: this.em.getReference(User, createByUserId),
       status: 'draft',
+      customer,
     });
 
     const items = await this.orderItemsFromRequest(order, dto.items);
     order.items.set(items);
-    await this.em.flush();
 
-    return order;
+    await this.em.flush();
+    await this.em.populate(order, ['createdBy.party']);
+
+    return order as OrderLoadedCustomerAndCreatedByAndItems
   }
 
   async updateOrder(orderId: string, dto: UpdateOrderDto) {

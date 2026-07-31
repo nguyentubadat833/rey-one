@@ -1,4 +1,5 @@
 import { Product } from '@/persistence/entities/catalog-product.entity';
+import { Party } from '@/persistence/entities/iam-party.entity';
 import { InvalidProductStatusError } from '@/utils/errors/product.error';
 import { Injectable } from '@nestjs/common';
 
@@ -6,9 +7,11 @@ import { Injectable } from '@nestjs/common';
 export class CommerceService {
   constructor() {}
 
-  static ensureProductSellable(product: Product) {
+  ensureProductSellable(product: Product) {
     if (product.status !== 'active') {
       throw InvalidProductStatusError();
     }
   }
+
+  ensurePartyCanOrder(party: Party) {}
 }

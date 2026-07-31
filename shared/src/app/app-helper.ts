@@ -1,39 +1,32 @@
 import { AppPermission } from "./app-type";
 
-const DOMAIN_PRODUCT_ITEMS: AppPermission[] = [
-  'domain:product:manage',
-  'domain:product:read'
-];
-
-const DOMAIN_ROLE_ITEMS: AppPermission[] = [
-  "domain:role:manage",
-  "domain:role:read",
-];
-
-const DOMAIN_MEMBER_ITEMS: AppPermission[] = [
-  "domain:member:manage",
-  "domain:member:read",
-];
-
-const DOMAIN_MANAGER_READ_ITEMS: AppPermission[] = [
-  "domain:member:read",
-  "domain:role:read",
-  'domain:product:read',
-];
-
-const DOMAIN_MANAGER_ITEMS: AppPermission[] = [
-  "domain:manage:read",
-  ...DOMAIN_MEMBER_ITEMS,
-  ...DOMAIN_ROLE_ITEMS,
-  ...DOMAIN_PRODUCT_ITEMS,
-];
-
 const PERMISSION_HIERARCHY: Partial<Record<AppPermission, AppPermission[]>> = {
-  "domain:product:manage": ['domain:product:read'],
+  "domain:member:manage": ["domain:member:read"],
   "domain:role:manage": ["domain:role:read"],
-  "domain:member:manage": ["domain:manage:read"],
-  'domain:manage:read': DOMAIN_MANAGER_READ_ITEMS,
-  "domain:manage": DOMAIN_MANAGER_ITEMS,
+  "product:manage": ["product:read"],
+  //
+  "domain:manage": [
+    "domain:manage:read",
+    //
+    "domain:member:manage",
+    "domain:member:read",
+    //
+    "domain:role:manage",
+    "domain:role:read",
+    //
+    "product:manage",
+    "product:read",
+    //
+    "order:manage",
+    "order:read",
+  ],
+  //
+  "domain:manage:read": [
+    "domain:member:read",
+    "domain:role:read",
+    "product:read",
+    "order:read",
+  ],
 };
 
 // Resolve tất cả permissions user thực sự có (bao gồm implied permissions)
