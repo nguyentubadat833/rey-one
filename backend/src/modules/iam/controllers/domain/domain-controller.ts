@@ -9,7 +9,7 @@ import { DOMAIN_ID_PARAMETER } from '@/utils/types/utils';
 import { DomainSummary } from '@/persistence/entities/query-entities/domain-query';
 import { DomainSummaryView, DomainWithIAMView } from '@rey-one/shared';
 import { DomainService } from '../../services/domain/domain-service';
-import { DomainNotFound } from '@/utils/errors/domain.error';
+import { DomainNotFoundError } from '@/utils/errors/domain.error';
 
 @RequireAuth()
 @ApiTags('IAM / Domains')
@@ -42,7 +42,7 @@ export class DomainController {
   @Patch(`:${DOMAIN_ID_PARAMETER}`)
   async updateDomain(@Param(DOMAIN_ID_PARAMETER) id: string, @Body() dto: UpdateDomainDto) {
     const domain = await this.em.findOneOrFail(Domain, id, {
-      failHandler: DomainNotFound,
+      failHandler: DomainNotFoundError,
     });
     this.em.assign(domain, dto, { ignoreUndefined: true });
 
@@ -59,7 +59,7 @@ export class DomainController {
       {
         id,
       },
-      { failHandler: DomainNotFound },
+      { failHandler: DomainNotFoundError },
     );
   }
 

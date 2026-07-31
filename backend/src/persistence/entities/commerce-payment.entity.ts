@@ -4,11 +4,13 @@ import { Order } from './commerce-order.entity';
 import { CURRENCIES, PAYMENT_FLOW_TYPES, PAYMENT_PROVIDERS, PAYMENT_STATUS_TRANSITIONS, PAYMENT_STATUSES, PaymentStatus } from '@rey-one/shared';
 import { AppError } from '@/utils/errors/app.error';
 import { BaseEntitySchema } from './base.entity';
+import { tenantFilterConfig } from './configs/doamin-tenant.filter';
 
 const PaymentEntitySchema = defineEntity({
   name: 'CommercePayment',
   tableName: 'commerce_payment',
   extends: BaseEntitySchema,
+  filters: tenantFilterConfig,
   properties: (p) => ({
     id: p.uuid().primary().onCreate(uuidv7),
     order: () => p.manyToOne(Order).ref(),

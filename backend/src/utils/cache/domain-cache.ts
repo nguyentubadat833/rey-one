@@ -1,7 +1,7 @@
 import { DomainRepository } from '@/persistence/repositories/domain-repository';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
-import { DomainNotFound } from '../errors/domain.error';
+import { DomainNotFoundError } from '../errors/domain.error';
 
 @Injectable()
 export class DomainCache {
@@ -34,7 +34,7 @@ export class DomainCache {
         },
         {
           fields: ['active'],
-          failHandler: DomainNotFound,
+          failHandler: DomainNotFoundError,
         },
       );
 

@@ -18,8 +18,8 @@ import { DomainSummary } from '@/persistence/entities/query-entities/domain-quer
 import { DomainService } from './services/domain/domain-service';
 import { DomainMemberController } from './controllers/domain/member-controller';
 import { AuthGuard } from './guard/auth-guard';
-import { RequireAdminGuard } from './guard/admin-guard';
-import { RequirePermissionGuard } from './guard/permission-guard';
+import { AdminGuard } from './guard/admin-guard';
+import { PermissionGuard } from './guard/permission-guard';
 import { DomainMiddleware } from '../../utils/middlewares/domain-middleware';
 import { DomainCache } from '@/utils/cache/domain-cache';
 import { DomainSubscriber } from '@/persistence/subscribers/domain-subscriber';
@@ -58,13 +58,13 @@ import { SERVICE_TOKENS } from '@/utils/types/tokens';
     DomainMemberService,
     DomainRoleService,
     //
-    RequireAdminGuard,
-    RequirePermissionGuard,
+    AdminGuard,
+    PermissionGuard,
     //
     DomainCache,
     DomainSubscriber,
   ],
-  exports: [RequireAdminGuard, RequirePermissionGuard],
+  exports: [AdminGuard, PermissionGuard],
   controllers: [AuthController, DomainController, DomainRoleController, DomainMemberController, UserController],
 })
 export class IAMModule implements OnModuleInit, NestModule {

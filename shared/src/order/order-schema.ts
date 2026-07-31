@@ -29,28 +29,24 @@ export const OrderSchema = z.object({
   items: z.array(OrderItemSchema),
 });
 
-export const CreateOrderSchema = OrderSchema.omit({
-  id: true,
-  status: true,
-  paidAmount: true,
-  expiresAt: true,
-  completedAt: true,
-  cancelledAt: true,
-  items: true,
+export const CreateOrderSchema = OrderSchema.pick({
+  partyId: true,
+  currency: true,
+  totalAmount: true,
+  metadata: true,
 }).extend({
   items: z.array(AddOrderItemSchema),
 });
 
-export const UpdateOrderSchema = OrderSchema.omit({
-  id: true,
+export const CustomerCreateOrderSchema = CreateOrderSchema.omit({
+  partyId: true
+})
+
+export const UpdateOrderSchema = OrderSchema.pick({
   partyId: true,
-  paymentType: true,
-  status: true,
-  paidAmount: true,
-  expiresAt: true,
-  completedAt: true,
-  cancelledAt: true,
-  items: true,
+  currency: true,
+  totalAmount: true,
+  metadata: true,
 })
   .extend({
     items: z.array(AddOrderItemSchema),

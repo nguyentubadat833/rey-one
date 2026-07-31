@@ -6,7 +6,7 @@ import { EntityManager } from '@mikro-orm/core';
 import { Inject, Injectable } from '@nestjs/common';
 import { ClsService } from 'nestjs-cls';
 import { CreateDomainMemberDto, UpdateDomainMemberDto } from '../../dtos/domain-dto';
-import { DomainMemberNotFound, DomainNotFound } from '@/utils/errors/domain.error';
+import { DomainMemberNotFoundError, DomainNotFoundError } from '@/utils/errors/domain.error';
 import { DomainRole } from '@/persistence/entities/iam-domain-role.entity';
 import { DomainMember } from '@/persistence/entities/iam-domain-member.entity';
 import { DomainMemberLoadedUserAndRole, DomainMemberLoadedUserAndRoleAndDomain } from '@/persistence/types/domain-type';
@@ -32,7 +32,7 @@ export class DomainMemberService {
         id: domainId,
       },
       {
-        failHandler: DomainNotFound,
+        failHandler: DomainNotFoundError,
       },
     );
 
@@ -73,7 +73,7 @@ export class DomainMemberService {
       },
       {
         populate: ['user.party'],
-        failHandler: DomainMemberNotFound,
+        failHandler: DomainMemberNotFoundError,
       },
     );
 
@@ -124,7 +124,7 @@ export class DomainMemberService {
       },
       {
         populate: ['user.party', 'domain'],
-        failHandler: DomainMemberNotFound,
+        failHandler: DomainMemberNotFoundError,
       },
     );
   }

@@ -5,7 +5,7 @@ import { DomainRole } from './iam-domain-role.entity';
 import { DomainMember } from './iam-domain-member.entity';
 import { DomainRepository } from '../repositories/domain-repository';
 import { Product } from './catalog-product.entity';
-import { InvalidDomainStatus } from '@/utils/errors/domain.error';
+import { InvalidDomainStatusError } from '@/utils/errors/domain.error';
 import { uuidv7 } from 'uuidv7';
 import { BaseEntitySchema } from './base.entity';
 import { Order } from './commerce-order.entity';
@@ -61,13 +61,13 @@ BaseDomainSchema.setClass(BaseDomain);
 export class Domain extends DomainEntitySchema.class {
   static ensureStatusValue(active: boolean) {
     if (!active) {
-      throw InvalidDomainStatus();
+      throw InvalidDomainStatusError();
     }
   }
 
   static ensureStatus(domain: Domain) {
     if (!domain.active) {
-      throw InvalidDomainStatus();
+      throw InvalidDomainStatusError();
     }
   }
 

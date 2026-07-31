@@ -7,7 +7,7 @@ import { DomainRole } from '@/persistence/entities/iam-domain-role.entity';
 import { Domain } from '@/persistence/entities/iam-domain.entity';
 import { ClsService } from 'nestjs-cls';
 import { AppClsStore } from '@/utils/types/system';
-import { DomainNotFound, DomainRoleNotFound } from '@/utils/errors/domain.error';
+import { DomainNotFoundError, DomainRoleNotFoundError } from '@/utils/errors/domain.error';
 import type { ConfigType } from '@nestjs/config';
 
 @Injectable()
@@ -30,14 +30,14 @@ export class DomainRoleService {
       },
       {
         populate: ['members.user.party'],
-        failHandler: DomainRoleNotFound,
+        failHandler: DomainRoleNotFoundError,
       },
     );
   }
 
   async createRole(dto: CreateDomainRoleDto, domainId: string = this.getDomainIdFromStore()) {
     const domain = await this.em.findOneOrFail(Domain, domainId, {
-      failHandler: DomainNotFound,
+      failHandler: DomainNotFoundError,
     });
 
     // Middleware checked
@@ -54,7 +54,7 @@ export class DomainRoleService {
 
   async updateRole(roleId: string, dto: UpdateDomainRoleDto) {
     const role = await this.em.findOneOrFail(DomainRole, roleId, {
-      failHandler: DomainRoleNotFound,
+      failHandler: DomainRoleNotFoundError,
     });
 
     // Middleware checked

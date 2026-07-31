@@ -1,5 +1,5 @@
 import { applyDecorators, createParamDecorator, ExecutionContext, SetMetadata } from '@nestjs/common';
-import { AUTH_METADATA } from '../types/tokens';
+import { AUTH_METADATA, TenantRequirement } from '../types/tokens';
 import { AppPermission } from '@rey-one/shared';
 import { ApiHeader } from '@nestjs/swagger';
 import { DOMAIN_ID_HEADER } from '../types/utils';
@@ -7,7 +7,7 @@ import { FastifyRequest } from 'fastify';
 import { UserAuth } from '../types/system';
 
 export const MarkPublic = () => SetMetadata(AUTH_METADATA.IS_PUBLIC, true);
-export const MarkRequireDomainActive = () => SetMetadata(AUTH_METADATA.REQUIRE_DOAMIN_ACTIVE, true) // Require domain is active
+export const MarkRequireTenant = (tenant: TenantRequirement) => SetMetadata(AUTH_METADATA.REQUIRE_TENANT, tenant); // Require domain is active
 export const MarkRequirePermission = (permission: AppPermission) => SetMetadata(AUTH_METADATA.REQUIRE_PERMISSION, permission);
 
 export function ApiDomainHeader(required = true) {

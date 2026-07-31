@@ -7,7 +7,7 @@ import { hash } from 'argon2';
 import { Party } from './iam-party.entity';
 import { uuidv7 } from 'uuidv7';
 import { BaseEntitySchema } from './base.entity';
-import { InvalidUserStatus, UserNotFound } from '@/utils/errors/user.error';
+import { InvalidUserStatusError, UserNotFoundError } from '@/utils/errors/user.error';
 
 // User Base Entity
 export const BaseUserEntitySchema = defineEntity({
@@ -44,7 +44,7 @@ const UserEntitySchema = defineEntity({
         .oneToMany(DomainMember)
         .mappedBy((member) => member.user)
         .orphanRemoval()
-        .ref(),
+        .ref()
   },
 });
 export class User extends UserEntitySchema.class {
@@ -58,13 +58,13 @@ export class User extends UserEntitySchema.class {
 
   static ensureExists(user: User | null): asserts user is User {
     if (!user) {
-      throw UserNotFound()
+      throw UserNotFoundError()
     }
   }
 
   static ensureActive(user: User) {
     if (user.status !== 'active') {
-      throw InvalidUserStatus()
+      throw InvalidUserStatusError()
     }
   }
 

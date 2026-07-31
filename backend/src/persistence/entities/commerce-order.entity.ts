@@ -7,11 +7,14 @@ import { Domain } from './iam-domain.entity';
 import { Product } from './catalog-product.entity';
 import { Payment } from './commerce-payment.entity';
 import { CURRENCIES, ORDER_PAYMENT_TYPES, ORDER_STATUS_TRANSITIONS, ORDER_STATUSES, OrderPaymentType, OrderStatus } from '@rey-one/shared';
+import { tenantFilterConfig } from './configs/doamin-tenant.filter';
+import { User } from './iam-user.entity';
 
 const OrderEntitySchema = defineEntity({
   name: 'CommerceOrder',
   tableName: 'commerce_order',
   extends: BaseEntitySchema,
+  filters: tenantFilterConfig,
   properties: (p) => ({
     id: p.uuid().primary().onCreate(uuidv7),
     paymentType: p.enum(ORDER_PAYMENT_TYPES).index().default('one_time').fieldName('payment_type'),
@@ -40,6 +43,7 @@ const OrderEntitySchema = defineEntity({
     completedAt: p.datetime().nullable().fieldName('completed_at'),
     cancelledAt: p.datetime().nullable().fieldName('cancelled_at'),
 
+    createdBy: () => p.manyToOne(Party).fieldName('created_by'),
     customer: () => p.manyToOne(Party),
     domain: () => p.manyToOne(Domain),
     items: () =>

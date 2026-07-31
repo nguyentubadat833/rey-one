@@ -4,7 +4,7 @@ import { DomainLoadedRolesAndMembers } from '@/persistence/types/domain-type';
 import { Domain } from '@/persistence/entities/iam-domain.entity';
 import { ClsService } from 'nestjs-cls';
 import { AppClsStore } from '@/utils/types/system';
-import { DomainNotFound } from '@/utils/errors/domain.error';
+import { DomainNotFoundError } from '@/utils/errors/domain.error';
 import { DomainRepository } from '@/persistence/repositories/domain-repository';
 import { DomainCache } from '@/utils/cache/domain-cache';
 
@@ -29,7 +29,7 @@ export class DomainService {
       },
       {
         populate: ['roles', 'members.user.party'],
-        failHandler: DomainNotFound,
+        failHandler: DomainNotFoundError,
       },
     );
   }

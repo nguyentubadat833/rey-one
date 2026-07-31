@@ -88,6 +88,7 @@ const AppErrorHttpStatus: Record<ErrorKey, HttpStatus> = {
   PROPERTY_REQUIRED: HttpStatus.BAD_REQUEST,
   OBJECT_NOT_FOUND: HttpStatus.NOT_FOUND,
   FEATURE_NOT_IMPLEMENTED: HttpStatus.NOT_IMPLEMENTED,
+  ITEMS_REQUIRED: HttpStatus.BAD_REQUEST
 };
 
 // const AppErrorHttpStatus: Record<ErrorType, HttpStatus> = {

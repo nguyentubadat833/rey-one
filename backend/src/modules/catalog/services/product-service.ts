@@ -6,7 +6,7 @@ import { Domain } from '@/persistence/entities/iam-domain.entity';
 import { ClsService } from 'nestjs-cls';
 import { AppClsStore } from '@/utils/types/system';
 import { ProductLoadedInfo } from '@/persistence/types/product-type';
-import { ProductNotFound } from '@/utils/errors/product.error';
+import { ProductNotFoundError } from '@/utils/errors/product.error';
 
 @Injectable()
 export class ProductService {
@@ -46,7 +46,7 @@ export class ProductService {
       Product,
       { id: productId },
       {
-        failHandler: ProductNotFound,
+        failHandler: ProductNotFoundError,
       },
     );
 
@@ -73,7 +73,7 @@ export class ProductService {
       { id },
       {
         populate: ['info'],
-        failHandler: ProductNotFound,
+        failHandler: ProductNotFoundError,
       },
     );
   }
