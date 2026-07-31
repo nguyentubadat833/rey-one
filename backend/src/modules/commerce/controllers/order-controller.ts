@@ -1,8 +1,8 @@
-import { RequireAuth, RequireTenant, SkipTenant } from '@/utils/decorators/auth.decorator';
+import { RequireAuth, RequirePermission, RequireTenant } from '@/utils/decorators/auth.decorator';
 import { ApiDomainHeader, CurrentUser } from '@/utils/decorators/utils.decorator';
 import { BadRequestException, Controller, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { CreateOrderQuerySchema, type OrderPaymentType } from '@rey-one/shared';
+import { CreateOrderQuerySchema } from '@rey-one/shared';
 import { OrderService } from '../services/order-service';
 import { CreateOrderDto } from '../dtos/order-dto';
 import { OrderMapper } from '../mappers/order-mapper';
@@ -15,6 +15,7 @@ import { OrderMapper } from '../mappers/order-mapper';
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
+  @RequirePermission('order:manage')
   @Post()
   async createOrder(@CurrentUser('id') createdByUserId: string, @Query() queries: unknown, dto: CreateOrderDto) {
     const parse = CreateOrderQuerySchema.safeParse(queries);
