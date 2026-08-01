@@ -1,4 +1,4 @@
-import { UserAuth } from '@/utils/types/system';
+import { AppClsStore, UserAuth } from '@/utils/types/system';
 import { AUTH_METADATA } from '@/utils/types/tokens';
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -6,29 +6,46 @@ import { UserType } from '@rey-one/shared';
 import { FastifyRequest } from 'fastify';
 import { AuthService } from '../services/auth-service';
 import guardHelper from './_helper';
+import { ClsService } from 'nestjs-cls';
+import { Reflector } from '@nestjs/core';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
     private readonly authService: AuthService,
     private readonly jwtService: JwtService,
-    // private reflector: Reflector,
-  ) {}
+    private readonly appStore: ClsService<AppClsStore>,
+    private reflector: Reflector,
+  ) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    const isPublic = this.reflector.getAllAndOverride<boolean>(AUTH_METADATA.IS_PUBLIC, [context.getHandler(), context.getClass()]);
+    if (isPublic) {
+      return true;
+    }
+
     const request = context.switchToHttp().getRequest<FastifyRequest>();
 
-    const { extractBasicCredentials, extractBearerToken } = guardHelper();
+    const setData = (userAuth: UserAuth) => {
+      request[AUTH_METADATA.USER] = userAuth
+      this.appStore.set('actor', userAuth)
+    }
 
+    const { extractBasicCredentials, extractBearerToken } = guardHelper();
     const bearerToken = extractBearerToken(request);
+
     if (bearerToken) {
-      request[AUTH_METADATA.USER] = await this.verifyBearerToken(bearerToken);
+      const userAuth = await this.verifyBearerToken(bearerToken);
+      setData(userAuth)
+
       return true;
     }
 
     const basicCredentials = extractBasicCredentials(request);
     if (basicCredentials) {
-      request[AUTH_METADATA.USER] = await this.authenticateBasic(basicCredentials);
+      const userAuth = await this.authenticateBasic(basicCredentials);
+      setData(userAuth)
+
       return true;
     }
 
@@ -80,10 +97,10 @@ export class AuthGuard implements CanActivate {
   }
 
   // async canActivate(context: ExecutionContext): Promise<boolean> {
-  //   const isPublic = this.reflector.getAllAndOverride<boolean>(AUTH_METADATA.IS_PUBLIC, [context.getHandler(), context.getClass()]);
-  //   if (isPublic) {
-  //     return true;
-  //   }
+  // const isPublic = this.reflector.getAllAndOverride<boolean>(AUTH_METADATA.IS_PUBLIC, [context.getHandler(), context.getClass()]);
+  // if (isPublic) {
+  //   return true;
+  // }
 
   //   const request = context.switchToHttp().getRequest<FastifyRequest>();
   //   const accessTokenFromCookie = request.cookies?.['access_token'];

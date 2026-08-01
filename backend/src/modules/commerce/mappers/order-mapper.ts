@@ -30,7 +30,7 @@ export class OrderMapper {
       },
       createdBy: {
         id: order.createdBy.id,
-        name: order.createdBy.party.id,
+        name: order.createdBy.party.getProperty('name'),
       },
     } satisfies OrderView;
   }

@@ -3,7 +3,7 @@ import { ProductService } from '../services/product-service';
 import { ApiDomainHeader } from '@/utils/decorators/utils.decorator';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RequireAuth, RequirePermission } from '@/utils/decorators/auth.decorator';
-import { CreateProductDto } from '../dtos/product-dto';
+import { CreateProductDto, UpdateProductDto } from '../dtos/product-dto';
 import { ProductMapper } from '../mappers/product-mapper';
 import { EntityManager } from '@mikro-orm/core';
 import { Product } from '@/persistence/entities/catalog-product.entity';
@@ -35,7 +35,7 @@ export class ProductController {
   @RequirePermission('product:manage')
   @ApiOperation({ summary: 'Update product' })
   @Patch(':id')
-  async updateProduct(@Param('id') id: string, @Body() dto: CreateProductDto) {
+  async updateProduct(@Param('id') id: string, @Body() dto: UpdateProductDto) {
     return await this.productService.updateProduct(id, dto).then(ProductMapper.toProductView);
   }
 

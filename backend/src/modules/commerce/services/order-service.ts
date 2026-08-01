@@ -21,10 +21,14 @@ export class OrderService {
     private readonly commerceService: CommerceService,
     private readonly em: EntityManager,
     private readonly clsService: ClsService<AppClsStore>,
-  ) {}
+  ) { }
 
   private getDomainIdFromStore() {
     return this.clsService.get('domainId');
+  }
+
+  private getActorIdFromStore() {
+    return this.clsService.get('actor.id')
   }
 
   private async orderItemsFromRequest(order: Order, items: AddOrderItemsDto[]): Promise<OrderItem[]> {
@@ -56,22 +60,32 @@ export class OrderService {
     });
   }
 
-  async createOrder(paymentType: OrderPaymentType, createByUserId: string, dto: CreateOrderDto, domainId = this.getDomainIdFromStore()) {
-    const customer = await this.em.findOneOrFail(
-      Party,
-      { id: dto.customerId },
-      {
-        failHandler: PartyNotFoundError,
-      },
-    );
-    this.commerceService.ensurePartyCanOrder(customer);
+  async createOrder(paymentType: OrderPaymentType, dto: CreateOrderDto, domainId = this.getDomainIdFromStore(), actorId: string = this.getActorIdFromStore()) {
+    let customer: Party
+
+
+    console.log(paymentType, dto, domainId, actorId)
+    if (dto.customer.id) {
+      customer = await this.em.findOneOrFail(
+        Party,
+        { id: dto.customer.id },
+        {
+          failHandler: PartyNotFoundError,
+        },
+      );
+      this.commerceService.ensurePartyCanOrder(customer);
+    } else {
+      customer = this.em.create(Party, {
+        name: dto.customer.name
+      })
+    }
 
     const order = this.em.create(Order, {
       paymentType: paymentType,
       totalAmount: dto.totalAmount,
       metadata: dto.metadata,
       domain: this.em.getReference(Domain, domainId),
-      createdBy: this.em.getReference(User, createByUserId),
+      createdBy: this.em.getReference(User, actorId),
       status: 'draft',
       customer,
     });

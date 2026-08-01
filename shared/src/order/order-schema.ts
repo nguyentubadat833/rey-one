@@ -8,9 +8,9 @@ export const OrderItemSchema = z.object({
     id: z.uuid(),
     name: z.string(),
   }),
-  quantity: z.number(),
+  quantity: z.number().default(1),
   subtotal: z.number(),
-  metadata: z.any().nullable(),
+  metadata: z.any().nullable().optional(),
 });
 
 export const AddOrderItemSchema = OrderItemSchema.omit({
@@ -29,7 +29,7 @@ export const OrderSchema = z.object({
   currency: z.enum(CURRENCIES).default("VND"),
   totalAmount: z.number(),
   paidAmount: z.number(),
-  metadata: z.any().nullable(),
+  metadata: z.any().nullable().optional(),
   expiresAt: z.date().nullable(),
   completedAt: z.date().nullable(),
   cancelledAt: z.date().nullable(),
@@ -53,13 +53,16 @@ export const CreateOrderSchema = OrderSchema.pick({
   currency: true,
   metadata: true,
 }).extend({
-  customerId: z.uuid(),
+  customer: z.object({
+    id: z.uuid().optional(),
+    name: z.string(),
+  }),
   totalAmount: z.number().transform((v) => BigInt(v)),
   items: z.array(AddOrderItemSchema),
 });
 
 export const CustomerCreateOrderSchema = CreateOrderSchema.omit({
-  customerId: true,
+  customer: true,
 });
 
 export const UpdateOrderSchema = OrderSchema.pick({

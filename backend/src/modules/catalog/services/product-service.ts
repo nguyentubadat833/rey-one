@@ -13,7 +13,7 @@ export class ProductService {
   constructor(
     private readonly em: EntityManager,
     private readonly clsService: ClsService<AppClsStore>,
-  ) {}
+  ) { }
 
   private getDefaultCostFromInput(input?: number | null): bigint | null {
     return input ? BigInt(input) : null;
@@ -41,7 +41,7 @@ export class ProductService {
     return product;
   }
 
-  async updateProduct(productId: string, dto: UpdateProductDto): Promise<ProductLoadedInfo>  {
+  async updateProduct(productId: string, dto: UpdateProductDto): Promise<ProductLoadedInfo> {
     const product = await this.em.findOneOrFail(
       Product,
       { id: productId },
@@ -59,6 +59,8 @@ export class ProductService {
       defaultCost: this.getDefaultCostFromInput(dto.defaultCost),
       trackInventory: dto.trackingInventory,
       status: dto.status,
+    }, {
+      ignoreUndefined: true
     });
 
     await this.em.populate(product, ['info']);
