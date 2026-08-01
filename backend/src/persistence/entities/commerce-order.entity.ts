@@ -9,6 +9,7 @@ import { Payment } from './commerce-payment.entity';
 import { CURRENCIES, ORDER_PAYMENT_TYPES, ORDER_STATUS_TRANSITIONS, ORDER_STATUSES, OrderPaymentType, OrderStatus } from '@rey-one/shared';
 import { tenantFilterConfig } from './configs/doamin-tenant.filter';
 import { User } from './iam-user.entity';
+import randomstring from 'randomstring'
 
 const OrderEntitySchema = defineEntity({
   name: 'CommerceOrder',
@@ -17,6 +18,7 @@ const OrderEntitySchema = defineEntity({
   filters: tenantFilterConfig,
   properties: (p) => ({
     id: p.uuid().primary().onCreate(uuidv7),
+    code: p.string().length(12).unique().onCreate(generateOrderCode),
     paymentType: p.enum(ORDER_PAYMENT_TYPES).index().default('one_time').fieldName('payment_type'),
     status: p.enum(ORDER_STATUSES).default('draft').index().accessor('_status'),
 
@@ -126,6 +128,13 @@ function saveHandler(args: EventArgs<Order>) {
       }
     }
   }
+}
+
+function generateOrderCode(){
+  return randomstring.generate({
+    length: 12,
+    charset: '123456789QWERTYUPASDFGHJKLMNBVCXZ'
+  })
 }
 
 // ============ ORDER ITEM ============

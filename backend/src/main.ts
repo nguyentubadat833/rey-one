@@ -6,14 +6,13 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { MikroORM } from '@mikro-orm/core';
 import { join } from 'path';
 // import { SocketIoAdapter } from './modules/platform/event/socket.adapter';
-import fastifyCookie from '@fastify/cookie';
-import fastifyView from '@fastify/view';
-import handlebars from 'handlebars';
 import { AppModules } from './app/app.modules';
 import { ResponseConfig } from './utils/interceptors/response-config';
 import { ZodValidationPipeConfig } from './utils/pipes/validate-configs';
 import { AppCatchEverythingFilter } from './utils/errors/filters/catch-everything.filter';
-import { DatabaseSeeder } from './app/app.seeder';
+import fastifyCookie from '@fastify/cookie';
+import fastifyView from '@fastify/view';
+import handlebars from 'handlebars';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(AppModules, new FastifyAdapter());

@@ -3,9 +3,10 @@ import { ChangeSetType, defineEntity, EventArgs, p } from '@mikro-orm/core';
 import { APP_PERMISSIONS } from '@rey-one/shared';
 import { Domain } from './iam-domain.entity';
 import { DomainMember } from './iam-domain-member.entity';
-import slugify from 'slugify';
 import { tenantFilterConfig } from './configs/doamin-tenant.filter';
 import { BaseEntitySchema } from './base.entity';
+import slugify from 'slugify';
+import randomstring from 'randomstring'
 
 export const DomainRoleEntitySchema = defineEntity({
   name: 'IAMUserRole',
@@ -30,7 +31,7 @@ export const DomainRoleEntitySchema = defineEntity({
   },
 });
 
-export class DomainRole extends DomainRoleEntitySchema.class {}
+export class DomainRole extends DomainRoleEntitySchema.class { }
 
 DomainRoleEntitySchema.setClass(DomainRole);
 DomainRoleEntitySchema.addHook('beforeCreate', handlerSave);
@@ -44,7 +45,10 @@ export function generateId(name: string) {
     trim: true,
   });
 
-  const suffix = crypto.randomUUID().slice(0, 7);
+  const suffix = randomstring.generate({
+    length: 7,
+    charset: 'alphabetic'
+  });
   return `${slug}-${suffix}`.toUpperCase();
 }
 

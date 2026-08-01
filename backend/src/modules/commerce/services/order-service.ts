@@ -63,8 +63,6 @@ export class OrderService {
   async createOrder(paymentType: OrderPaymentType, dto: CreateOrderDto, domainId = this.getDomainIdFromStore(), actorId: string = this.getActorIdFromStore()) {
     let customer: Party
 
-
-    console.log(paymentType, dto, domainId, actorId)
     if (dto.customer.id) {
       customer = await this.em.findOneOrFail(
         Party,
@@ -107,7 +105,7 @@ export class OrderService {
       },
       {
         failHandler: OrderNotFoundError,
-        populate: ['items'],
+        populate: ['items.product.info', 'createdBy.party', 'customer'],
       },
     );
 
@@ -128,6 +126,6 @@ export class OrderService {
     }
 
     await this.em.flush();
-    return order;
+    return order as OrderLoadedCustomerAndCreatedByAndItems
   }
 }

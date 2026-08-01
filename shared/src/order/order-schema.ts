@@ -46,7 +46,6 @@ export const OrderSchema = z.object({
 
 export const CreateOrderQuerySchema = z.object({
   paymentType: z.enum(ORDER_PAYMENT_TYPES),
-  // partyId: z.uuid(),
 });
 
 export const CreateOrderSchema = OrderSchema.pick({
