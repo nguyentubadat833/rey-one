@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Đang chuyển đến trang thanh toán...</title>
+</head>
+
+<body>
+  <p>Đang chuyển hướng tới trang thanh toán SePay...</p>
+
+  <form id="sepayForm" action="{{checkoutUrl}}" method="POST">
+    {{#each fields}}
+    {{#if this}}
+    <input type="hidden" name="{{@key}}" value="{{this}}" />
+    {{/if}}
+    {{/each}}
+  </form>
+
+  
+  <script>
+    document.getElementById('sepayForm').submit();
+  </script>
+</body>
+
+</html>

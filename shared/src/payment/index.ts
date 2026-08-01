@@ -1,6 +1,5 @@
 import { PaymentStatus } from "./payment-type";
 
-export * from "./payment-constant";
 export * from "./payment-type";
 
 export const PAYMENT_STATUS_TRANSITIONS: Record<

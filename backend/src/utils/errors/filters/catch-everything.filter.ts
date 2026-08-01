@@ -8,7 +8,7 @@ import { DriverException, UniqueConstraintViolationException } from '@mikro-orm/
 export class AppCatchEverythingFilter implements ExceptionFilter {
   private readonly logger = new Logger(AppCatchEverythingFilter.name);
 
-  constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
+  constructor(private readonly httpAdapterHost: HttpAdapterHost) { }
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const { httpAdapter } = this.httpAdapterHost;
@@ -88,7 +88,10 @@ const AppErrorHttpStatus: Record<ErrorKey, HttpStatus> = {
   PROPERTY_REQUIRED: HttpStatus.BAD_REQUEST,
   OBJECT_NOT_FOUND: HttpStatus.NOT_FOUND,
   FEATURE_NOT_IMPLEMENTED: HttpStatus.NOT_IMPLEMENTED,
-  ITEMS_REQUIRED: HttpStatus.BAD_REQUEST
+  ITEMS_REQUIRED: HttpStatus.BAD_REQUEST,
+  SEPAY_PAYMENT_ERROR: HttpStatus.BAD_GATEWAY,
+  SEPAY_UNSUPPORTED_CURRENCY: HttpStatus.BAD_REQUEST,
+  PAYMENT_METHOD_NOT_SUPPORTED: HttpStatus.BAD_REQUEST,
 };
 
 // const AppErrorHttpStatus: Record<ErrorType, HttpStatus> = {

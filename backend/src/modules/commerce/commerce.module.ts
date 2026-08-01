@@ -7,6 +7,8 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Order, OrderItem } from '@/persistence/entities/commerce-order.entity';
 import { Domain } from '@/persistence/entities/iam-domain.entity';
 import { DomainMiddleware } from '@/utils/middlewares/domain-middleware';
+import { PaymentStrategyRegistry } from './services/payment-service/provider-strategies/payment-strategy.registry';
+import { SepayGatewayPaymentBankTransferStrategy } from './services/payment-service/sepay/payment-gateway.bank-transfer.strategy';
 
 @Module({
   imports: [
@@ -15,7 +17,7 @@ import { DomainMiddleware } from '@/utils/middlewares/domain-middleware';
     }),
   ],
   controllers: [OrderController],
-  providers: [DomainCache, CommerceService, OrderService],
+  providers: [DomainCache, CommerceService, OrderService, PaymentStrategyRegistry, SepayGatewayPaymentBankTransferStrategy],
 })
 export class CommerceModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
