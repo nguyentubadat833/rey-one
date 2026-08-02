@@ -1,7 +1,7 @@
 import { defineEntity } from '@mikro-orm/core';
 import { uuidv7 } from 'uuidv7';
 import { Order } from './commerce-order.entity';
-import { CURRENCIES, PAYMENT_FLOW_TYPES, PAYMENT_PROVIDERS, PAYMENT_STATUS_TRANSITIONS, PAYMENT_STATUSES, PaymentStatus } from '@rey-one/shared';
+import { CURRENCIES, PAYMENT_FLOW_TYPES, PAYMENT_METHODS, PAYMENT_PROVIDERS, PAYMENT_STATUS_TRANSITIONS, PAYMENT_STATUSES, PaymentStatus } from '@rey-one/shared';
 import { AppError } from '@/utils/errors/app.error';
 import { BaseEntitySchema } from './base.entity';
 import { tenantFilterConfig } from './configs/doamin-tenant.filter';
@@ -18,8 +18,12 @@ const PaymentEntitySchema = defineEntity({
 
     amount: p.bigint().check((columns) => `${columns.amount} > 0`),
     currency: p.enum(CURRENCIES),
-    status: p.enum(PAYMENT_STATUSES).default('pending').index().accessor('_status'),
+    status: p
+      .enum(PAYMENT_STATUSES)
+      .index()
+      .accessor('_status'),
     provider: p.enum(PAYMENT_PROVIDERS),
+    providerMethod: p.enum(PAYMENT_METHODS),
     providerTransactionId: p.string().nullable().index().fieldName('provider_transaction_id'),
     displayMode: p.enum(PAYMENT_FLOW_TYPES).nullable().fieldName('display_mode'),
     rawPayload: p.json().nullable().fieldName('raw_payload'),

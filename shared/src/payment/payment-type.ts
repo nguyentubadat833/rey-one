@@ -28,6 +28,7 @@ export type PaymentStatus = typeof PAYMENT_STATUSES[number]
 export type PaymentProvider = typeof PAYMENT_PROVIDERS[number]
 export type PaymentMethod = typeof PAYMENT_METHODS[number]
 export type SepayPaymentMethod = typeof SEPAY_PAYMENT_METHODS[number]
+export type PaymentFlowType = typeof PAYMENT_FLOW_TYPES[number]
 
 export type InitPaymentConfig = {
     successUrl?: string;

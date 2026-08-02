@@ -7,6 +7,7 @@ import { AppError } from '@/utils/errors/app.error';
 
 @Injectable()
 export class SepayGatewayPaymentBankTransferStrategy extends SepayPaymentBaseStrategy implements PaymentStrategy {
+  
   readonly provider: PaymentProvider = 'sepay';
   readonly method: PaymentMethod = 'sepay_gateway_bank_transfer';
 
@@ -34,10 +35,10 @@ export class SepayGatewayPaymentBankTransferStrategy extends SepayPaymentBaseStr
     const checkoutUrl = this.client.checkout.initCheckoutUrl();
 
     return {
-      provider: this.provider,
-      method: this.method,
+      // provider: this.provider,
+      // method: this.method,
       checkoutUrl,
       fields, // dùng để build HTML form auto-submit tới SePay
-    };
+    }
   }
 }

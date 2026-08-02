@@ -7,11 +7,15 @@ import { AppError } from '@/utils/errors/app.error';
 
 @Injectable()
 export class PaymentStrategyRegistry {
+
+  private readonly sepayGatewayStrategy: SepayGatewayPaymentBankTransferStrategy
+  private readonly sepayQrcodeStrategy: SepayQRcodeBankTransferStrategy
+  
   private readonly strategies = new Map<PaymentMethod, PaymentStrategy>();
 
-  constructor(sepayGatewayStrategy: SepayGatewayPaymentBankTransferStrategy, sepayQrcodeStrategy: SepayQRcodeBankTransferStrategy) {
-    this.strategies.set('sepay_gateway_bank_transfer', sepayGatewayStrategy);
-    this.strategies.set('sepay_qrcode_bank_transfer', sepayQrcodeStrategy)
+  constructor() {
+    this.strategies.set('sepay_gateway_bank_transfer', this.sepayGatewayStrategy);
+    this.strategies.set('sepay_qrcode_bank_transfer', this.sepayQrcodeStrategy)
   }
 
   resolve(method: PaymentMethod): PaymentStrategy {

@@ -10,6 +10,7 @@ export interface SepayPaymentBaseStrategy {
 
 @Injectable()
 export abstract class SepayPaymentBaseStrategy {
+  
   constructor(@Inject(paymentConfig.KEY) readonly config: ConfigType<typeof paymentConfig>) {
     this.client = new SePayPgClient({
       env: this.config.sepay.env,

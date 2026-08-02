@@ -16,10 +16,6 @@ export class SepayQRcodeBankTransferStrategy extends SepayPaymentBaseStrategy im
             throw new AppError('SEPAY_UNSUPPORTED_CURRENCY');
         }
 
-        // if (order.payment?.method !== this.method) {
-        //   void this.cancelOrder(order.id);
-        // }
-
         const paymentCode = `${this.config.contentPrefix}${order.code}`;
         const amount = Number(order.totalAmount);
 

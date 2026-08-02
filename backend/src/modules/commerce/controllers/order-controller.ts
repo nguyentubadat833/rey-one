@@ -36,7 +36,7 @@ export class OrderController {
 
   @RequirePermission('order:read')
   @Get(':orderId')
-  async getOrder(@Param('orderId') orderId) {
+  async getOrder(@Param('orderId') orderId: string) {
     return await this.em.findOneOrFail(Order,
       {
         id: orderId
