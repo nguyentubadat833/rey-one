@@ -11,5 +11,6 @@ export const AUTH_METADATA = {
 } as const;
 
 export const SERVICE_TOKENS = {
+  SEPAY_CLIENT: Symbol("SEPAY_CLIENT"),
   DOAMIN_SERVICE: Symbol('DOMAIN_SERVICE'),
 } as const;

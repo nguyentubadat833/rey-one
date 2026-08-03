@@ -1,6 +1,7 @@
 import { PaymentStatus } from "./payment-type";
 
 export * from "./payment-type";
+export * from './payment.schema'
 
 export const PAYMENT_STATUS_TRANSITIONS: Record<
   PaymentStatus,

@@ -13,7 +13,7 @@ import { AppError } from '@/utils/errors/app.error';
 import { OrderPaymentType } from '@rey-one/shared';
 import { PartyNotFoundError } from '@/utils/errors/party.error';
 import { User } from '@/persistence/entities/iam-user.entity';
-import { OrderLoadedCustomerAndCreatedByAndItems } from '@/persistence/types/order-type';
+import { OrderLoadedCustomerAndCreatedByAndItems, OrderLoadedCustomerAndDomainAndPayments } from '@/persistence/types/order-type';
 
 @Injectable()
 export class OrderService {
@@ -21,14 +21,14 @@ export class OrderService {
     private readonly commerceService: CommerceService,
     private readonly em: EntityManager,
     private readonly clsService: ClsService<AppClsStore>,
-  ) { }
+  ) {}
 
   private getDomainIdFromStore() {
     return this.clsService.get('domainId');
   }
 
   private getActorIdFromStore() {
-    return this.clsService.get('actor.id')
+    return this.clsService.get('actor.id');
   }
 
   private async orderItemsFromRequest(order: Order, items: AddOrderItemsDto[]): Promise<OrderItem[]> {
@@ -61,7 +61,11 @@ export class OrderService {
   }
 
   async createOrder(paymentType: OrderPaymentType, dto: CreateOrderDto, domainId = this.getDomainIdFromStore(), actorId: string = this.getActorIdFromStore()) {
-    let customer: Party
+    if (paymentType !== 'one_time') {
+      throw new AppError('ORDER_PAYMENT_NOT_SUPPORTED');
+    }
+
+    let customer: Party;
 
     if (dto.customer.id) {
       customer = await this.em.findOneOrFail(
@@ -74,8 +78,8 @@ export class OrderService {
       this.commerceService.ensurePartyCanOrder(customer);
     } else {
       customer = this.em.create(Party, {
-        name: dto.customer.name
-      })
+        name: dto.customer.name,
+      });
     }
 
     const order = this.em.create(Order, {
@@ -94,7 +98,7 @@ export class OrderService {
     await this.em.flush();
     await this.em.populate(order, ['createdBy.party']);
 
-    return order as OrderLoadedCustomerAndCreatedByAndItems
+    return order as OrderLoadedCustomerAndCreatedByAndItems;
   }
 
   async updateOrder(orderId: string, dto: UpdateOrderDto) {
@@ -126,6 +130,19 @@ export class OrderService {
     }
 
     await this.em.flush();
-    return order as OrderLoadedCustomerAndCreatedByAndItems
+    return order as OrderLoadedCustomerAndCreatedByAndItems;
+  }
+
+  async getOrderById(id: string): Promise<OrderLoadedCustomerAndDomainAndPayments> {
+    return await this.em.findOneOrFail(
+      Order,
+      {
+        id,
+      },
+      {
+        failHandler: OrderNotFoundError,
+        populate: ['domain', 'customer', 'payments'],
+      },
+    );
   }
 }

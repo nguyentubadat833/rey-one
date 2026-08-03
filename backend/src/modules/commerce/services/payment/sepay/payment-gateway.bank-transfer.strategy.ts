@@ -1,44 +1,62 @@
-import { Injectable } from '@nestjs/common';
-import { SepayPaymentBaseStrategy } from './sepay-base.strategy';
-import { InitPaymentConfig, PaymentMethod, PaymentProvider } from '@rey-one/shared';
+import { Inject, Injectable } from '@nestjs/common';
+import { InitPaymentInput, PaymentMethod } from '@rey-one/shared';
 import { Order } from '@/persistence/entities/commerce-order.entity';
-import { PaymentStrategy, SepayGatewayPaymentInitResult } from '../provider-strategies/payment-strategy.interface';
+import { PaymentStrategy, SepayGatewayStrategy } from '../provider-strategies/payment-strategy';
 import { AppError } from '@/utils/errors/app.error';
+import { SePayPgClient } from 'sepay-pg-node';
+import { SERVICE_TOKENS } from '@/utils/types/tokens';
+import { paymentConfig } from '@/configs/payment.config';
+import type { ConfigType } from '@nestjs/config';
+import { PaymentService } from '../payment-service';
+import { OrderService } from '../../order-service';
 
 @Injectable()
-export class SepayGatewayPaymentBankTransferStrategy extends SepayPaymentBaseStrategy implements PaymentStrategy {
-  
-  readonly provider: PaymentProvider = 'sepay';
-  readonly method: PaymentMethod = 'sepay_gateway_bank_transfer';
+export class SepayGatewayPaymentBankTransferStrategy implements PaymentStrategy {
+  readonly method: PaymentMethod = 'sepay:gateway:bank-transfer';
 
-  async initPayment(order: Order, config: InitPaymentConfig): Promise<SepayGatewayPaymentInitResult> {
+  constructor(
+    @Inject(SERVICE_TOKENS.SEPAY_CLIENT) private readonly sepayClient: SePayPgClient,
+    @Inject(paymentConfig.KEY) readonly config: ConfigType<typeof paymentConfig>,
+    private readonly orderService: OrderService,
+    private readonly paymentService: PaymentService,
+  ) {}
+
+  async initPayment(params: InitPaymentInput): Promise<SepayGatewayStrategy> {
+    const order = await this.orderService.getOrderById(params.orderId);
+    const orderCode = order.code;
+    const customerCode = order.customer.code
+
     if (order.currency !== 'VND') {
       throw new AppError('SEPAY_UNSUPPORTED_CURRENCY');
     }
 
-    const content = `DH${order.code}`;
+    const payment = await this.paymentService.createPayment({
+      method: this.method,
+      order,
+    });
+    const paymentCode = payment.code
 
-    const fields = this.client.checkout.initOneTimePaymentFields({
-      customer_id: order.customer.id,
-      order_amount: Number(order.totalAmount),
+    const fields = this.sepayClient.checkout.initOneTimePaymentFields({
+      customer_id: customerCode,
+      order_amount: Number(payment.amount),
       merchant: this.config.sepay.merchantId,
-      currency: String(order.currency).toUpperCase(),
+      currency: payment.currency,
       operation: 'PURCHASE',
-      order_description: content,
-      order_invoice_number: String(order.code),
+      order_description: `DH${orderCode}`,
+      order_invoice_number: orderCode,
       payment_method: 'BANK_TRANSFER',
-      success_url: config.successUrl,
-      cancel_url: config.cancelUrl,
-      error_url: config.errorUrl,
+      success_url: params.successUrl,
+      cancel_url: params.cancelUrl,
+      error_url: params.errorUrl,
     });
 
-    const checkoutUrl = this.client.checkout.initCheckoutUrl();
+    const checkoutUrl = this.sepayClient.checkout.initCheckoutUrl();
 
     return {
-      // provider: this.provider,
-      // method: this.method,
+      orderCode,
+      paymentCode,
       checkoutUrl,
       fields, // dùng để build HTML form auto-submit tới SePay
-    }
+    };
   }
 }

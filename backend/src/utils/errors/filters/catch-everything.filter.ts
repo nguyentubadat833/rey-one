@@ -8,7 +8,7 @@ import { DriverException, UniqueConstraintViolationException } from '@mikro-orm/
 export class AppCatchEverythingFilter implements ExceptionFilter {
   private readonly logger = new Logger(AppCatchEverythingFilter.name);
 
-  constructor(private readonly httpAdapterHost: HttpAdapterHost) { }
+  constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const { httpAdapter } = this.httpAdapterHost;
@@ -82,7 +82,9 @@ const AppErrorHttpStatus: Record<ErrorKey, HttpStatus> = {
   SEPAY_PAYMENT_ERROR: HttpStatus.BAD_GATEWAY,
   SEPAY_UNSUPPORTED_CURRENCY: HttpStatus.BAD_REQUEST,
   PAYMENT_METHOD_NOT_SUPPORTED: HttpStatus.BAD_REQUEST,
+  INVALID_PAYMENT_STATUS: HttpStatus.CONFLICT,
   ORDER_PAYMENT_NOT_SUPPORTED: HttpStatus.BAD_REQUEST,
+  INVALID_ORDER_STATUS: HttpStatus.CONFLICT,
   INVALID_CREDENTIAL: HttpStatus.UNAUTHORIZED,
   INVALID_PERMISSION: HttpStatus.BAD_REQUEST,
   INVALID_STATUS: HttpStatus.CONFLICT,
@@ -92,7 +94,7 @@ const AppErrorHttpStatus: Record<ErrorKey, HttpStatus> = {
   PROPERTY_NOT_INITIALIZED: HttpStatus.CONFLICT,
   PROPERTY_REQUIRED: HttpStatus.BAD_REQUEST,
   OBJECT_NOT_FOUND: HttpStatus.NOT_FOUND,
-  ITEMS_REQUIRED: HttpStatus.BAD_REQUEST
+  ITEMS_REQUIRED: HttpStatus.BAD_REQUEST,
 };
 
 // const AppErrorHttpStatus: Record<ErrorType, HttpStatus> = {

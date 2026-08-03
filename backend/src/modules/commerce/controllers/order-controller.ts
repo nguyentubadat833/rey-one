@@ -1,7 +1,7 @@
 import { RequireAuth, RequirePermission, RequireTenant } from '@/utils/decorators/auth.decorator';
 import { ApiDomainHeader } from '@/utils/decorators/utils.decorator';
 import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { OrderService } from '../services/order-service';
 import { CreateOrderDto, CreateOrderQueryDto, UpdateOrderDto } from '../dtos/order-dto';
 import { OrderMapper } from '../mappers/order-mapper';
@@ -17,9 +17,10 @@ import { OrderNotFoundError } from '@/utils/errors/order.error';
 export class OrderController {
   constructor(
     private readonly em: EntityManager,
-    private readonly orderService: OrderService
-  ) { }
+    private readonly orderService: OrderService,
+  ) {}
 
+  @ApiOperation({ summary: 'Create order' })
   @RequirePermission('order:manage')
   @Post()
   async createOrder(@Query() query: CreateOrderQueryDto, @Body() dto: CreateOrderDto) {
@@ -27,6 +28,7 @@ export class OrderController {
     return OrderMapper.toOrderView(order);
   }
 
+  @ApiOperation({ summary: 'Update order' })
   @RequirePermission('order:manage')
   @Patch(':orderId')
   async updateOrder(@Param('orderId') orderId: string, dto: UpdateOrderDto) {
@@ -34,17 +36,21 @@ export class OrderController {
     return OrderMapper.toOrderView(order);
   }
 
+  @ApiOperation({ summary: 'Get order' })
   @RequirePermission('order:read')
   @Get(':orderId')
   async getOrder(@Param('orderId') orderId: string) {
-    return await this.em.findOneOrFail(Order,
-      {
-        id: orderId
-      },
-      {
-        failHandler: OrderNotFoundError,
-        populate: ['customer', 'createdBy.party', 'items.product.info']
-      }
-    ).then(OrderMapper.toOrderView)
+    return await this.em
+      .findOneOrFail(
+        Order,
+        {
+          id: orderId,
+        },
+        {
+          failHandler: OrderNotFoundError,
+          populate: ['customer', 'createdBy.party', 'items.product.info'],
+        },
+      )
+      .then(OrderMapper.toOrderView);
   }
 }

@@ -18,7 +18,7 @@ const OrderEntitySchema = defineEntity({
   filters: tenantFilterConfig,
   properties: (p) => ({
     id: p.uuid().primary().onCreate(uuidv7),
-    code: p.string().length(12).unique().onCreate(generateOrderCode),
+    code: p.string().length(15).unique().onCreate(generateOrderCode),
     paymentType: p.enum(ORDER_PAYMENT_TYPES).index().default('one_time').fieldName('payment_type'),
     status: p.enum(ORDER_STATUSES).default('draft').index().accessor('_status'),
 
@@ -131,10 +131,12 @@ function saveHandler(args: EventArgs<Order>) {
 }
 
 function generateOrderCode(){
-  return randomstring.generate({
+  const code = randomstring.generate({
     length: 12,
-    charset: '123456789QWERTYUPASDFGHJKLMNBVCXZ'
+    charset: '23456789QWERTYUPASDFGHJKLMNBVCXZ'
   })
+  
+  return `RDR${code}`
 }
 
 // ============ ORDER ITEM ============

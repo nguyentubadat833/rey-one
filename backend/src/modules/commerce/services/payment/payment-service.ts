@@ -1,54 +1,57 @@
-import { EntityManager } from "@mikro-orm/core";
-import { Injectable } from "@nestjs/common";
-import { Currency, PaymentFlowType, PaymentMethod, PaymentProvider } from "@rey-one/shared";
-import { CommerceService } from "../commerce-service";
-import { Order } from "@/persistence/entities/commerce-order.entity";
-import { OrderNotFoundError } from "@/utils/errors/order.error";
-import { Payment } from "@/persistence/entities/commerce-payment.entity";
-import { AppError } from "@/utils/errors/app.error";
+import { EntityManager } from '@mikro-orm/core';
+import { Injectable } from '@nestjs/common';
+import { PaymentMethod } from '@rey-one/shared';
+import { CommerceService } from '../commerce-service';
+import { Payment } from '@/persistence/entities/commerce-payment.entity';
+import { OrderLoadedCustomerAndDomainAndPayments } from '@/persistence/types/order-type';
+import { PaymentLoadedOrder } from '@/persistence/types/payment-type';
 
 export interface CreatePaymentInput {
-    orderId: string
-    provider: PaymentProvider
-    method: PaymentMethod
-    displayMode: PaymentFlowType
+  method: PaymentMethod;
+  order: OrderLoadedCustomerAndDomainAndPayments;
+  //   amount?: bigint;  nếu không phải order payment === 'one_time' thì phải có amount riêng
 }
 
 @Injectable()
 export class PaymentService {
-    constructor(
-        private readonly commerceService: CommerceService,
-        private readonly em: EntityManager
-    ) { }
+  constructor(
+    private readonly commerceService: CommerceService,
+    private readonly em: EntityManager,
+  ) {}
 
-    async createPayment(input: CreatePaymentInput) {
-        const order = await this.em.findOneOrFail(Order,
-            {
-                id: input.orderId
-            },
-            {
-                failHandler: OrderNotFoundError,
-                populate: ['domain', 'customer']
-            }
-        )
-        this.commerceService.ensureOrderCanBePayment(order)
+  async createPayment(input: CreatePaymentInput): Promise<Payment> {
+    const order = input.order;
+    this.commerceService.ensureOrderCanBePayment(order);
 
-        if(order.paymentType !== 'one_time'){
-            throw new AppError('ORDER_PAYMENT_NOT_SUPPORTED')
-        }
+    let payment = order.payments.getItems().find((payment) => payment.status === 'pending');
 
-        const payment = this.em.create(Payment, {
-            order: order,
-            amount: order.totalAmount,
-            currency: order.currency,
-            provider: input.provider,
-            providerMethod: input.method,
-            displayMode: input.displayMode,
-            status: 'pending',
-            rawPayload: undefined
-        })
-
-        await this.em.flush()
-        return payment
+    if (payment) {
+      this.em.assign(payment, {
+        method: input.method,
+      });
+    } else {
+      payment = this.em.create(Payment, {
+        order: input.order,
+        amount: order.totalAmount, // amount có thể  không phải order,totalAmount nếu là không phải one_time
+        currency: order.currency,
+        method: input.method,
+        status: 'pending',
+      });
     }
+
+    await this.em.flush();
+    return payment;
+  }
+
+  async getPaymentsByOrderId(orderId: string): Promise<PaymentLoadedOrder[]> {
+    return await this.em.find(
+      Payment,
+      {
+        order: orderId,
+      },
+      {
+        populate: ['order'],
+      },
+    );
+  }
 }

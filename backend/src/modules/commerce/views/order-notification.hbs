@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{title}}</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #f4f6fb;
+      --card-bg: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --primary: #2563eb;
+      --border: #e5e7eb;
+      --shadow: 0 20px 50px rgba(15, 23, 42, .08);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+
+      font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+
+      background: linear-gradient(180deg, #f8fafc, #eef2ff);
+    }
+
+    .card {
+      width: 100%;
+      max-width: 460px;
+      background: var(--card-bg);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .content {
+      padding: 40px 32px;
+      text-align: center;
+    }
+
+    .icon {
+      width: 84px;
+      height: 84px;
+      margin: 0 auto 24px;
+
+      border-radius: 999px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      font-size: 40px;
+      font-weight: 700;
+
+      color: {{iconColor}};
+      background: {{iconBackground}};
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-size: 24px;
+      color: var(--text);
+    }
+
+    .message {
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    .footer {
+      padding: 24px 32px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .countdown {
+      margin-bottom: 18px;
+      color: #9ca3af;
+      font-size: 14px;
+    }
+
+    button {
+      width: 100%;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+
+      background: var(--primary);
+      color: white;
+
+      font-size: 15px;
+      font-weight: 600;
+
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    button:active {
+      transform: scale(.98);
+    }
+
+    @media (max-width: 480px) {
+      .content {
+        padding: 32px 24px;
+      }
+
+      .footer {
+        padding: 20px 24px;
+      }
+
+      h1 {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="card">
+
+    <div class="content">
+
+      <div
+        class="icon"
+        style="color: {{iconColor}}; background: {{iconBackground}};"
+      >
+        {{icon}}
+      </div>
+
+      <h1>{{title}}</h1>
+
+      <div class="message">
+        {{message}}
+      </div>
+
+    </div>
+
+    <div class="footer">
+
+      <div class="countdown">
+        Trang sẽ tự động đóng sau
+        <strong><span id="seconds">30</span></strong>
+        giây.
+      </div>
+
+      <button onclick="closePage()">
+        Đóng ngay
+      </button>
+
+    </div>
+
+  </div>
+
+  <script>
+    let seconds = 30;
+    const label = document.getElementById("seconds");
+
+    const timer = setInterval(() => {
+      seconds--;
+
+      if (seconds <= 0) {
+        clearInterval(timer);
+        closePage();
+        return;
+      }
+
+      label.textContent = seconds;
+    }, 1000);
+
+    function closePage() {
+      // Nếu là popup
+      if (window.opener && !window.opener.closed) {
+        window.close();
+        return;
+      }
+
+      // Quay lại trang trước
+      if (window.history.length > 1) {
+        history.back();
+        return;
+      }
+
+      // Fallback
+      window.location.href = "/";
+    }
+  </script>
+
+</body>
+
+</html>
