@@ -1,4 +1,4 @@
-import { z } from "zod";
+export * from "./util-schema";
 export * from "./util-type";
 
 // export const JSONSchema: z.ZodType<

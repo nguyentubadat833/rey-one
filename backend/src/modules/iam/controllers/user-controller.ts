@@ -1,9 +1,11 @@
 import { UserSummary } from '@/persistence/entities/query-entities/user-query';
 import { RequireAdmin, RequireAuth } from '@/utils/decorators/auth.decorator';
+import { PaginationQueryDto } from '@/utils/dtos/utils-dto';
+import { ResponseMapper } from '@/utils/mappers/response-mapper';
 import { EntityManager } from '@mikro-orm/core';
-import { Controller, Get, NotFoundException, Param } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { UserSummaryView } from '@rey-one/shared';
+import { UserSummariesView, UserSummaryView } from '@rey-one/shared';
 
 @RequireAuth()
 @ApiTags('IAM / Users')
@@ -14,8 +16,17 @@ export class UserController {
   @RequireAdmin()
   @ApiOperation({ summary: 'User summaries' })
   @Get()
-  async summaries(): Promise<UserSummaryView[]> {
-    return this.em.findAll(UserSummary);
+  async summaries(@Query() { limit, page }: PaginationQueryDto): Promise<UserSummariesView> {
+    const [data, total] = await this.em.findAndCount(
+      UserSummary,
+      {},
+      {
+        limit,
+        offset: (page - 1) * limit,
+      },
+    );
+
+    return ResponseMapper.toPaginatedResponse(data, total, page, limit);
   }
 
   @RequireAdmin()

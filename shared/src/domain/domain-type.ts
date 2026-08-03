@@ -5,6 +5,7 @@ import {
   DomainSchema,
 } from "./domain-schema";
 import { UserView } from "../user";
+import { PaginatedResponse } from "../utils";
 
 // Domain
 export type DomainView = z.infer<typeof DomainSchema>;
@@ -13,6 +14,7 @@ export type DomainSummaryView = DomainView & {
   memberCount: number;
   productCount: number;
 };
+export type DomainSummariesView = PaginatedResponse<DomainSummaryView>
 
 // Domain role
 export type DomainRoleView = z.infer<typeof DomainRoleSchema>;

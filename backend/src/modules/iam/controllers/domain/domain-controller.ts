@@ -1,5 +1,5 @@
 import { EntityManager } from '@mikro-orm/core';
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RequireAdmin, RequireAuth, RequirePermission } from '@/utils/decorators/auth.decorator';
 import { CreateDomainDto, UpdateDomainDto } from '../../dtos/domain-dto';
@@ -7,9 +7,11 @@ import { Domain } from '@/persistence/entities/iam-domain.entity';
 import { DomainMapper } from '../../mappers/domain-mapper';
 import { DOMAIN_ID_PARAMETER } from '@/utils/types/utils';
 import { DomainSummary } from '@/persistence/entities/query-entities/domain-query';
-import { DomainSummaryView, DomainWithIAMView } from '@rey-one/shared';
+import { DomainSummaryView, DomainSummariesView, DomainWithIAMView } from '@rey-one/shared';
 import { DomainService } from '../../services/domain/domain-service';
 import { DomainNotFoundError } from '@/utils/errors/domain.error';
+import { PaginationQueryDto } from '@/utils/dtos/utils-dto';
+import { ResponseMapper } from '@/utils/mappers/response-mapper';
 
 @RequireAuth()
 @ApiTags('IAM / Domains')
@@ -23,8 +25,17 @@ export class DomainController {
   @RequireAdmin()
   @ApiOperation({ summary: 'Domain summaries' })
   @Get()
-  async getSummaries(): Promise<DomainSummaryView[]> {
-    return this.em.findAll(DomainSummary);
+  async getSummaries(@Query() { limit, page }: PaginationQueryDto): Promise<DomainSummariesView> {
+    const [data, total] = await this.em.findAndCount(
+      DomainSummary,
+      {},
+      {
+        limit,
+        offset: (page - 1) * limit,
+      },
+    );
+
+    return ResponseMapper.toPaginatedResponse(data, total, page, limit);
   }
 
   @RequireAdmin()

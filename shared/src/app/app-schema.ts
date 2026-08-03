@@ -1,7 +1,7 @@
 import z from "zod"
 
 export const apiMetaSchema = z.object({
-    time: z.ZodISODateTime,
+    time: z.iso.datetime(),
     path: z.string()
 })
 

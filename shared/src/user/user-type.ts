@@ -6,6 +6,7 @@ import {
   USER_STATUSES,
   OAUTH_PROVIDERS,
 } from "./user-constant";
+import { PaginatedResponse } from "../utils";
 
 export type UserType = (typeof USER_TYPES)[number];
 export type UserProvider = (typeof USER_PROVIDERS)[number];
@@ -16,6 +17,7 @@ export type UserView = z.infer<typeof UserSchema>;
 export type UserSummaryView = UserView & {
   memberCount: number;
 };
+export type UserSummariesView = PaginatedResponse<UserSummaryView>;
 
 export type UserLoginResponse = {
   accessToken: string;

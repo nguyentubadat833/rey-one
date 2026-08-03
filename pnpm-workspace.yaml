@@ -1,6 +1,7 @@
 packages:
   - "backend"
   - "shared"
+  - "hub"
 allowBuilds:
   "@nestjs/core": true
   "@parcel/watcher": true
