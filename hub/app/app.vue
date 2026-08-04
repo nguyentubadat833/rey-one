@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { ToasterProps } from '@nuxt/ui';
+import type { ToasterProps } from '@nuxt/ui'
+
 useHead({
   meta: [
     { name: 'viewport', content: 'width=device-width, initial-scale=1' }
@@ -12,15 +13,15 @@ useHead({
   }
 })
 
-// const title = 'Rey One'
-// const description = 'SaaS'
+const title = 'R-One'
+const description = 'An all-in-one platform for managing content, digital products, courses, users, and online payments.'
 
-// useSeoMeta({
-//   title,
-//   description,
-//   ogTitle: title,
-//   ogDescription: description,
-// })
+useSeoMeta({
+  title,
+  description,
+  ogTitle: title,
+  ogDescription: description
+})
 
 const toaster = { position: 'top-center' } satisfies ToasterProps
 </script>

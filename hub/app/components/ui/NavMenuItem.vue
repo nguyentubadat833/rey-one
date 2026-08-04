@@ -1,13 +1,6 @@
 <script setup lang="ts">
 import useUI from '~/composables/ui'
-
-
-type MenuItem = {
-  label: string
-  icon: string
-  to?: string
-  children?: MenuItem[]
-}
+import type { MenuItem } from '~/types/ui-types';
 
 const props = defineProps<{
   item: MenuItem
@@ -84,58 +77,38 @@ function afterLeave(el: Element) {
 
 <template>
   <!-- Có children → expandable -->
-  <div v-if="item.children">
-    <button
-      :class="[
+  <div v-if="!item.hidden">
+    <div v-if="item.children">
+      <button :class="[
         'flex w-full items-center justify-between rounded-xl px-4 py-3 transition',
         hoverNavItem,
-      ]"
-      :style="{ paddingLeft: `${(depth + 1) * 16}px` }"
-      @click="toggle(item)"
-    >
-      <div class="flex items-center gap-3">
-        <UIcon :name="item.icon" class="text-lg shrink-0" />
-        <span v-if="!collapsed">{{ item.label }}</span>
-      </div>
+      ]" :style="{ paddingLeft: `${(depth + 1) * 16}px` }" @click="toggle(item)">
+        <div class="flex items-center gap-3">
+          <UIcon :name="item.icon" class="text-lg shrink-0" />
+          <span v-if="!collapsed">{{ item.label }}</span>
+        </div>
 
-      <UIcon
-        v-if="!collapsed"
-        name="i-lucide-chevron-right"
-        :class="['transition-transform duration-200', isExpanded(item) && 'rotate-90']"
-      />
-    </button>
+        <UIcon v-if="!collapsed" name="i-lucide-chevron-right"
+          :class="['transition-transform duration-200', isExpanded(item) && 'rotate-90']" />
+      </button>
 
-    <Transition
-      @before-enter="beforeEnter"
-      @enter="enter"
-      @after-enter="afterEnter"
-      @leave="leave"
-      @after-leave="afterLeave"
-    >
-      <div v-if="isExpanded(item) && !collapsed" class="overflow-hidden">
-        <!-- Đệ quy — gọi lại chính nó cho từng child -->
-        <NavMenuItem
-          v-for="child in item.children"
-          :key="child.label"
-          :item="child"
-          :collapsed="collapsed"
-          :depth="depth + 1"
-        />
-      </div>
-    </Transition>
-  </div>
+      <Transition @before-enter="beforeEnter" @enter="enter" @after-enter="afterEnter" @leave="leave"
+        @after-leave="afterLeave">
+        <div v-if="isExpanded(item) && !collapsed" class="overflow-hidden">
+          <!-- Đệ quy — gọi lại chính nó cho từng child -->
+          <NavMenuItem v-for="child in item.children" :key="child.label" :item="child" :collapsed="collapsed"
+            :depth="depth + 1" />
+        </div>
+      </Transition>
+    </div>
 
-  <!-- Không có children → RouterLink -->
-  <RouterLink
-    v-else
-    :to="item.to!"
-    :class="[
+    <!-- Không có children → RouterLink -->
+    <RouterLink v-else :to="item.to!" :class="[
       'flex items-center gap-3 rounded-xl px-4 py-3 transition',
       isActive(item.to) ? 'bg-primary text-white' : hoverNavItem,
-    ]"
-    :style="{ paddingLeft: `${(depth + 1) * 16}px` }"
-  >
-    <UIcon :name="item.icon" class="text-lg shrink-0" />
-    <span v-if="!collapsed">{{ item.label }}</span>
-  </RouterLink>
+    ]" :style="{ paddingLeft: `${(depth + 1) * 16}px` }">
+      <UIcon :name="item.icon" class="text-lg shrink-0" />
+      <span v-if="!collapsed">{{ item.label }}</span>
+    </RouterLink>
+  </div>
 </template>

@@ -1,4 +1,4 @@
-import z from "zod";
+import { z } from "zod";
 import { zPhoneNumber } from "../phone/phone-schema";
 import { USER_STATUSES, USER_TYPES } from "./user-constant";
 
@@ -8,15 +8,15 @@ const phoneSchema = zPhoneNumber("VN").nullable().optional();
 const imageSchema = z.url().nullable().optional();
 
 export const BaseLoginSchema = z.object({
-  identity: z.string(),
-  password: z.string(),
+  identity: z.string({error: "Identity is required"}),
+  password: z.string({error: "Password is required"}),
 });
 
 export const UserSchema = z.object({
-  id: z.string(),
-  type: z.enum(USER_TYPES),
-  status: z.enum(USER_STATUSES),
-  name: z.string(),
+  id: z.string().readonly(),
+  type: z.enum(USER_TYPES, {error: "User type is required"}),
+  status: z.enum(USER_STATUSES).default('pending'),
+  name: z.string({error: "Name is required"}),
   username: usernameSchema,
   phone: phoneSchema,
   email: emailSchema,

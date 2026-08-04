@@ -2,7 +2,6 @@
 import AppHeader from '~/components/ui/AppHeader.vue';
 import AppSidebar from '~/components/ui/AppSidebar.vue';
 
-
 </script>
 
 <template>

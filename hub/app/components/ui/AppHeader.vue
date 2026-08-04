@@ -3,19 +3,18 @@ import useAuth from '~/composables/auth';
 import useUI from '~/composables/ui';
 
 const { isMobileOrTablet } = useDevice()
-const { mobileSidebarOpen } = useUI();
+const { mobileSidebarOpen,toggleSidebar: toogle } = useUI();
 const { authState, logout } = useAuth()
-
 const router = useRouter()
-
 
 const headerTitle = computed(() => router.currentRoute.value.meta?.title || 'Hub Management Platform');
 
 function toggleSidebar() {
+
   if (isMobileOrTablet) {
     mobileSidebarOpen.value = true;
   } else {
-    toggleSidebar();
+    toogle();
   }
 }
 </script>

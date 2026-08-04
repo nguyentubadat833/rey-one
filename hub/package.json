@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "update:shared": "pnpm up @rey-one/shared",
     "build": "nuxt build",
     "dev": "nuxt dev",
     "preview": "nuxt preview",
@@ -16,6 +17,8 @@
     "@nuxt/ui": "^4.10.0",
     "@nuxtjs/device": "4.0.0",
     "@rey-one/shared": "file:../shared",
+    "@vueuse/core": "^14.4.0",
+    "@vueuse/nuxt": "^14.4.0",
     "nuxt": "^4.5.1",
     "tailwindcss": "^4.3.3",
     "zod": "^4.4.3"

@@ -1,42 +1,76 @@
-import type { BaseLoginSchema, UserLoginResponse, UserView } from "@rey-one/shared";
+import {
+  BaseLoginSchema,
+  type ApiResponse,
+  type UserLoginResponse,
+  type UserView,
+} from "@rey-one/shared";
 import type z from "zod";
+import { useGuestAPI, useAPI } from "./api";
+
+type BaseLoginForm = z.input<typeof BaseLoginSchema>;
 
 const authState = reactive({
-    user: null as null | UserView,
-    authenticated: false
-})
+  user: null as null | UserView,
+  authenticated: false,
+});
+
+const authFormState = reactive<Partial<BaseLoginForm>>({});
 
 export default function useAuth() {
+  function setAuth(user: UserView) {
+    authState.authenticated = true;
+    authState.user = user;
+  }
 
-    const { $clientApi } = useNuxtApp()
+  function clearAuth() {
+    authState.user = null;
+    authState.authenticated = false;
+  }
 
-    function setAuth(user: UserView) {
-        authState.authenticated = true
-        authState.user = user
+  async function login(
+    onSuccess: () => Promise<void> = () => Promise.resolve(),
+  ) {
+    const payload = zodValidate(BaseLoginSchema, authFormState);
+    if (payload) {
+      const response = await useGuestAPI<ApiResponse<UserLoginResponse>>(
+        "/auth/login",
+        {
+          method: "POST",
+          body: payload
+        },
+      );
+
+      setAuth(response.data.user);
+      await onSuccess();
+    }
+  }
+
+  async function loadAuthState() {
+    if (!authState.authenticated) {
+      const { data: res } = await useAPI<ApiResponse<UserView>>("/auth", {
+        retry: 3,
+        retryDelay: 4000,
+      });
+      if (res.value) {
+        setAuth(res.value.data);
+      }
     }
 
-    function clearAuth() {
-        authState.user = null
-        authState.authenticated = false
-    }
+    return authState;
+  }
 
-    async function login(req: z.input<typeof BaseLoginSchema>) {
-        const loginResult = await $clientApi<UserLoginResponse>('/auth/login', {
-            method: 'post',
-            body: req
-        })
+  function logout() {
+    clearAuth();
+  }
 
-        setAuth(loginResult.user)
-    }
+  return {
+    authState,
+    authFormState,
 
-    function logout() {
-        clearAuth()
-    }
-
-    return {
-        authState,
-
-        login,
-        logout
-    }
+    login,
+    logout,
+    loadAuthState,
+  };
 }
+
+// export default createSharedComposable(_useAuth)

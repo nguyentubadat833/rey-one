@@ -3,14 +3,20 @@ import { computed } from "vue";
 import useAuth from "~/composables/auth";
 import useUI from "~/composables/ui";
 import NavMenuItem from "./NavMenuItem.vue";
+import useNav from "~/composables/nav.ts";
+import type { MenuItem } from "~/types/ui-types.ts";
 
 const { isMobileOrTablet } = useDevice()
 const { sidebarOpen, mobileSidebarOpen } = useUI();
 const { authState } = useAuth()
-// const { baseLinks } = useNav();
+const { baseLinks } = useNav();
 
+if (!isMobileOrTablet) {
+  sidebarOpen.value = true
+}
 
-const collapsed = computed(() => !sidebarOpen);
+const isAdmin = computed(() => authState.user?.type === 'admin_user')
+const collapsed = computed(() => !sidebarOpen.value);
 const accountInfo = computed(() => {
   if (!authState.user || !authState.authenticated) {
     return null;
@@ -22,18 +28,12 @@ const accountInfo = computed(() => {
   };
 });
 
-type MenuItem = {
-  label: string;
-  icon: string;
-  to?: string;
-  children?: MenuItem[];
-};
-
 const menus: MenuItem[] = [
   {
     label: "Dashboard",
     icon: "i-lucide-layout-dashboard",
-    // to: baseLinks.index,
+    to: baseLinks.index,
+    hidden: !isAdmin.value
   },
   {
     label: "IAM",
@@ -42,77 +42,63 @@ const menus: MenuItem[] = [
       {
         label: "Users",
         icon: "i-lucide-shield-user",
-        // to: baseLinks.iam.users,
+        to: baseLinks.iamUsers,
+        hidden: !isAdmin.value
       },
       {
-        label: "Organization",
+        label: "Domains",
         icon: "i-lucide-building-2",
-        children: [
-          {
-            label: "Manage",
-            icon: "i-lucide-building",
-            // to: baseLinks.iam.organization.index,
-          },
-          {
-            label: "Roles",
-            icon: "i-lucide-shield-check",
-            // to: baseLinks.iam.organization.roles,
-          },
-          {
-            label: "Memberships",
-            icon: "i-lucide-users",
-            // to: baseLinks.iam.organization.memberships,
-          },
-        ]
+        to: baseLinks.iamDomains,
+        hidden: !isAdmin.value
       },
     ],
   },
-  {
-    label: "Academy",
-    icon: "i-lucide-graduation-cap",
-    children: [
-      {
-        label: "Courses",
-        icon: "i-lucide-square-library",
-        // to: baseLinks.academy.courses,
-      },
-      {
-        label: "Enrollments",
-        icon: "i-lucide-users-round",
-        // to: baseLinks.academy.enrollments
-      },
-    ],
-  },
-  {
-    label: "Commerce",
-    icon: "i-lucide-badge-dollar-sign",
-    children: [
-      {
-        label: "Sellable",
-        icon: "i-lucide-package",
-        // to: baseLinks.commerce.sellable,
-      },
-      {
-        label: "Promotions",
-        icon: "i-lucide-badge-percent",
-        // to: baseLinks.commerce.promotions,
-      },
-      {
-        label: "Orders",
-        icon: "i-lucide-shopping-cart",
-        // to: baseLinks.commerce.orders,
-      },
-      {
-        label: "Payments",
-        icon: "i-lucide-banknote",
-        // to: baseLinks.commerce.payments,
-      },
-    ],
-  },
-  {
-    label: "Settings",
-    icon: "i-lucide-settings",
-  },
+  // {
+  //   label: "Academy",
+  //   icon: "i-lucide-graduation-cap",
+  //   children: [
+  //     {
+  //       label: "Courses",
+  //       icon: "i-lucide-square-library",
+  //       // to: baseLinks.academy.courses,
+  //     },
+  //     {
+  //       label: "Enrollments",
+  //       icon: "i-lucide-users-round",
+  //       // to: baseLinks.academy.enrollments
+  //     },
+  //   ],
+  // },
+  // {
+  //   label: "Commerce",
+  //   icon: "i-lucide-badge-dollar-sign",
+  //   children: [
+  //     {
+  //       label: "Sellable",
+  //       icon: "i-lucide-package",
+  //       // to: baseLinks.commerce.sellable,
+  //     },
+  //     {
+  //       label: "Promotions",
+  //       icon: "i-lucide-badge-percent",
+  //       // to: baseLinks.commerce.promotions,
+  //     },
+  //     {
+  //       label: "Orders",
+  //       icon: "i-lucide-shopping-cart",
+  //       // to: baseLinks.commerce.orders,
+  //     },
+  //     {
+  //       label: "Payments",
+  //       icon: "i-lucide-banknote",
+  //       // to: baseLinks.commerce.payments,
+  //     },
+  //   ],
+  // },
+  // {
+  //   label: "Settings",
+  //   icon: "i-lucide-settings",
+  // },
 ];
 </script>
 
