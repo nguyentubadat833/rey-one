@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import useAuth from '~/composables/auth';
-import useUI from '~/composables/ui';
+import useUI from '~/composables/ui/ui';
 
 const { isMobileOrTablet } = useDevice()
 const { mobileSidebarOpen,toggleSidebar: toogle } = useUI();

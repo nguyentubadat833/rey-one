@@ -1,16 +1,15 @@
 <script setup lang="ts">
 import type { TableRow } from '@nuxt/ui';
 import type { ApiResponse, UserSummariesView, UserSummaryView } from '@rey-one/shared';
+import { useAsyncAPI } from '~/composables/api';
 import RefreshButton from '~/components/ui/button/RefreshButton.vue';
-import { useAPI } from '~/composables/api';
-
 
 definePageMeta({
     title: "Users Management",
     middleware: ['admin']
 });
 
-const { data: response, pending, refresh } = await useAPI<ApiResponse<UserSummariesView>>('/users')
+const { data: response, pending, refresh } = await useAsyncAPI<ApiResponse<UserSummariesView>>('/users')
 const users = computed(() => response.value?.data.data ?? [])
 
 const globalFilter = ref()
@@ -39,8 +38,8 @@ function onSelect(e: Event, row: TableRow<UserSummaryView>) {
             </div>
         </div>
         <UTable ref="usersTable" v-model:row-selection="rowSelection" v-model:pagination="pagination" :data="users"
-            v-model:global-filter="globalFilter" :loading="pending" loading-color="primary" loading-animation="carousel" sticky class="flex-1 overflow-auto"
-            @select="onSelect" />
+            v-model:global-filter="globalFilter" :loading="pending" loading-color="primary" loading-animation="carousel"
+            sticky class="flex-1 overflow-auto" @select="onSelect" />
         <div class="flex justify-end border-t border-default pt-4 px-4">
             <UPagination :page="(usersTable?.tableApi?.getState().pagination.pageIndex || 0) + 1"
                 :items-per-page="usersTable?.tableApi?.getState().pagination.pageSize"

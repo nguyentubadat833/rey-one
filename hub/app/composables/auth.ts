@@ -5,7 +5,7 @@ import {
   type UserView,
 } from "@rey-one/shared";
 import type z from "zod";
-import { useGuestAPI, useAPI } from "./api";
+import { useGuestAPI, useAsyncAPI } from "./api";
 
 type BaseLoginForm = z.input<typeof BaseLoginSchema>;
 
@@ -47,7 +47,7 @@ export default function useAuth() {
 
   async function loadAuthState() {
     if (!authState.authenticated) {
-      const { data: res } = await useAPI<ApiResponse<UserView>>("/auth", {
+      const { data: res } = await useAsyncAPI<ApiResponse<UserView>>("/auth", {
         retry: 3,
         retryDelay: 4000,
       });

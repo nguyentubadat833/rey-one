@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import useUI from '~/composables/ui'
+import useUI from '~/composables/ui/ui'
 import type { MenuItem } from '~/types/ui-types';
 
 const props = defineProps<{

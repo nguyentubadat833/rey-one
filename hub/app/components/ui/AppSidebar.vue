@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import useAuth from "~/composables/auth";
-import useUI from "~/composables/ui";
+import useUI from "~/composables/ui/ui.ts";
 import NavMenuItem from "./NavMenuItem.vue";
-import useNav from "~/composables/nav.ts";
+import useNav from "~/composables/ui/nav.ts";
 import type { MenuItem } from "~/types/ui-types.ts";
 
 const { isMobileOrTablet } = useDevice()

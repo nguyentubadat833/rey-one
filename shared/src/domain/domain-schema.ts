@@ -1,29 +1,13 @@
-import z from "zod";
+import { z } from "zod";
 import { APP_PERMISSIONS } from "../app";
 import { UserSchema } from "../user";
-import { MetaUI } from "../utils";
-import test from "node:test";
 
 // domain
 export const DomainSchema = z.object({
-  id: z.string().readonly().meta(<MetaUI>{
-    label: 'ID',
-    component: 'text',
-    readonly: true
-  }),
-  name: z.string().meta(<MetaUI>{
-    label: 'Name',
-    component: 'text',
-    placeholder: "Domain name"
-  }),
-  active: z.boolean().default(true).meta(<MetaUI>{
-    label: "Active",
-    component: 'boolean-check'
-  }),
-  permissions: z.array(z.enum(APP_PERMISSIONS)).default([]).meta(<MetaUI>{
-    label: "Permissions",
-    component: 'multi-select'
-  }),
+  id: z.string().readonly(),
+  name: z.string({error: "Name is required"}),
+  active: z.boolean().default(true),
+  permissions: z.array(z.enum(APP_PERMISSIONS)).default([])
 });
 
 export const CreateDomainSchema = DomainSchema.omit({

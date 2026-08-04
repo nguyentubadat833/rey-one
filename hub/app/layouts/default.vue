@@ -12,7 +12,7 @@ import AppSidebar from '~/components/ui/AppSidebar.vue';
             <div class="flex min-w-0 flex-1 flex-col gap-4 overflow-hidden p-1">
                 <AppHeader />
 
-                <main class="flex-1 min-w-0 overflow-y-auto overflow-x-hidden rounded-3xl p-6 shadow-sm">
+                <main class="flex-1 min-w-0 overflow-y-auto overflow-x-hidden rounded-3xl p-6 shadow-sm border light:border-gray-200 dark:border-neutral-800">
                     <slot />
                 </main>
             </div>
