@@ -5,11 +5,11 @@ import { DomainRole } from '../entities/iam-domain-role.entity';
 
 // Domain type
 export type DomainLoadedRolesAndMembers = Loaded<Domain, 'roles' | 'members.user.party'>;
-// export type DomainSelectedIdAndName = Selected<Domain, 'id' | 'name'>;
 
 // Domain member
 export type DomainMemberLoadedUserAndRole = Loaded<DomainMember, 'user.party'>;
-export type DomainMemberLoadedUserAndRoleAndDomain = Loaded<DomainMember, 'user.party' | 'domain'>
+export type DomainMemberLoadedUserAndRoleAndDomain = Loaded<DomainMember, 'user.party' | 'domain'>;
+export type DomainMemberLoadedDomain = Loaded<DomainMember, 'domain'>;
 
 // Domain role
-export type DomainRoleLoadedMembers = Loaded<DomainRole, 'members.user.party'>
+export type DomainRoleLoadedMembers = Loaded<DomainRole, 'members.user.party'>;
