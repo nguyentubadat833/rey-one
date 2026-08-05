@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { NavigationMenuItem, SidebarProps } from '@nuxt/ui'
-import UserCard from '~/components/UserCard.vue';
+import UserCard from '~/components/ui/UserCard.vue';
 import useAuth from '~/composables/auth';
 
 defineProps<Pick<SidebarProps, 'variant' | 'collapsible' | 'side'>>()
@@ -131,7 +131,7 @@ const items: NavigationMenuItem[] = [
 
             </div>
 
-            <div class="flex-1 p-4">
+            <div class="flex-1 px-4">
                 <slot />
             </div>
         </div>
