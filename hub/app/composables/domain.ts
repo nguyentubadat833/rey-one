@@ -1,12 +1,14 @@
 import {
   CreateDomainSchema,
   type ApiResponse,
+  type DomainAvailableOption,
   type DomainSchema,
   type DomainView,
 } from "@rey-one/shared";
 import type z from "zod";
 import { useAPI } from "./api";
 import { UpdateDomainSchema } from "@rey-one/shared";
+import useAuth from "./auth";
 
 type DomainForm = z.infer<typeof DomainSchema>;
 
@@ -20,6 +22,10 @@ export default function useDomain() {
     domainFormState.name = undefined;
     domainFormState.active = true;
     domainFormState.permissions = [];
+  }
+
+  async function getDomainOptions() {
+    const result = await useAPI<ApiResponse<DomainAvailableOption[]>>('/domains/options')
   }
 
   async function save(

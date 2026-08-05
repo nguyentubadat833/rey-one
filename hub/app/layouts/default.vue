@@ -1,10 +1,18 @@
 <script setup lang="ts">
 import type { NavigationMenuItem, SidebarProps } from '@nuxt/ui'
+import useAuth from '~/composables/auth';
 
 defineProps<Pick<SidebarProps, 'variant' | 'collapsible' | 'side'>>()
 
-const { isMobile, isMobileOrTablet } = useDevice()
+const { isMobile } = useDevice()
+const { authState } = useAuth()
+
 const open = ref(true)
+const profileState = computed(() => ({
+    image: authState.userAuth?.user.image,
+    name: authState.userAuth?.user.name,
+    identity: authState.userAuth?.user?.username ?? authState.userAuth?.user?.email ?? authState.userAuth?.user?.phone
+}))
 
 const items: NavigationMenuItem[] = [
     {
@@ -96,13 +104,26 @@ const items: NavigationMenuItem[] = [
                 variant !== 'floating' && 'border-b border-default',
                 side === 'right' && 'justify-end'
             ]">
-                <div v-if="isMobileOrTablet" class="flex gap-2 items-center">
+                <div v-if="isMobile" class="flex gap-2 items-center">
                     <UIcon name="glyphs-poly:grid-add" class="size-8" />
                     <p class=" font-bold">RONE SYSTEM</p>
                 </div>
 
                 <UButton :icon="side === 'left' ? 'i-lucide-panel-left' : 'i-lucide-panel-right'" color="neutral"
                     variant="ghost" aria-label="Toggle sidebar" @click="open = !open" />
+
+                <div v-if="!isMobile" class="flex items-center gap-3">
+                    <UAvatar :alt="profileState.image ?? profileState.name" size="md" />
+                    <div class="flex flex-col">
+                        <div class="text-sm font-medium">
+                            {{ profileState.name }}
+                        </div>
+                        <div class="text-xs text-neutral-500">
+                            {{ profileState.identity }}
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
             <div class="flex-1 p-4">

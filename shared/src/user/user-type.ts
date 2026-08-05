@@ -7,6 +7,7 @@ import {
   OAUTH_PROVIDERS,
 } from "./user-constant";
 import { PaginatedResponse } from "../utils";
+import { AppPermission } from "../app";
 
 export type UserType = (typeof USER_TYPES)[number];
 export type UserProvider = (typeof USER_PROVIDERS)[number];
@@ -19,7 +20,15 @@ export type UserSummaryView = UserView & {
 };
 export type UserSummariesView = PaginatedResponse<UserSummaryView>;
 
-export type UserLoginResponse = {
-  accessToken: string;
+export type UserDomainAccess = {
+  domainId: string;
+  domainName: string;
+  accessPermissions: AppPermission[];
+};
+export type UserAuthResponse = {
+  acessDomains: UserDomainAccess[];
   user: UserView;
+};
+export type UserLoginResponse = UserAuthResponse & {
+  accessToken: string;
 };

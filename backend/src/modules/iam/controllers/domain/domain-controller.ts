@@ -7,11 +7,14 @@ import { Domain } from '@/persistence/entities/iam-domain.entity';
 import { DomainMapper } from '../../mappers/domain-mapper';
 import { DOMAIN_ID_PARAMETER } from '@/utils/types/utils';
 import { DomainSummary } from '@/persistence/entities/query-entities/domain-query';
-import { DomainSummaryView, DomainSummariesView, DomainWithIAMView } from '@rey-one/shared';
+import { DomainSummaryView, DomainSummariesView, DomainWithIAMView, DomainAvailableOption } from '@rey-one/shared';
 import { DomainService } from '../../services/domain/domain-service';
 import { DomainNotFoundError } from '@/utils/errors/domain.error';
 import { PaginationQueryDto } from '@/utils/dtos/utils-dto';
 import { ResponseMapper } from '@/utils/mappers/response-mapper';
+import { CurrentUser } from '@/utils/decorators/utils.decorator';
+import { DomainMember } from '@/persistence/entities/iam-domain-member.entity';
+import type { UserAuth } from '@/utils/types/system';
 
 @RequireAuth()
 @ApiTags('IAM / Domains')
@@ -21,6 +24,34 @@ export class DomainController {
     private readonly em: EntityManager,
     private readonly domainService: DomainService,
   ) {}
+
+  // @ApiOperation({ summary: 'Domain available options' })
+  // @Get('/options')
+  // async getDomainAvailableOptions(@CurrentUser() user: UserAuth): Promise<DomainAvailableOption[]> {
+  //   if (user.type === 'admin_user') {
+  //     return await this.em
+  //       .find(Domain, {
+  //         active: true,
+  //       })
+  //       .then((domains) => domains.map(DomainMapper.toDomainOption));
+  //   }
+
+  //   const domains: Domain[] = await this.em
+  //     .find(
+  //       DomainMember,
+  //       {
+  //         user: user.id,
+  //         domain: {
+  //           active: true,
+  //         },
+  //       },
+  //       {
+  //         populate: ['domain'],
+  //       },
+  //     )
+  //     .then((members) => members.map((item) => item.domain.getEntity()));
+  //   return domains.map((item) => DomainMapper.toDomainOption(item));
+  // }
 
   @RequireAdmin()
   @ApiOperation({ summary: 'Domain summaries' })

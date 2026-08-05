@@ -33,8 +33,8 @@ export class AuthController {
     const user = await this.userRepo.findByIdentity({ id: userId });
     User.ensureExists(user);
 
-    const loadedUser = await this.em.populate(user, ['party']);
-    return UserMapper.toUserView(loadedUser);
+    const loadedUser = await this.em.populate(user, ['party', 'members.domain']);
+    return UserMapper.toUserAuth(loadedUser);
   }
 
   @MarkPublic()
@@ -44,8 +44,8 @@ export class AuthController {
     const { user, onSuccess } = await this.authService.baseAuthentication(dto);
 
     if (user.isDomainUser()) {
-      await this.em.populate(user, ['members.domain'])
-      const members = user.members.getItems()
+      await this.em.populate(user, ['members.domain']);
+      const members = user.members.getItems();
       if (members.length) {
         members[0].domain.getEntity().ensureStatus();
       }
@@ -73,12 +73,12 @@ export class AuthController {
     });
 
     user.token = accessToken;
-    const loadedUser = await this.em.populate(user, ['party']);
+    const loadedUser = await this.em.populate(user, ['party', 'members.domain']);
     await onSuccess();
 
     return {
       accessToken: accessToken,
-      user: UserMapper.toUserView(loadedUser),
+      ...UserMapper.toUserAuth(loadedUser),
     } satisfies UserLoginResponse;
   }
 }

@@ -8,6 +8,10 @@ import { UserView } from "../user";
 import { PaginatedResponse } from "../utils";
 
 // Domain
+export type DomainAvailableOption = {
+  id: string;
+  name: string;
+};
 export type DomainView = z.infer<typeof DomainSchema>;
 export type DomainSummaryView = DomainView & {
   roleCount: number;

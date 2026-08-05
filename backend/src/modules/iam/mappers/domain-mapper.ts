@@ -8,6 +8,7 @@ import {
   DomainRoleLoadedMembers,
 } from '@/persistence/types/domain-type';
 import {
+  DomainAvailableOption,
   DomainMemberDetailView,
   DomainMemberView,
   DomainRoleView,
@@ -28,7 +29,7 @@ export class DomainMapper {
       roleCount: domain.roleCount,
       memberCount: domain.memberCount,
       productCount: domain.productCount,
-      registeredAt: domain.createdAt.toISOString()
+      registeredAt: domain.createdAt.toISOString(),
     } satisfies DomainSummaryView;
   }
 

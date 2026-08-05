@@ -1,7 +1,5 @@
-import { type ToastProps } from "@nuxt/ui";
-
 export function useNotification() {
-  function pushToast(object: Partial<ToastProps>) {
+  function pushToast(object: Partial<{ title: string; description: string }>) {
     const nuxtApp = useNuxtApp();
 
     nuxtApp.runWithContext(() => {
