@@ -23,12 +23,10 @@ export type UserSummariesView = PaginatedResponse<UserSummaryView>;
 export type UserDomainAccess = {
   domainId: string;
   domainName: string;
-  accessPermissions: AppPermission[];
+  permissions: AppPermission[];
 };
-export type UserAuthResponse = {
-  acessDomains: UserDomainAccess[];
-  user: UserView;
-};
-export type UserLoginResponse = UserAuthResponse & {
+
+export type UserLoginResponse = {
   accessToken: string;
+  user: UserView;
 };

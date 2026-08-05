@@ -7,14 +7,11 @@ import { Domain } from '@/persistence/entities/iam-domain.entity';
 import { DomainMapper } from '../../mappers/domain-mapper';
 import { DOMAIN_ID_PARAMETER } from '@/utils/types/utils';
 import { DomainSummary } from '@/persistence/entities/query-entities/domain-query';
-import { DomainSummaryView, DomainSummariesView, DomainWithIAMView, DomainAvailableOption } from '@rey-one/shared';
+import { DomainSummaryView, DomainSummariesView, DomainWithIAMView } from '@rey-one/shared';
 import { DomainService } from '../../services/domain/domain-service';
 import { DomainNotFoundError } from '@/utils/errors/domain.error';
 import { PaginationQueryDto } from '@/utils/dtos/utils-dto';
 import { ResponseMapper } from '@/utils/mappers/response-mapper';
-import { CurrentUser } from '@/utils/decorators/utils.decorator';
-import { DomainMember } from '@/persistence/entities/iam-domain-member.entity';
-import type { UserAuth } from '@/utils/types/system';
 
 @RequireAuth()
 @ApiTags('IAM / Domains')

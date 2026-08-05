@@ -26,6 +26,7 @@ import { DomainSubscriber } from '@/persistence/subscribers/domain-subscriber';
 import { DomainMemberService } from './services/domain/member-service';
 import { DomainRoleService } from './services/domain/role-service';
 import { SERVICE_TOKENS } from '@/utils/types/tokens';
+import { MeController } from './controllers/me-controller';
 
 @Module({
   imports: [
@@ -65,7 +66,7 @@ import { SERVICE_TOKENS } from '@/utils/types/tokens';
     DomainSubscriber,
   ],
   exports: [AdminGuard, PermissionGuard],
-  controllers: [AuthController, DomainController, DomainRoleController, DomainMemberController, UserController],
+  controllers: [AuthController, MeController, DomainController, DomainRoleController, DomainMemberController, UserController],
 })
 export class IAMModule implements OnModuleInit, NestModule {
   constructor(

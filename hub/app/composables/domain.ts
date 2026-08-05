@@ -24,10 +24,6 @@ export default function useDomain() {
     domainFormState.permissions = [];
   }
 
-  async function getDomainOptions() {
-    const result = await useAPI<ApiResponse<DomainAvailableOption[]>>('/domains/options')
-  }
-
   async function save(
     onSuccess: () => Promise<void> = () => Promise.resolve(),
   ) {

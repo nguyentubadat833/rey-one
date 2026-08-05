@@ -1,13 +1,13 @@
 import {
   BaseLoginSchema,
   type ApiResponse,
-  type UserAuthResponse,
-  type UserLoginResponse
+  type UserLoginResponse,
+  type UserView
 } from "@rey-one/shared";
 import type z from "zod";
 import { useGuestAPI, useAsyncAPI } from "./api";
 
-type UserAuth = UserAuthResponse
+type UserAuth = UserView
 type BaseLoginForm = z.input<typeof BaseLoginSchema>;
 
 const authState = reactive({
@@ -41,14 +41,14 @@ export default function useAuth() {
         },
       );
 
-      setAuth(response.data);
+      setAuth(response.data.user);
       await onSuccess();
     }
   }
 
   async function loadAuthState() {
     if (!authState.authenticated) {
-      const { data: res } = await useAsyncAPI<ApiResponse<UserAuthResponse>>("/auth", {
+      const { data: res } = await useAsyncAPI<ApiResponse<UserView>>("/me", {
         retry: 3,
         retryDelay: 4000,
       });

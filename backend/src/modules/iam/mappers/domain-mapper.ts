@@ -3,6 +3,7 @@ import { DomainRole } from '@/persistence/entities/iam-domain-role.entity';
 import { IDomainSummary } from '@/persistence/entities/query-entities/domain-query';
 import {
   DomainLoadedRolesAndMembers,
+  DomainMemberLoadedDomain,
   DomainMemberLoadedUserAndRole,
   DomainMemberLoadedUserAndRoleAndDomain,
   DomainRoleLoadedMembers,
@@ -16,6 +17,7 @@ import {
   DomainSummaryView,
   DomainView,
   DomainWithIAMView,
+  UserDomainAccess,
   UserView,
 } from '@rey-one/shared';
 
@@ -100,5 +102,13 @@ export class DomainMapper {
         name: member.domain.getProperty('name'),
       },
     } satisfies DomainMemberDetailView;
+  }
+
+  static toUserDomainAccess(member: DomainMemberLoadedDomain){
+    return {
+      domainId: member.domain.id,
+      domainName: member.domain.getProperty('name'),
+      permissions: member.role?.permissions ?? []
+    } satisfies UserDomainAccess
   }
 }

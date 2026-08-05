@@ -9,7 +9,7 @@ import { CreateDomainMemberDto, UpdateDomainMemberDto } from '../../dtos/domain-
 import { DomainMemberNotFoundError, DomainNotFoundError } from '@/utils/errors/domain.error';
 import { DomainRole } from '@/persistence/entities/iam-domain-role.entity';
 import { DomainMember } from '@/persistence/entities/iam-domain-member.entity';
-import { DomainMemberLoadedUserAndRole, DomainMemberLoadedUserAndRoleAndDomain } from '@/persistence/types/domain-type';
+import { DomainMemberLoadedDomain, DomainMemberLoadedUserAndRole, DomainMemberLoadedUserAndRoleAndDomain } from '@/persistence/types/domain-type';
 import type { ConfigType } from '@nestjs/config';
 
 @Injectable()
@@ -20,10 +20,14 @@ export class DomainMemberService {
     private readonly domainRepo: DomainRepository,
     private readonly em: EntityManager,
     @Inject(authConfig.KEY) private readonly config: ConfigType<typeof authConfig>,
-  ) {}
+  ) { }
 
   private getDomainIdFromStore() {
     return this.clsService.get('domainId');
+  }
+
+  private getActorIdFromStore() {
+    return this.clsService.get('actor.id')
   }
 
   async createMember(dto: CreateDomainMemberDto, domainId: string = this.getDomainIdFromStore()) {
@@ -114,6 +118,20 @@ export class DomainMemberService {
         populate: ['user.party', 'role'],
       },
     );
+  }
+
+  async getMembersByUser(userId: string = this.getActorIdFromStore()): Promise<DomainMemberLoadedDomain[]> {
+    return this.em.find(DomainMember,
+      {
+        user: userId,
+        domain: {
+          active: true
+        }
+      },
+      {
+        populate: ['domain']
+      }
+    )
   }
 
   getDomainMemberDetail(userId: string): Promise<DomainMemberLoadedUserAndRoleAndDomain> {

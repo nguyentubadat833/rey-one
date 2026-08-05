@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { NavigationMenuItem, SidebarProps } from '@nuxt/ui'
+import UserCard from '~/components/UserCard.vue';
 import useAuth from '~/composables/auth';
 
 defineProps<Pick<SidebarProps, 'variant' | 'collapsible' | 'side'>>()
@@ -8,11 +9,14 @@ const { isMobile } = useDevice()
 const { authState } = useAuth()
 
 const open = ref(true)
-const profileState = computed(() => ({
-    image: authState.userAuth?.user.image,
-    name: authState.userAuth?.user.name,
-    identity: authState.userAuth?.user?.username ?? authState.userAuth?.user?.email ?? authState.userAuth?.user?.phone
-}))
+const profileState = computed(() => {
+    const user = authState.userAuth
+    return {
+        image: user?.image,
+        name: user?.name,
+        identity: user?.username ?? user?.email ?? user?.phone
+    }
+})
 
 const items: NavigationMenuItem[] = [
     {
@@ -20,7 +24,7 @@ const items: NavigationMenuItem[] = [
         icon: 'ic:round-pie-chart'
     },
     {
-        label: 'Access Management',
+        label: 'IAM',
         icon: 'ic:twotone-vpn-lock',
         children: [
             {
@@ -84,18 +88,29 @@ const items: NavigationMenuItem[] = [
         side === 'right' && 'flex-row-reverse'
     ]">
         <USidebar v-model:open="open" variant="floating" collapsible="icon" :side="side" :ui="{
-            header: 'flex justify-between',
-            container: 'h-full'
+            container: 'h-full',
         }">
             <template #header>
-                <div class="flex gap-2 items-center">
-                    <UIcon name="glyphs-poly:grid-add" class="size-8" />
-                    <p v-if="open" class=" font-bold">RONE SYSTEM</p>
+                <div class="w-full space-y-5 py-4">
+                    <div class="flex justify-between items-center gap-2">
+                        <div class="flex gap-2 items-center">
+                            <UIcon name="glyphs-poly:grid-add" class="size-8" />
+                            <p v-if="open" class=" font-bold">RONE SYSTEM</p>
+                        </div>
+                        <UIcon v-if="isMobile" name="ic:twotone-close" size="25" @click="open = false" />
+                    </div>
                 </div>
-                <UIcon v-if="isMobile" name="ic:twotone-close" size="25" @click="open = false" />
             </template>
 
             <UNavigationMenu :items="items" orientation="vertical" :ui="{ link: 'p-1.5 overflow-hidden' }" />
+
+            <template #footer>
+                <div class="w-full" :class="[{ 'flex justify-between items-center gap-2': isMobile }]">
+                    <UserCard v-if="isMobile" />
+                    <UColorModeSelect v-if="open && !isMobile" class="w-full" />
+                    <UColorModeButton v-else />
+                </div>
+            </template>
         </USidebar>
 
         <div
@@ -112,24 +127,12 @@ const items: NavigationMenuItem[] = [
                 <UButton :icon="side === 'left' ? 'i-lucide-panel-left' : 'i-lucide-panel-right'" color="neutral"
                     variant="ghost" aria-label="Toggle sidebar" @click="open = !open" />
 
-                <div v-if="!isMobile" class="flex items-center gap-3">
-                    <UAvatar :alt="profileState.image ?? profileState.name" size="md" />
-                    <div class="flex flex-col">
-                        <div class="text-sm font-medium">
-                            {{ profileState.name }}
-                        </div>
-                        <div class="text-xs text-neutral-500">
-                            {{ profileState.identity }}
-                        </div>
-                    </div>
-                </div>
+                <UserCard v-if="!isMobile" />
 
             </div>
 
             <div class="flex-1 p-4">
-                <div class="size-full">
-                    <slot />
-                </div>
+                <slot />
             </div>
         </div>
     </div>

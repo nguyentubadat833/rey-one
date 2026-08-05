@@ -1,6 +1,6 @@
 import { IUserSummary } from '@/persistence/entities/query-entities/user-query';
-import { UserLoadedParty, UserLoadedPartyAndMembers } from '@/persistence/types/user-type';
-import { UserSummaryView, UserView, UserAuthResponse } from '@rey-one/shared';
+import { UserLoadedParty } from '@/persistence/types/user-type';
+import { UserSummaryView, UserView } from '@rey-one/shared';
 
 export class UserMapper {
   static toUserView(user: UserLoadedParty) {
@@ -27,20 +27,5 @@ export class UserMapper {
       phone: user.phone,
       memberCount: user.memberCount,
     } satisfies UserSummaryView;
-  }
-
-  static toUserAuth(user: UserLoadedPartyAndMembers) {
-    return {
-      acessDomains: user.members.map((item) => ({
-        domainId: item.domain.getProperty('id'),
-        domainName: item.domain.getProperty('name'),
-        accessPermissions: item.role?.permissions ?? [],
-      })),
-      user: UserMapper.toUserView(user),
-    } satisfies UserAuthResponse;
-  }
-
-  static toUserAccessDomain(){
-
   }
 }
