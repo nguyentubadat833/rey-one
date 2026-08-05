@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useAsyncAPI } from '~/composables/api';
 import type { TableColumn, TableRow } from '@nuxt/ui';
-import type { ApiResponse, DomainSummariesView, DomainSummaryView } from '@rey-one/shared';
+import type { ApiResponse, DomainSummariesView, DomainSummaryView, PaginatedResponse, PaginationQuery } from '@rey-one/shared';
 import DomainForm from '~/components/DomainForm.vue';
 import RefreshButton from '~/components/ui/button/RefreshButton.vue';
 import useDomain from '~/composables/domain';
@@ -13,29 +13,34 @@ definePageMeta({
 });
 
 const columns = [
-    { accessorKey: "id", header: "ID" },
+    { id: "no" },
     { accessorKey: "name", header: "Name" },
     { accessorKey: 'active', header: "Status" },
-    // { accessorKey: "permissions", header: "Permissions" },
+    { accessorKey: 'memberCount', header: "Members" },
+    { accessorKey: 'roleCount', header: "Roles" },
+    { accessorKey: 'productCount', header: "Products" },
+    { accessorKey: "registeredAt", header: "Registered At" },
     { id: 'actions' }
 ] satisfies TableColumn<DomainSummaryView>[]
 
 const { domainFormState, domainFormStateVersion, resetForm: resetDomainFormState } = useDomain()
 
+const globalFilter = ref()
+const paginationQuery = ref<PaginationQuery>({
+    page: 1,
+    limit: 30
+})
+const rowSelection = ref<Record<string, boolean>>({})
+
 const { data: response, pending, refresh } = await useAsyncAPI<ApiResponse<DomainSummariesView>>('/domains', {
+    query: paginationQuery,
     watch: [
-        domainFormStateVersion
+        domainFormStateVersion,
+        paginationQuery.value
     ]
 })
 const domains = computed(() => response.value?.data.data ?? [])
-
-const globalFilter = ref()
-const pagination = ref({
-    pageIndex: 0,
-    pageSize: 5
-})
-const rowSelection = ref<Record<string, boolean>>({})
-const domainsTable = useTemplateRef('domainsTable')
+const totalRows = computed(() => response.value?.data.total)
 
 function onSelect(e: Event, row: TableRow<DomainSummaryView>) {
     rowSelection.value = {
@@ -56,35 +61,39 @@ function handlerClickAddDomainButton() {
 </script>
 
 <template>
-    <div class="flex flex-col">
+    <div>
         <div class="flex justify-between items-center px-4 py-3.5 border-b border-accented">
             <div>
                 <UInput v-model="globalFilter" class="max-w-sm" placeholder="Filter..." />
             </div>
             <div class="flex items-center gap-4">
                 <RefreshButton @click="refresh" :loading="pending" />
-                <DomainForm @click="handlerClickAddDomainButton">
+                <DomainForm :click-icon="handlerClickAddDomainButton">
                     <template #icon>
                         <CreateButton />
                     </template>
                 </DomainForm>
             </div>
         </div>
-        <UTable ref="domainsTable" v-model:row-selection="rowSelection" v-model:pagination="pagination" :data="domains"
-            :columns="columns" v-model:global-filter="globalFilter" :loading="pending" loading-color="primary"
-            loading-animation="carousel" sticky class="flex-1 overflow-auto" @select="onSelect">
+        <UTable v-model:row-selection="rowSelection" :data="domains" :columns="columns"
+            v-model:global-filter="globalFilter" :loading="pending" loading-color="primary" loading-animation="carousel"
+            sticky class="h-[70vh]" @select="onSelect">
+            <template #no-cell="{ row }">{{ row.index + 1 }}</template>
             <template #active-cell="{ row }">
                 <UBadge :color="row.original.active ? 'success' : 'neutral'" label="Active" />
             </template>
+            <template #registeredAt-cell="{ row }">
+                <NuxtTime :datetime="row.original.registeredAt" dateStyle="medium" locale="vi-VN" />
+            </template>
             <template #actions-cell="{ row }">
-                <DomainForm @click="handlerClickDomainButton(row)" />
+                <DomainForm :click-icon="() => handlerClickDomainButton(row)" />
             </template>
         </UTable>
         <div class="flex justify-end border-t border-default pt-4 px-4">
-            <UPagination :page="(domainsTable?.tableApi?.getState().pagination.pageIndex || 0) + 1"
-                :items-per-page="domainsTable?.tableApi?.getState().pagination.pageSize"
-                :total="domainsTable?.tableApi?.getFilteredRowModel().rows.length"
-                @update:page="(p) => domainsTable?.tableApi?.setPageIndex(p - 1)" />
+            <UPagination :page="paginationQuery.page" :items-per-page="paginationQuery.limit" :total="totalRows"
+                @update:page="(p) => {
+                    paginationQuery.page = p
+                }" />
         </div>
     </div>
 </template>

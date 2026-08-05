@@ -32,10 +32,16 @@ export class DomainController {
       {
         limit,
         offset: (page - 1) * limit,
+        orderBy: [
+          {
+            createdAt: 'DESC',
+          },
+        ],
       },
     );
 
-    return ResponseMapper.toPaginatedResponse(data, total, page, limit);
+    const domains = data.map((item) => DomainMapper.toDomainSummary(item));
+    return ResponseMapper.toPaginatedResponse(domains, total, page, limit);
   }
 
   @RequireAdmin()
@@ -65,13 +71,15 @@ export class DomainController {
   @ApiOperation({ summary: 'Domain summary' })
   @Get(`:${DOMAIN_ID_PARAMETER}`)
   async getSummary(@Param(DOMAIN_ID_PARAMETER) id: string): Promise<DomainSummaryView> {
-    return this.em.findOneOrFail(
-      DomainSummary,
-      {
-        id,
-      },
-      { failHandler: DomainNotFoundError },
-    );
+    return this.em
+      .findOneOrFail(
+        DomainSummary,
+        {
+          id,
+        },
+        { failHandler: DomainNotFoundError },
+      )
+      .then((data) => DomainMapper.toDomainSummary(data));
   }
 
   @RequirePermission('domain:manage:read', false)

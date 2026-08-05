@@ -22,7 +22,7 @@ function toggleSidebar() {
 <template>
   <!-- <header class="flex h-16 items-center justify-between rounded-3xl border border-neutral-200 bg-white px-5 shadow-sm"> -->
   <header>
-    <UCard :ui="{ root: 'rounded-3xl shadow-sm', body: 'flex items-center justify-between px-5 py-2!' }">
+    <UCard :ui="{ root: 'rounded-xl shadow-sm', body: 'flex items-center justify-between px-5 py-2!' }">
       <div class="flex items-center gap-3 ">
         <UButton icon="i-lucide-panel-left" color="neutral" variant="ghost" @click="toggleSidebar" />
 

@@ -28,6 +28,7 @@ export class DomainMapper {
       roleCount: domain.roleCount,
       memberCount: domain.memberCount,
       productCount: domain.productCount,
+      registeredAt: domain.createdAt.toISOString()
     } satisfies DomainSummaryView;
   }
 

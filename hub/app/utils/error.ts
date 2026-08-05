@@ -6,8 +6,8 @@ export class ValidateInputError extends Error {
   }
 }
 
-  // export class ApiError extends Error {
-  //   constructor(public readonly response: FetchResponse<any>) {
-  //     super("API ERROR");
-  //   }
-  // }
+export class ApiError extends Error {
+  constructor(public readonly data: any) {
+    super();
+  }
+}

@@ -6,7 +6,7 @@ useHead({
     { name: 'viewport', content: 'width=device-width, initial-scale=1' }
   ],
   link: [
-    { rel: 'icon', href: '/favicon.ico' }
+    { rel: 'icon', href: '/favicon.svg' }
   ],
   htmlAttrs: {
     lang: 'en'
@@ -24,10 +24,12 @@ useSeoMeta({
 })
 
 const toaster = { position: 'top-center' } satisfies ToasterProps
+
 </script>
 
 <template>
   <UApp :toaster="toaster">
+    <NuxtLoadingIndicator />
     <NuxtLayout>
       <UMain>
         <NuxtPage />

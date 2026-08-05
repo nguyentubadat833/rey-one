@@ -105,7 +105,7 @@ const menus: MenuItem[] = [
 <template>
   <aside class="p-1">
     <div v-if="!isMobileOrTablet" :class="[
-      'h-full shrink-0 flex flex-col transition-all duration-300 rounded-3xl shadow-sm border dark:border-neutral-800 light:border-gray-200',
+      'h-full shrink-0 flex flex-col transition-all duration-300 rounded-xl shadow-sm border dark:border-neutral-800 light:border-gray-200',
       collapsed ? 'w-20' : 'w-72',
     ]">
       <div class="flex h-20 items-center border-b border-neutral-100 px-5">

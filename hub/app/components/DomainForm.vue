@@ -1,10 +1,12 @@
 <template>
     <UModal :title="title">
-        <slot name="icon"></slot>
-        <UButton v-if="!$slots.icon" icon="ic:baseline-checklist" color="neutral" variant="subtle" />
+        <div @click="clickIcon">
+            <slot name="icon"></slot>
+            <UButton v-if="!$slots.icon" icon="ic:baseline-edit-note" color="neutral" variant="subtle" />
+        </div>
 
         <template #body>
-            <form class="space-y-5">
+            <form class="space-y-5" @submit.prevent="save">
                 <UFormField label="ID">
                     <UInput disabled v-model="state.id" class="w-full" />
                 </UFormField>
@@ -20,7 +22,7 @@
         <template #footer>
             <div class="flex justify-end gap-3 w-full">
                 <CancelButton />
-                <SaveButton :loading="loading" @click="save()" />
+                <SaveButton :loading="loading" @click="submit()" />
             </div>
         </template>
     </UModal>
@@ -30,7 +32,20 @@ import useDomain from '~/composables/domain';
 import SaveButton from './ui/button/SaveButton.vue';
 import CancelButton from './ui/button/CancelButton.vue';
 
+defineProps<{
+    clickIcon?: () => void
+}>()
+
 const { domainFormState: state, domainFormLoading: loading, save } = useDomain()
 
-const title = computed(() => state.id ? state.name : 'New Domain') 
+const title = computed(() => state.id ? state.name : 'New Domain')
+
+async function submit() {
+    loading.value = true
+    try {
+        await save()
+    } finally {
+        loading.value = false
+    }
+}
 </script>

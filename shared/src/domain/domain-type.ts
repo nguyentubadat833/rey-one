@@ -13,23 +13,24 @@ export type DomainSummaryView = DomainView & {
   roleCount: number;
   memberCount: number;
   productCount: number;
+  registeredAt: string;
 };
-export type DomainSummariesView = PaginatedResponse<DomainSummaryView>
+export type DomainSummariesView = PaginatedResponse<DomainSummaryView>;
 
 // Domain role
 export type DomainRoleView = z.infer<typeof DomainRoleSchema>;
 export type DomainRoleWithMembersView = DomainRoleView & {
-  members: UserView[]
-}
+  members: UserView[];
+};
 
 // Domain member
-export type DomainMemberView = z.infer<typeof DomainMemberViewSchema> 
+export type DomainMemberView = z.infer<typeof DomainMemberViewSchema>;
 export type DomainMemberDetailView = DomainMemberView & {
-  domain: Omit<DomainView, 'active' | 'permissions'>
-}
+  domain: Omit<DomainView, "active" | "permissions">;
+};
 
 // Domain detail
-export type DomainWithIAMView =  DomainView & {
-  roles: DomainRoleView[],
-  members: DomainMemberView[],
-}
+export type DomainWithIAMView = DomainView & {
+  roles: DomainRoleView[];
+  members: DomainMemberView[];
+};
