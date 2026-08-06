@@ -88,11 +88,15 @@ DomainEntitySchema.addHook('beforeCreate', saveHandler);
 DomainEntitySchema.addHook('beforeUpdate', saveHandler);
 
 async function saveHandler(args: EventArgs<Domain>) {
-
   const changeSetPayload = args.changeSet?.payload;
 
   if (changeSetPayload?.permissions) {
     const permissions = args.entity.permissions;
     args.entity.permissions = Array.from(new Set(permissions));
+
+    const roles = await args.entity.roles.loadItems();
+    roles.forEach((role) => {
+      role.permissions = role.permissions.filter((permission) => args.entity.permissions.includes(permission));
+    });
   }
 }

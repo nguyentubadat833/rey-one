@@ -2,6 +2,7 @@ import { Domain } from '@/persistence/entities/iam-domain.entity';
 import { DomainRole } from '@/persistence/entities/iam-domain-role.entity';
 import { IDomainSummary } from '@/persistence/entities/query-entities/domain-query';
 import {
+  DomainLoadedRoles,
   DomainLoadedRolesAndMembers,
   DomainMemberLoadedDomain,
   DomainMemberLoadedUserAndRole,
@@ -9,7 +10,7 @@ import {
   DomainRoleLoadedMembers,
 } from '@/persistence/types/domain-type';
 import {
-  DomainAvailableOption,
+  DomainAndRolesView,
   DomainMemberDetailView,
   DomainMemberView,
   DomainRoleView,
@@ -62,6 +63,13 @@ export class DomainMapper {
       active: role.active,
       permissions: role.permissions,
     } satisfies DomainRoleView;
+  }
+
+  static toDomainAndRolesView(domain: DomainLoadedRoles) {
+    return {
+      ...DomainMapper.toDomainView(domain),
+      roles: domain.roles.getItems().map(item => DomainMapper.toDomainRoleView(item))
+    } satisfies DomainAndRolesView;
   }
 
   static toDomainRoleWithMembers(role: DomainRoleLoadedMembers) {

@@ -8,6 +8,7 @@ import {
 } from "./user-constant";
 import { PaginatedResponse } from "../utils";
 import { AppPermission } from "../app";
+import { DomainRoleView, DomainView } from "../domain";
 
 export type UserType = (typeof USER_TYPES)[number];
 export type UserProvider = (typeof USER_PROVIDERS)[number];
@@ -19,6 +20,12 @@ export type UserSummaryView = UserView & {
   memberCount: number;
 };
 export type UserSummariesView = PaginatedResponse<UserSummaryView>;
+export type UserDetailView = UserView & {
+  members: {
+    domain: DomainView
+    role?: DomainRoleView | null
+  }[]
+}
 
 export type UserDomainAccess = {
   domainId: string;

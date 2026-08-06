@@ -27,6 +27,7 @@ import { DomainMemberService } from './services/domain/member-service';
 import { DomainRoleService } from './services/domain/role-service';
 import { SERVICE_TOKENS } from '@/utils/types/tokens';
 import { MeController } from './controllers/me-controller';
+import { UserService } from './services/user-service';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { MeController } from './controllers/me-controller';
     },
     //
     AuthService,
+    UserService,
     DomainService,
     DomainMemberService,
     DomainRoleService,

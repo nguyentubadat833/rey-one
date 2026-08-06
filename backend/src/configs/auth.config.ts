@@ -14,6 +14,7 @@ const schema = z
     USER_ADMIN_PASSWORD: z.string().default('admin'),
     USER_SUPPORT_IDENTITY: z.string().default('support'),
     USER_SUPPORT_PASSWORD: z.string().default('support'),
+    USER_PASSWORD: z.string().default('user'),
     DOMAIN_MEMBER_PASSWORD: z.string().default('member'),
   })
   .superRefine((val, ctx) => {
@@ -45,6 +46,9 @@ export const authConfig = registerAs('auth', () => {
         identity: parsed.USER_SUPPORT_IDENTITY,
         password: parsed.USER_SUPPORT_PASSWORD,
       },
+      password: {
+        default: parsed.USER_PASSWORD
+      }
     },
     domain: {
       member: {

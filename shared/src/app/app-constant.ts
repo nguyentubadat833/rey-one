@@ -16,4 +16,7 @@ export const APP_PERMISSIONS = [
   //
   "domain:manage:read",
   "domain:manage",
+  //
+  "user:read",
+  "user:manage"
 ] as const;

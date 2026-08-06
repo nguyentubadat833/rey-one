@@ -16,6 +16,9 @@ export type DomainSummaryView = DomainView & {
   registeredAt: string;
 };
 export type DomainSummariesView = PaginatedResponse<DomainSummaryView>;
+export type DomainAndRolesView = DomainView & {
+  roles: DomainRoleView[];
+};
 
 // Domain role
 export type DomainRoleView = z.infer<typeof DomainRoleSchema>;

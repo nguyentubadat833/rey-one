@@ -12,9 +12,6 @@ import { DomainService } from '../../services/domain/domain-service';
 import { DomainNotFoundError } from '@/utils/errors/domain.error';
 import { PaginationQueryDto } from '@/utils/dtos/utils-dto';
 import { ResponseMapper } from '@/utils/mappers/response-mapper';
-import { CurrentUser } from '@/utils/decorators/utils.decorator';
-import type { UserAuth } from '@/utils/types/system';
-import type { FastifyReply } from 'fastify';
 
 @RequireAuth()
 @ApiTags('IAM / Domains')
@@ -45,6 +42,13 @@ export class DomainController {
 
     const domains = data.map((item) => DomainMapper.toDomainSummary(item));
     return ResponseMapper.toPaginatedResponse(domains, total, page, limit);
+  }
+
+  @RequirePermission('domain:manage:read')
+  @ApiOperation({ summary: 'Available Domains' })
+  @Get('/available')
+  async availableDomains() {
+    return await this.domainService.getAvailableDomains().then((rs) => rs.map((item) => DomainMapper.toDomainAndRolesView(item)));
   }
 
   @RequireAdmin()

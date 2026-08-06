@@ -27,6 +27,10 @@ const PERMISSION_HIERARCHY: Partial<Record<AppPermission, AppPermission[]>> = {
     "product:read",
     "order:read",
   ],
+  //
+  "user:manage": [
+    "user:read"
+  ]
 };
 
 // Resolve tất cả permissions user thực sự có (bao gồm implied permissions)

@@ -5,6 +5,7 @@ import { DomainRole } from '../entities/iam-domain-role.entity';
 
 // Domain type
 export type DomainLoadedRolesAndMembers = Loaded<Domain, 'roles' | 'members.user.party'>;
+export type DomainLoadedRoles = Loaded<Domain, 'roles'>
 
 // Domain member
 export type DomainMemberLoadedUserAndRole = Loaded<DomainMember, 'user.party'>;

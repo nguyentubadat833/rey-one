@@ -3,15 +3,20 @@ import { RequireAdmin, RequireAuth } from '@/utils/decorators/auth.decorator';
 import { PaginationQueryDto } from '@/utils/dtos/utils-dto';
 import { ResponseMapper } from '@/utils/mappers/response-mapper';
 import { EntityManager } from '@mikro-orm/core';
-import { Controller, Get, NotFoundException, Param, Query } from '@nestjs/common';
+import { Body, Controller, Get, NotFoundException, Param, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserSummariesView, UserSummaryView } from '@rey-one/shared';
+import { CreateUserDto } from '../dtos/user-dto';
+import { UserService } from '../services/user-service';
 
 @RequireAuth()
 @ApiTags('IAM / Users')
 @Controller('users')
 export class UserController {
-  constructor(private readonly em: EntityManager) {}
+  constructor(
+    private readonly em: EntityManager,
+    private readonly userService: UserService,
+  ) {}
 
   @RequireAdmin()
   @ApiOperation({ summary: 'User summaries' })
@@ -40,5 +45,12 @@ export class UserController {
       },
       { failHandler: () => new NotFoundException() },
     );
+  }
+
+  @RequireAdmin()
+  @ApiOperation({ summary: 'Create user' })
+  @Post()
+  async createUser(@Body() dto: CreateUserDto) {
+    return this.userService.createUser(dto);
   }
 }
