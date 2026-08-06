@@ -1,7 +1,7 @@
 {
   "name": "rey-one",
   "scripts": {
-    "dev": "concurrently \"pnpm --filter @rey-one/shared dev\" \"pnpm --filter @rey-one/hub update:shared\" \"pnpm --filter @rey-one/backend start:dev\" \"pnpm --filter @rey-one/hub dev\""
+    "dev": "pnpm --filter @rey-one/shared build && concurrently \"pnpm --filter @rey-one/backend start:dev\" \"pnpm --filter @rey-one/hub dev\""
   },
   "devDependencies": {
     "concurrently": "^9.0.0"

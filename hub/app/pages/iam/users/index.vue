@@ -5,6 +5,7 @@ import { useAsyncAPI } from '~/composables/api';
 import RefreshButton from '~/components/ui/button/RefreshButton.vue';
 import UserForm from '~/components/UserForm.vue';
 import CreateButton from '~/components/ui/button/CreateButton.vue';
+import useUser from '~/composables/user';
 
 definePageMeta({
     title: "Users Management",
@@ -22,6 +23,7 @@ const columns = [
     { id: 'actions' }
 ] satisfies TableColumn<UserSummaryView>[]
 
+const { userFormState } = useUser()
 
 const { data: response, pending, refresh } = await useAsyncAPI<ApiResponse<UserSummariesView>>('/users')
 const users = computed(() => response.value?.data.data ?? [])
@@ -41,7 +43,7 @@ function onSelect(e: Event, row: TableRow<UserSummaryView>) {
 }
 
 async function handlerClickUserButton(row: TableRow<UserSummaryView>) {
-    // Object.assign(domainFormData.value, row.original)
+
     await nextTick()
 }
 

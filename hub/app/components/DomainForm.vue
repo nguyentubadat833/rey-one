@@ -55,7 +55,7 @@ const { domainFormState, save } = useDomain()
 const formData = toRef(domainFormState, 'data')
 const formLoading = toRef(domainFormState, 'loading')
 
-const modalTitle = computed(() => formData.value.id ? formData.value.name : 'New Domain')
+const modalTitle = computed(() => formData.value.id ? formData.value.name : '*New Domain')
 
 async function submit() {
     formData.value.permissions = permissionChecks.value.filter(item => item.active === true).map(item => item.permissions)

@@ -1,10 +1,10 @@
-import type { ApiResponse, UserDetailView, UserView } from "@rey-one/shared";
+import { CreateUserSchema, UpdateUserSchema, type ApiResponse, type UserDetailView, type UserView } from "@rey-one/shared";
 import { useAPI } from "./api";
 
 const defaultData: Partial<UserDetailView> = {}
 
 const defaultState = {
-    data: defaultData,
+    data: nullToUndefined(defaultData),
     version: Date.now(),
     loading: false,
 }
@@ -28,15 +28,43 @@ export default function useUser() {
         const data = userFormState.data
 
         const action = async () => {
-            if (data.id) {
+            let result
 
-            } else {
-                const result = await useAPI<ApiResponse<UserDetailView>>('/users', {
-                    method: 'POST'
+            if (data.id) {
+                const payload = zodValidate(CreateUserSchema, data);
+                result = await useAPI<ApiResponse<UserDetailView>>(`/users/${data.id}`, {
+                    method: 'PATCH',
+                    body: payload
                 })
 
-                userFormState.data = result.data
+                pushToast({
+                    title: userFormState.data.name,
+                    description: "Updated"
+                })
+            } else {
+                const payload = zodValidate(UpdateUserSchema, data);
+                result = await useAPI<ApiResponse<UserDetailView>>('/users', {
+                    method: 'POST',
+                    body: payload
+                })
+
+                pushToast({
+                    title: userFormState.data.name,
+                    description: "Created"
+                })
             }
+
+            userFormState.data = nullToUndefined(result.data)
+
+            await onSuccess()
+        }
+
+        userFormState.loading = true
+        try {
+            await action()
+            ++userFormState.version
+        } finally {
+            userFormState.loading = false
         }
     }
 
@@ -44,6 +72,7 @@ export default function useUser() {
         userFormState,
 
         resetState,
-        resetForm
+        resetForm,
+        save
     }
 }

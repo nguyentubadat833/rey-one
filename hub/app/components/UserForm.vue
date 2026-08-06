@@ -13,15 +13,17 @@
                 <UFormField label="Name">
                     <UInput v-model="formData.name" class="w-full" />
                 </UFormField>
-                <UFormField label="Active">
-                    <USwitch v-model="formData.active" :default-value="true" />
+                <UFormField label="Username">
+                    <UInput v-model="formData.username" class="w-full" />
                 </UFormField>
-                <UFormField label="Permissions">
-                    <UTable :data="permissionChecks" sticky class="max-h-[50vh]">
-                        <template #active-cell="{ row }">
-                            <UCheckbox v-model="row.original.active" />
-                        </template>
-                    </UTable>
+                <UFormField label="Email">
+                    <UInput v-model="formData.email" class="w-full" />
+                </UFormField>
+                <UFormField label="Phone">
+                    <UInput v-model="formData.phone" class="w-full" />
+                </UFormField>
+                <UFormField label="Status">
+                    <USelect v-model="formData.status" :items="[...USER_STATUSES]" class="w-40"/>
                 </UFormField>
             </form>
         </template>
@@ -29,48 +31,24 @@
         <template #footer>
             <div class="flex justify-end gap-3 w-full">
                 <CancelButton />
-                <SaveButton :loading="formLoading" @click="submit()" />
+                <SaveButton :loading="userFormState.loading" @click="save()" />
             </div>
         </template>
     </UModal>
 </template>
 <script setup lang="ts">
-import useDomain from '~/composables/domain';
 import SaveButton from './ui/button/SaveButton.vue';
 import CancelButton from './ui/button/CancelButton.vue';
-import { APP_PERMISSIONS } from '@rey-one/shared';
+import { USER_STATUSES } from '@rey-one/shared';
+import useUser from '~/composables/user.ts';
 
 defineProps<{
     clickIcon?: () => void
 }>()
 
-const permissionChecks = ref(
-    APP_PERMISSIONS.map((name) => ({
-        permissions: name,
-        active: false,
-    }))
-)
+const { userFormState, save } = useUser()
+const formData = toRef(userFormState, 'data')
 
-const { domainFormState, save } = useDomain()
-const formData = toRef(domainFormState, 'data')
-const formLoading = toRef(domainFormState, 'loading')
+const modalTitle = computed(() => formData.value.id ? formData.value.name : '*New User')
 
-const modalTitle = computed(() => formData.value.id ? formData.value.name : 'New Domain')
-
-async function submit() {
-    formData.value.permissions = permissionChecks.value.filter(item => item.active === true).map(item => item.permissions)
-
-    formLoading.value = true
-    try {
-        await save()
-    } finally {
-        formLoading.value = false
-    }
-}
-
-watch(formData.value, (newValue, oldValue) => {
-    permissionChecks.value.forEach(item => {
-        item.active = newValue.permissions?.includes(item.permissions) ?? false
-    })
-})
 </script>
