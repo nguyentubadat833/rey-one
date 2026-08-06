@@ -1,5 +1,5 @@
 export function useNotification() {
-  function pushToast(object: Partial<{ title: string; description: string }>) {
+  function pushToast(object: Partial<{ title: string; description: string, color: any }>) {
     const nuxtApp = useNuxtApp();
 
     nuxtApp.runWithContext(() => {

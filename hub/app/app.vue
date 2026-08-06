@@ -26,7 +26,7 @@ useSeoMeta({
 const toaster = { position: 'top-center' } satisfies ToasterProps
 
 </script>
-
+  
 <template>
   <UApp :toaster="toaster">
     <NuxtLoadingIndicator />

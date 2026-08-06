@@ -23,7 +23,6 @@ export const useGuestAPI = $fetch.create({
     handlerResponseError(response);
   },
 });
-
 function handlerResponseError(response: FetchResponse<any>) {
   if (!response.ok) {
     const nuxtApp = useNuxtApp();

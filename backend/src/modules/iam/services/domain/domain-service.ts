@@ -45,15 +45,16 @@ export class DomainService {
     const userId = user.id;
     const userType = user.type;
 
+    console.log(userType)
     if (userType === 'admin_user') {
-      return this.em
+      return await this.em
         .find(Domain, {
           active: true,
         })
         .then((rs) => rs.map(DomainMapper.toUserDomainAccess));
     }
 
-    return this.em
+    return await this.em
       .find(
         DomainMember,
         {

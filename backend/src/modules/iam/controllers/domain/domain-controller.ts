@@ -1,17 +1,20 @@
 import { EntityManager } from '@mikro-orm/core';
-import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, ForbiddenException, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, Res } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RequireAdmin, RequireAuth, RequirePermission } from '@/utils/decorators/auth.decorator';
 import { CreateDomainDto, UpdateDomainDto } from '../../dtos/domain-dto';
 import { Domain } from '@/persistence/entities/iam-domain.entity';
 import { DomainMapper } from '../../mappers/domain-mapper';
-import { DOMAIN_ID_PARAMETER } from '@/utils/types/utils';
+import { DOMAIN_ID_HEADER, DOMAIN_ID_PARAMETER } from '@/utils/types/utils';
 import { DomainSummary } from '@/persistence/entities/query-entities/domain-query';
 import { DomainSummaryView, DomainSummariesView, DomainWithIAMView } from '@rey-one/shared';
 import { DomainService } from '../../services/domain/domain-service';
 import { DomainNotFoundError } from '@/utils/errors/domain.error';
 import { PaginationQueryDto } from '@/utils/dtos/utils-dto';
 import { ResponseMapper } from '@/utils/mappers/response-mapper';
+import { CurrentUser } from '@/utils/decorators/utils.decorator';
+import type { UserAuth } from '@/utils/types/system';
+import type { FastifyReply } from 'fastify';
 
 @RequireAuth()
 @ApiTags('IAM / Domains')

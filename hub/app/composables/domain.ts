@@ -19,8 +19,8 @@ const domainFormState = reactive({
 });
 
 const accessDomainState = reactive({
-  domain: null as UserDomainAccess | null,
-  list: [] as UserDomainAccess[],
+  domain: undefined as UserDomainAccess | undefined,
+  list: undefined as UserDomainAccess[] | undefined,
   loading: false,
 });
 
@@ -50,8 +50,26 @@ export default function useDomain() {
       const userAuthId = (await loadAuthState()).userAuth?.id;
       if (!userAuthId) return;
 
+      try {
+        await useAPI(`/me/domains/${domain.domainId}/working`);
+      } catch (e) {
+        return;
+      }
+
       accessDomainState.domain = domain;
       localStorage.setItem(`${userAuthId}:working_domain`, domain.domainId);
+    };
+
+    const leaveDomain = async () => {
+      const userAuthId = (await loadAuthState()).userAuth?.id;
+      if (!userAuthId) return;
+
+      await useAPI("/me/domains", {
+        method: "DELETE",
+      });
+
+      accessDomainState.domain = undefined;
+      localStorage.removeItem(`${userAuthId}:working_domain`);
     };
 
     const loadWorkingDomain = async () => {
@@ -63,15 +81,20 @@ export default function useDomain() {
       );
       if (!storageDomainId) return;
 
-      const domain = accessDomainState.list.find(
+      if (!accessDomainState.list) await loadDomains();
+
+      const domain = accessDomainState.list?.find(
         (item) => item.domainId === storageDomainId,
       );
-      accessDomainState.domain = domain ?? null;
+      if (!domain) return;
+
+      await chooseDomain(domain);
     };
 
     return {
       loadDomains,
       chooseDomain,
+      leaveDomain,
       loadWorkingDomain,
     };
   }

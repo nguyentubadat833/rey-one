@@ -25,7 +25,7 @@ import type { DropdownMenuItem } from '@nuxt/ui';
 import useAuth from '~/composables/auth';
 
 const colorMode = useColorMode()
-const { authState } = useAuth()
+const { authState, logout } = useAuth()
 
 const user = computed(() => {
     const user = authState.userAuth
@@ -103,7 +103,10 @@ const userItems = computed<DropdownMenuItem[][]>(() => [
     // },
     {
       label: 'Log out',
-      icon: 'i-lucide-log-out'
+      icon: 'i-lucide-log-out',
+      onSelect() {
+        logout()
+      }
     }
   ]
 ])

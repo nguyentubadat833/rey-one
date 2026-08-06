@@ -2,12 +2,12 @@ import {
   BaseLoginSchema,
   type ApiResponse,
   type UserLoginResponse,
-  type UserView
+  type UserView,
 } from "@rey-one/shared";
 import type z from "zod";
 import { useGuestAPI, useAsyncAPI } from "./api";
 
-type UserAuth = UserView
+type UserAuth = UserView;
 type BaseLoginForm = z.input<typeof BaseLoginSchema>;
 
 const authState = reactive({
@@ -37,7 +37,7 @@ export default function useAuth() {
         "/auth/login",
         {
           method: "POST",
-          body: payload
+          body: payload,
         },
       );
 
@@ -60,8 +60,14 @@ export default function useAuth() {
     return authState;
   }
 
-  function logout() {
-    clearAuth();
+  async function logout() {
+    const accessTokenCookie = useCookie("access_token");
+    accessTokenCookie.value = null;
+
+    clearNuxtData();
+    clearNuxtState();
+
+    window.location.href = "/auth/login";
   }
 
   return {

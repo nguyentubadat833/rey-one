@@ -1,78 +1,22 @@
 <script setup lang="ts">
-import type { NavigationMenuItem, SidebarProps } from '@nuxt/ui'
+import type { SidebarProps } from '@nuxt/ui'
 import Brand from '~/components/ui/Brand.vue';
-import AccessDomain from '~/components/ui/AccessDomain.vue';
 import UserCard from '~/components/ui/UserCard.vue';
+import useUI from '~/composables/ui/ui';
+import Sidebar from '~/components/ui/Sidebar.vue';
+import useDomain from '~/composables/domain';
 
 defineProps<Pick<SidebarProps, 'variant' | 'collapsible' | 'side'>>()
 
 const { isMobile } = useDevice()
+const { openSidebar } = useUI()
 
-const openSidebar = ref(true)
+const { accessDomain } = useDomain()
+const { loadWorkingDomain } = accessDomain()
 
-const items: NavigationMenuItem[] = [
-    {
-        label: 'Dashboard',
-        icon: 'ic:round-pie-chart',
-        to: '/'
-    },
-    {
-        label: 'IAM',
-        icon: 'ic:twotone-vpn-lock',
-        children: [
-            {
-                label: "Users",
-                icon: 'ic:baseline-supervisor-account',
-                to: '/iam/users'
-            },
-            {
-                label: "Domains",
-                icon: 'ic:round-domain',
-                to: '/iam/domains'
-            }
-        ]
-    },
-    {
-        label: 'Commerce',
-        icon: 'ic:round-storefront',
-        children: [
-            {
-                label: 'Products',
-                icon: 'ic:outline-web-stories'
-            },
-            {
-                label: 'Orders',
-                icon: 'ic:outline-shopping-bag'
-            },
-            {
-                label: 'Promotions',
-                icon: 'ic:outline-discount'
-            },
-            {
-                label: 'Payments',
-                icon: 'ic:outline-payments'
-            }
-        ]
-    },
-    {
-        label: 'Contacts',
-        icon: 'ic:baseline-all-inbox'
-    },
-    {
-        label: 'Setting',
-        icon: 'ic:baseline-settings-suggest',
-        // children: [
-        //     {
-        //         label: "My information",
-        //         icon: 'ic:sharp-manage-accounts'
-        //     }
-        // ]
-    },
-    // {
-    //     label: 'Leave',
-    //     icon: 'ic:baseline-log-out'
-    // }
-]
+onBeforeMount(() => {
+    loadWorkingDomain()
+})
 </script>
 
 <template>
@@ -80,29 +24,7 @@ const items: NavigationMenuItem[] = [
         variant === 'inset' && 'bg-neutral-50 dark:bg-neutral-950',
         side === 'right' && 'flex-row-reverse'
     ]">
-        <USidebar v-model:open="openSidebar" variant="floating" collapsible="icon" :close="true" :side="side" :ui="{
-            container: 'h-full',
-        }">
-            <template #header>
-                <div class="w-full space-y-5 py-4">
-                    <div class="flex justify-between items-center gap-2">
-                        <Brand :show-name="openSidebar" />
-                        <UIcon v-if="isMobile" name="ic:twotone-close" size="25" @click="openSidebar = false" />
-                    </div>
-                    <AccessDomain />
-                </div>
-            </template>
-
-            <UNavigationMenu :items="items" orientation="vertical" :ui="{ link: 'p-1.5 overflow-hidden' }" />
-
-            <template #footer>
-                <div class="w-full" :class="[{ 'flex justify-between items-center gap-2': isMobile }]">
-                    <UserCard />
-                    <!-- <UColorModeSelect v-if="openSidebar && !isMobile" class="w-full" />
-                    <UColorModeButton v-else /> -->
-                </div>
-            </template>
-        </USidebar>
+        <Sidebar :side="side" />
 
         <div
             class="flex-1 flex flex-col overflow-hidden lg:peer-data-[variant=floating]:my-4 peer-data-[variant=inset]:m-4 lg:peer-data-[variant=inset]:not-peer-data-[collapsible=offcanvas]:ms-0 peer-data-[variant=inset]:rounded-xl peer-data-[variant=inset]:shadow-sm peer-data-[variant=inset]:ring peer-data-[variant=inset]:ring-default bg-default">
