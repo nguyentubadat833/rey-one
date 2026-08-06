@@ -1,5 +1,5 @@
 <template>
-    <UModal title="Working Organization">
+    <UModal title="Working Organization" v-model:open="open">
         <UButton :label="!selectedDomain?.domainName ? 'No Oraganization' : selectedDomain.domainName"
             icon="ic:twotone-domain" color="neutral" variant="subtle" block />
 
@@ -49,13 +49,20 @@ import RefreshButton from './RefreshButton.vue';
 
 const { copy, copied } = useClipboard()
 const { accessDomain, accessDomainState } = useDomain()
-const { loadDomains, chooseDomain, leaveDomain } = accessDomain()
+const { loadDomains, chooseDomain, leaveDomain: leave } = accessDomain()
 
+const open = ref(false)
 const selectedDomain = toRef(accessDomainState, 'domain')
 
 function openMenu(){
     if(!accessDomainState.list){
         loadDomains()
     }
+}
+
+async function leaveDomain(){
+    await leave()
+
+    open.value = false
 }
 </script>

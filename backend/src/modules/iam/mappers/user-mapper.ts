@@ -1,5 +1,5 @@
 import { IUserSummary } from '@/persistence/entities/query-entities/user-query';
-import { UserLoadedMembers, UserLoadedParty } from '@/persistence/types/user-type';
+import { UserLoadedPartyAndMembers, UserLoadedParty } from '@/persistence/types/user-type';
 import { UserDetailView, UserSummaryView, UserView } from '@rey-one/shared';
 import { DomainMapper } from './domain-mapper';
 
@@ -30,7 +30,7 @@ export class UserMapper {
     } satisfies UserSummaryView;
   }
 
-  static toUserDetailView(user: UserLoadedMembers) {
+  static toUserDetailView(user: UserLoadedPartyAndMembers) {
     return {
       ...UserMapper.toUserView(user),
       members: user.members.map((item) => ({

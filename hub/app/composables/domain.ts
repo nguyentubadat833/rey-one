@@ -1,16 +1,14 @@
 import {
   CreateDomainSchema,
   type ApiResponse,
-  type DomainSchema,
   type DomainView,
   type UserDomainAccess,
 } from "@rey-one/shared";
-import type z from "zod";
 import { useAPI } from "./api";
 import { UpdateDomainSchema } from "@rey-one/shared";
 import useAuth from "./auth";
 
-type DomainForm = z.infer<typeof DomainSchema>;
+type DomainForm = DomainView
 
 const domainFormState = reactive({
   data: {} as Partial<DomainForm>,
@@ -26,6 +24,7 @@ const accessDomainState = reactive({
 
 export default function useDomain() {
   const { loadAuthState } = useAuth();
+  const router = useRouter()
 
   function resetForm() {
     domainFormState.data.id = undefined;
@@ -50,26 +49,20 @@ export default function useDomain() {
       const userAuthId = (await loadAuthState()).userAuth?.id;
       if (!userAuthId) return;
 
-      try {
-        await useAPI(`/me/domains/${domain.domainId}/working`);
-      } catch (e) {
-        return;
-      }
-
       accessDomainState.domain = domain;
       localStorage.setItem(`${userAuthId}:working_domain`, domain.domainId);
+
+      await router.push('/')
     };
 
     const leaveDomain = async () => {
       const userAuthId = (await loadAuthState()).userAuth?.id;
       if (!userAuthId) return;
 
-      await useAPI("/me/domains", {
-        method: "DELETE",
-      });
-
       accessDomainState.domain = undefined;
       localStorage.removeItem(`${userAuthId}:working_domain`);
+
+      await router.push('/')
     };
 
     const loadWorkingDomain = async () => {

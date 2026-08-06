@@ -3,4 +3,4 @@ import { User } from '../entities/iam-user.entity';
 
 export type IdentifierType = { id: string } | { username: string } | { email: string } | { phone: string };
 export type UserLoadedParty = Loaded<User, 'party'>;
-export type UserLoadedMembers = Loaded<User, 'members.domain' | 'party'>
+export type UserLoadedPartyAndMembers = Loaded<User, 'members.domain' | 'party'>

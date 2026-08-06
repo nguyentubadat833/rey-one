@@ -35,3 +35,5 @@ export const CreateUserSchema = UserSchema.omit({
     }),
   ),
 });
+
+export const UpdateUserSchema = CreateUserSchema.partial()

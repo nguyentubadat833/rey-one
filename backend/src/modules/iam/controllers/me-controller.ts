@@ -41,21 +41,21 @@ export class MeController {
     return await this.domainService.getUserAccessDomains();
   }
 
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'User working domain' })
-  @Get(`/domains/:${DOMAIN_ID_PARAMETER}/working`)
-  async userWorkingDomain(@Param(DOMAIN_ID_PARAMETER) domainId: string, @Res({ passthrough: true }) res: FastifyReply) {
-    const accessDomains = await this.domainService.getUserAccessDomains();
-    if (!accessDomains.some((domain) => domain.domainId === domainId)) throw new ForbiddenException();
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // @ApiOperation({ summary: 'User working domain' })
+  // @Get(`/domains/:${DOMAIN_ID_PARAMETER}/working`)
+  // async userWorkingDomain(@Param(DOMAIN_ID_PARAMETER) domainId: string, @Res({ passthrough: true }) res: FastifyReply) {
+  //   const accessDomains = await this.domainService.getUserAccessDomains();
+  //   if (!accessDomains.some((domain) => domain.domainId === domainId)) throw new ForbiddenException();
 
-    res.header(DOMAIN_ID_HEADER, domainId);
-  }
+  //   res.header(DOMAIN_ID_HEADER, domainId);
+  // }
 
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'User leave domain' })
-  @Delete(`/domains`)
-  async userLeaveDomain(@Res({ passthrough: true }) res: FastifyReply) {
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // @ApiOperation({ summary: 'User leave domain' })
+  // @Delete(`/domains`)
+  // async userLeaveDomain(@Res({ passthrough: true }) res: FastifyReply) {
 
-    res.removeHeader(DOMAIN_ID_HEADER)
-  }
+  //   res.removeHeader(DOMAIN_ID_HEADER)
+  // }
 }

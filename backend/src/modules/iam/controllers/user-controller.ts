@@ -3,11 +3,12 @@ import { RequireAdmin, RequireAuth } from '@/utils/decorators/auth.decorator';
 import { PaginationQueryDto } from '@/utils/dtos/utils-dto';
 import { ResponseMapper } from '@/utils/mappers/response-mapper';
 import { EntityManager } from '@mikro-orm/core';
-import { Body, Controller, Get, NotFoundException, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, NotFoundException, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserSummariesView, UserSummaryView } from '@rey-one/shared';
 import { CreateUserDto } from '../dtos/user-dto';
 import { UserService } from '../services/user-service';
+import { UserMapper } from '../mappers/user-mapper';
 
 @RequireAuth()
 @ApiTags('IAM / Users')
@@ -16,7 +17,7 @@ export class UserController {
   constructor(
     private readonly em: EntityManager,
     private readonly userService: UserService,
-  ) {}
+  ) { }
 
   @RequireAdmin()
   @ApiOperation({ summary: 'User summaries' })
@@ -51,6 +52,13 @@ export class UserController {
   @ApiOperation({ summary: 'Create user' })
   @Post()
   async createUser(@Body() dto: CreateUserDto) {
-    return this.userService.createUser(dto);
+    return this.userService.createUser(dto).then(UserMapper.toUserDetailView);
+  }
+
+  @RequireAdmin()
+  @ApiOperation({ summary: 'Update user' })
+  @Patch(':id')
+  async updateUser(@Param('id') userId: string, @Body() dto: CreateUserDto) {
+    return this.userService.updateUser(userId, dto).then(UserMapper.toUserDetailView);
   }
 }
