@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useAsyncAPI } from '~/composables/api';
 import type { TableColumn, TableRow } from '@nuxt/ui';
-import type { ApiResponse, DomainSummariesView, DomainSummaryView, PaginatedResponse, PaginationQuery } from '@rey-one/shared';
+import type { ApiResponse, DomainSummariesView, DomainSummaryView, PaginationQuery } from '@rey-one/shared';
 import DomainForm from '~/components/DomainForm.vue';
 import RefreshButton from '~/components/ui/button/RefreshButton.vue';
 import useDomain from '~/composables/domain';
@@ -23,7 +23,9 @@ const columns = [
     { id: 'actions' }
 ] satisfies TableColumn<DomainSummaryView>[]
 
-const { domainFormState, domainFormStateVersion, resetForm: resetDomainFormState } = useDomain()
+const { domainFormState: domainState, resetForm: resetDomainFormState } = useDomain()
+const domainFormData = toRef(domainState, 'data')
+const domainFormStateVersion = toRef(domainState, 'version')
 
 const globalFilter = ref()
 const paginationQuery = ref<PaginationQuery>({
@@ -47,11 +49,11 @@ function onSelect(e: Event, row: TableRow<DomainSummaryView>) {
         [`${row.index}`]: true
     }
 
-    Object.assign(domainFormState, row.original)
+    Object.assign(domainFormData.value, row.original)
 }
 
 async function handlerClickDomainButton(row: TableRow<DomainSummaryView>) {
-    Object.assign(domainFormState, row.original)
+    Object.assign(domainFormData.value, row.original)
     await nextTick()
 }
 

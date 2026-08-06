@@ -10,6 +10,7 @@ import { UserMapper } from "../mappers/user-mapper";
 import { DomainMemberService } from "../services/domain/member-service";
 import { DomainMapper } from "../mappers/domain-mapper";
 import { UserDomainAccess } from "@rey-one/shared";
+import { DomainService } from "../services/domain/domain-service";
 
 @RequireAuth()
 @ApiTags('Me')
@@ -18,7 +19,7 @@ export class MeController {
     constructor(
         private readonly em: EntityManager,
         private readonly userRepo: UserRepository,
-        private readonly authService: AuthService,
+        private readonly domainService: DomainService,
         private readonly domainMemberService: DomainMemberService
     ) { }
 
@@ -35,7 +36,6 @@ export class MeController {
     @ApiOperation({ summary: "Get domains" })
     @Get('/domains')
     async getDomains(): Promise<UserDomainAccess[]> {
-        return await this.domainMemberService.getMembersByUser()
-            .then(rs => rs.map(DomainMapper.toUserDomainAccess))
+        return await this.domainService.getUserAccessDomains()
     }
 }

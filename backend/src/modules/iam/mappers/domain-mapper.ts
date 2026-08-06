@@ -104,11 +104,19 @@ export class DomainMapper {
     } satisfies DomainMemberDetailView;
   }
 
-  static toUserDomainAccess(member: DomainMemberLoadedDomain){
+  static toUserDomainAccess(domain: Domain) {
+    return {
+      domainId: domain.id,
+      domainName: domain.name,
+      permissions: [],
+    } satisfies UserDomainAccess;
+  }
+
+  static memberToUserDomainAccess(member: DomainMemberLoadedDomain) {
     return {
       domainId: member.domain.id,
       domainName: member.domain.getProperty('name'),
-      permissions: member.role?.permissions ?? []
-    } satisfies UserDomainAccess
+      permissions: member.role?.permissions ?? [],
+    } satisfies UserDomainAccess;
   }
 }

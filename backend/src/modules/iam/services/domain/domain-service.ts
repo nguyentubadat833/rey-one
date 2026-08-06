@@ -7,6 +7,9 @@ import { AppClsStore } from '@/utils/types/system';
 import { DomainNotFoundError } from '@/utils/errors/domain.error';
 import { DomainRepository } from '@/persistence/repositories/domain-repository';
 import { DomainCache } from '@/utils/cache/domain-cache';
+import { UserDomainAccess } from '@rey-one/shared';
+import { DomainMember } from '@/persistence/entities/iam-domain-member.entity';
+import { DomainMapper } from '../../mappers/domain-mapper';
 
 @Injectable()
 export class DomainService {
@@ -21,6 +24,10 @@ export class DomainService {
     return this.clsService.get('domainId');
   }
 
+  private getActorFromStore() {
+    return this.clsService.get('actor');
+  }
+
   async getDomainDetailWithIAM(domainId: string = this.getDomainIdFromStore()): Promise<DomainLoadedRolesAndMembers> {
     return this.em.findOneOrFail(
       Domain,
@@ -32,5 +39,33 @@ export class DomainService {
         failHandler: DomainNotFoundError,
       },
     );
+  }
+
+  async getUserAccessDomains(user = this.getActorFromStore()): Promise<UserDomainAccess[]> {
+    const userId = user.id;
+    const userType = user.type;
+
+    if (userType === 'admin_user') {
+      return this.em
+        .find(Domain, {
+          active: true,
+        })
+        .then((rs) => rs.map(DomainMapper.toUserDomainAccess));
+    }
+
+    return this.em
+      .find(
+        DomainMember,
+        {
+          user: userId,
+          domain: {
+            active: true,
+          },
+        },
+        {
+          populate: ['domain'],
+        },
+      )
+      .then((rs) => rs.map(DomainMapper.memberToUserDomainAccess));
   }
 }

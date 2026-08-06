@@ -20,14 +20,14 @@ export class DomainMemberService {
     private readonly domainRepo: DomainRepository,
     private readonly em: EntityManager,
     @Inject(authConfig.KEY) private readonly config: ConfigType<typeof authConfig>,
-  ) { }
+  ) {}
 
   private getDomainIdFromStore() {
     return this.clsService.get('domainId');
   }
 
-  private getActorIdFromStore() {
-    return this.clsService.get('actor.id')
+  private getActorFromStore() {
+    return this.clsService.get('actor');
   }
 
   async createMember(dto: CreateDomainMemberDto, domainId: string = this.getDomainIdFromStore()) {
@@ -120,18 +120,22 @@ export class DomainMemberService {
     );
   }
 
-  async getMembersByUser(userId: string = this.getActorIdFromStore()): Promise<DomainMemberLoadedDomain[]> {
-    return this.em.find(DomainMember,
+  async getMembersByUser(user = this.getActorFromStore()): Promise<DomainMemberLoadedDomain[]> {
+    const userId = user.id;
+    const userType = user.type;
+    
+    return this.em.find(
+      DomainMember,
       {
         user: userId,
         domain: {
-          active: true
-        }
+          active: true,
+        },
       },
       {
-        populate: ['domain']
-      }
-    )
+        populate: ['domain'],
+      },
+    );
   }
 
   getDomainMemberDetail(userId: string): Promise<DomainMemberLoadedUserAndRoleAndDomain> {

@@ -22,34 +22,6 @@ export class DomainController {
     private readonly domainService: DomainService,
   ) {}
 
-  // @ApiOperation({ summary: 'Domain available options' })
-  // @Get('/options')
-  // async getDomainAvailableOptions(@CurrentUser() user: UserAuth): Promise<DomainAvailableOption[]> {
-  //   if (user.type === 'admin_user') {
-  //     return await this.em
-  //       .find(Domain, {
-  //         active: true,
-  //       })
-  //       .then((domains) => domains.map(DomainMapper.toDomainOption));
-  //   }
-
-  //   const domains: Domain[] = await this.em
-  //     .find(
-  //       DomainMember,
-  //       {
-  //         user: user.id,
-  //         domain: {
-  //           active: true,
-  //         },
-  //       },
-  //       {
-  //         populate: ['domain'],
-  //       },
-  //     )
-  //     .then((members) => members.map((item) => item.domain.getEntity()));
-  //   return domains.map((item) => DomainMapper.toDomainOption(item));
-  // }
-
   @RequireAdmin()
   @ApiOperation({ summary: 'Domain summaries' })
   @Get()

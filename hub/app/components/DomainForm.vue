@@ -8,13 +8,13 @@
         <template #body>
             <form class="space-y-5" @submit.prevent="save">
                 <UFormField label="ID">
-                    <UInput disabled v-model="state.id" class="w-full" />
+                    <UInput disabled v-model="formData.id" class="w-full" />
                 </UFormField>
                 <UFormField label="Name">
-                    <UInput v-model="state.name" class="w-full" />
+                    <UInput v-model="formData.name" class="w-full" />
                 </UFormField>
                 <UFormField label="Active">
-                    <USwitch v-model="state.active" :default-value="true" />
+                    <USwitch v-model="formData.active" :default-value="true" />
                 </UFormField>
                 <UFormField label="Permissions">
                     <UTable :data="permissionChecks" sticky class="max-h-[50vh]">
@@ -29,7 +29,7 @@
         <template #footer>
             <div class="flex justify-end gap-3 w-full">
                 <CancelButton />
-                <SaveButton :loading="loading" @click="submit()" />
+                <SaveButton :loading="formLoading" @click="submit()" />
             </div>
         </template>
     </UModal>
@@ -51,23 +51,26 @@ const permissionChecks = ref(
     }))
 )
 
-const { domainFormState: state, domainFormLoading: loading, save } = useDomain()
-const modalTitle = computed(() => state.id ? state.name : 'New Domain')
+const { domainFormState, save } = useDomain()
+const formData = toRef(domainFormState, 'data')
+const formLoading = toRef(domainFormState, 'loading')
+
+const modalTitle = computed(() => formData.value.id ? formData.value.name : 'New Domain')
 
 async function submit() {
-    state.permissions = permissionChecks.value.filter(item => item.active).map(item => item.permissions)
+    formData.value.permissions = permissionChecks.value.filter(item => item.active === true).map(item => item.permissions)
 
-    loading.value = true
+    formLoading.value = true
     try {
         await save()
     } finally {
-        loading.value = false
+        formLoading.value = false
     }
 }
 
-watch(toRef(state, 'permissions'), (newValue, oldValue) => {
+watch(formData.value, (newValue, oldValue) => {
     permissionChecks.value.forEach(item => {
-        item.active = newValue?.includes(item.permissions) ?? false
+        item.active = newValue.permissions?.includes(item.permissions) ?? false
     })
 })
 </script>

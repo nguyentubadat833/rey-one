@@ -1,27 +1,20 @@
 <script setup lang="ts">
 import type { NavigationMenuItem, SidebarProps } from '@nuxt/ui'
+import Brand from '~/components/ui/Brand.vue';
+import AccessDomain from '~/components/ui/AccessDomain.vue';
 import UserCard from '~/components/ui/UserCard.vue';
-import useAuth from '~/composables/auth';
 
 defineProps<Pick<SidebarProps, 'variant' | 'collapsible' | 'side'>>()
 
 const { isMobile } = useDevice()
-const { authState } = useAuth()
 
-const open = ref(true)
-const profileState = computed(() => {
-    const user = authState.userAuth
-    return {
-        image: user?.image,
-        name: user?.name,
-        identity: user?.username ?? user?.email ?? user?.phone
-    }
-})
+const openSidebar = ref(true)
 
 const items: NavigationMenuItem[] = [
     {
-        label: 'OVERVIEW',
-        icon: 'ic:round-pie-chart'
+        label: 'Dashboard',
+        icon: 'ic:round-pie-chart',
+        to: '/'
     },
     {
         label: 'IAM',
@@ -68,17 +61,17 @@ const items: NavigationMenuItem[] = [
     {
         label: 'Setting',
         icon: 'ic:baseline-settings-suggest',
-        children: [
-            {
-                label: "My information",
-                icon: 'ic:sharp-manage-accounts'
-            }
-        ]
+        // children: [
+        //     {
+        //         label: "My information",
+        //         icon: 'ic:sharp-manage-accounts'
+        //     }
+        // ]
     },
-    {
-        label: 'Leave',
-        icon: 'ic:baseline-log-out'
-    }
+    // {
+    //     label: 'Leave',
+    //     icon: 'ic:baseline-log-out'
+    // }
 ]
 </script>
 
@@ -87,18 +80,16 @@ const items: NavigationMenuItem[] = [
         variant === 'inset' && 'bg-neutral-50 dark:bg-neutral-950',
         side === 'right' && 'flex-row-reverse'
     ]">
-        <USidebar v-model:open="open" variant="floating" collapsible="icon" :side="side" :ui="{
+        <USidebar v-model:open="openSidebar" variant="floating" collapsible="icon" :close="true" :side="side" :ui="{
             container: 'h-full',
         }">
             <template #header>
                 <div class="w-full space-y-5 py-4">
                     <div class="flex justify-between items-center gap-2">
-                        <div class="flex gap-2 items-center">
-                            <UIcon name="glyphs-poly:grid-add" class="size-8" />
-                            <p v-if="open" class=" font-bold">RONE SYSTEM</p>
-                        </div>
-                        <UIcon v-if="isMobile" name="ic:twotone-close" size="25" @click="open = false" />
+                        <Brand :show-name="openSidebar" />
+                        <UIcon v-if="isMobile" name="ic:twotone-close" size="25" @click="openSidebar = false" />
                     </div>
+                    <AccessDomain />
                 </div>
             </template>
 
@@ -106,9 +97,9 @@ const items: NavigationMenuItem[] = [
 
             <template #footer>
                 <div class="w-full" :class="[{ 'flex justify-between items-center gap-2': isMobile }]">
-                    <UserCard v-if="isMobile" />
-                    <UColorModeSelect v-if="open && !isMobile" class="w-full" />
-                    <UColorModeButton v-else />
+                    <UserCard />
+                    <!-- <UColorModeSelect v-if="openSidebar && !isMobile" class="w-full" />
+                    <UColorModeButton v-else /> -->
                 </div>
             </template>
         </USidebar>
@@ -119,19 +110,17 @@ const items: NavigationMenuItem[] = [
                 variant !== 'floating' && 'border-b border-default',
                 side === 'right' && 'justify-end'
             ]">
-                <div v-if="isMobile" class="flex gap-2 items-center">
-                    <UIcon name="glyphs-poly:grid-add" class="size-8" />
-                    <p class=" font-bold">RONE SYSTEM</p>
+                <div class="flex justify-between items-center w-full">
+                    <Brand v-if="isMobile" :show-name="isMobile" />
+
+                    <UButton :icon="side === 'left' ? 'i-lucide-panel-left' : 'i-lucide-panel-right'" color="neutral"
+                        variant="ghost" aria-label="Toggle sidebar" @click="openSidebar = !openSidebar" />
+                    <div v-if="!isMobile">
+                        <UserCard />
+                    </div>
                 </div>
-
-                <UButton :icon="side === 'left' ? 'i-lucide-panel-left' : 'i-lucide-panel-right'" color="neutral"
-                    variant="ghost" aria-label="Toggle sidebar" @click="open = !open" />
-
-                <UserCard v-if="!isMobile" />
-
             </div>
-
-            <div class="flex-1 px-4">
+            <div class="flex-1 p-4">
                 <slot />
             </div>
         </div>
