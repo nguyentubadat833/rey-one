@@ -9,6 +9,7 @@ import { uuidv7 } from 'uuidv7';
 import { BaseEntitySchema } from './base.entity';
 import { InvalidUserStatusError, UserNotFoundError } from '@/utils/errors/user.error';
 import { Order } from './commerce-order.entity';
+import randomstring from 'randomstring';
 
 // User Base Entity
 export const BaseUserEntitySchema = defineEntity({
@@ -39,7 +40,7 @@ const UserEntitySchema = defineEntity({
     lastFailedLoginAttemptAt: p.datetime().nullable().fieldName('last_failed_login_attempt_at'),
     lastSuccessfulLoginAt: p.datetime().nullable().fieldName('last_successful_login_at'),
     token: p.string().persist(false).nullable(),
-    party: () => p.oneToOne(Party).ref(),
+    party: () => p.oneToOne(Party).unique().ref(),
     members: () =>
       p
         .oneToMany(DomainMember)
@@ -114,6 +115,8 @@ async function saveHandler(args: EventArgs<User>) {
   const changePassword = args.changeSet?.payload.password;
 
   if (changeSetType === ChangeSetType.CREATE) {
+    entity.party.getEntity().code = generatePartyCode();
+
     if (!changeEmail && !changeUsername && !changePhone) {
       throw AppError.withMessage('PROPERTY_REQUIRED', 'At least one of email, username, or phone is required');
     }
@@ -143,4 +146,12 @@ async function saveHandler(args: EventArgs<User>) {
       throw AppError.withMessage('BUSINESS_RULE_VIOLATION', 'A domain user cannot belong to more than one domain.');
     }
   }
+}
+
+function generatePartyCode() {
+  const string = randomstring.generate({
+    length: 12,
+    charset: '123456789QWERTYUPASDFGHJKLMNBVCXZ',
+  });
+  return `USR${string}`;
 }

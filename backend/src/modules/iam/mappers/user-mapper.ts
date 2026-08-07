@@ -2,6 +2,7 @@ import { IUserSummary } from '@/persistence/entities/query-entities/user-query';
 import { UserLoadedPartyAndMembers, UserLoadedParty } from '@/persistence/types/user-type';
 import { UserDetailView, UserSummaryView, UserView } from '@rey-one/shared';
 import { DomainMapper } from './domain-mapper';
+import { DomainLoadedParty } from '@/persistence/types/domain-type';
 
 export class UserMapper {
   static toUserView(user: UserLoadedParty) {
@@ -33,10 +34,13 @@ export class UserMapper {
   static toUserDetailView(user: UserLoadedPartyAndMembers) {
     return {
       ...UserMapper.toUserView(user),
-      members: user.members.map((item) => ({
-        domain: DomainMapper.toDomainView(item.domain.getEntity()),
-        role: item.role ? DomainMapper.toDomainRoleView(item.role) : null,
-      })),
+      members: user.members.map((item) => {
+        const domain = item.domain.unwrap() as DomainLoadedParty
+        return {
+          domain: DomainMapper.toDomainView(domain),
+          role: item.role ? DomainMapper.toDomainRoleView(item.role) : null,
+        };
+      }),
     } satisfies UserDetailView;
   }
 }

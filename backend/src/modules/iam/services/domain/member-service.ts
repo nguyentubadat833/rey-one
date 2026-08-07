@@ -133,7 +133,7 @@ export class DomainMemberService {
         },
       },
       {
-        populate: ['domain'],
+        populate: ['domain.party'],
       },
     );
   }
@@ -145,7 +145,7 @@ export class DomainMemberService {
         user: userId,
       },
       {
-        populate: ['user.party', 'domain'],
+        populate: ['user.party', 'domain.party'],
         failHandler: DomainMemberNotFoundError,
       },
     );

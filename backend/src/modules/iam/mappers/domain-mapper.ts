@@ -2,8 +2,9 @@ import { Domain } from '@/persistence/entities/iam-domain.entity';
 import { DomainRole } from '@/persistence/entities/iam-domain-role.entity';
 import { IDomainSummary } from '@/persistence/entities/query-entities/domain-query';
 import {
-  DomainLoadedRoles,
-  DomainLoadedRolesAndMembers,
+  DomainLoadedParty,
+  DomainLoadedPartyAndRoles,
+  DomainLoadedPartyAndRolesAndMembers,
   DomainMemberLoadedDomain,
   DomainMemberLoadedUserAndRole,
   DomainMemberLoadedUserAndRoleAndDomain,
@@ -36,19 +37,19 @@ export class DomainMapper {
     } satisfies DomainSummaryView;
   }
 
-  static toDomainView(domain: Domain) {
+  static toDomainView(domain: DomainLoadedParty) {
     return {
       id: domain.id,
-      name: domain.name,
+      name: domain.party.getProperty('name'),
       active: domain.active,
       permissions: domain.permissions,
     } satisfies DomainView;
   }
 
-  static toDomainWithIAMView(domain: DomainLoadedRolesAndMembers) {
+  static toDomainWithIAMView(domain: DomainLoadedPartyAndRolesAndMembers) {
     return {
       id: domain.id,
-      name: domain.name,
+      name: domain.party.getProperty('name'),
       active: domain.active,
       permissions: domain.permissions,
       roles: domain.roles.map(DomainMapper.toDomainRoleView),
@@ -65,7 +66,7 @@ export class DomainMapper {
     } satisfies DomainRoleView;
   }
 
-  static toDomainAndRolesView(domain: DomainLoadedRoles) {
+  static toDomainAndRolesView(domain: DomainLoadedPartyAndRoles) {
     return {
       ...DomainMapper.toDomainView(domain),
       roles: domain.roles.getItems().map(item => DomainMapper.toDomainRoleView(item))
@@ -107,15 +108,15 @@ export class DomainMapper {
       ...DomainMapper.toDomainMemberView(member),
       domain: {
         id: member.user.getProperty('id'),
-        name: member.domain.getProperty('name'),
+        name: member.domain.getProperty('party').getProperty('name'),
       },
     } satisfies DomainMemberDetailView;
   }
 
-  static toUserDomainAccess(domain: Domain) {
+  static toUserDomainAccess(domain: DomainLoadedParty) {
     return {
       domainId: domain.id,
-      domainName: domain.name,
+      domainName: domain.party.getProperty('name'),
       permissions: [],
     } satisfies UserDomainAccess;
   }
@@ -123,7 +124,7 @@ export class DomainMapper {
   static memberToUserDomainAccess(member: DomainMemberLoadedDomain) {
     return {
       domainId: member.domain.id,
-      domainName: member.domain.getProperty('name'),
+      domainName: member.domain.getProperty('party').getProperty('name'),
       permissions: member.role?.permissions ?? [],
     } satisfies UserDomainAccess;
   }

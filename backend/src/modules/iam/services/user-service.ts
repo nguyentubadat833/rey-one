@@ -17,16 +17,16 @@ export class UserService {
     private readonly em: EntityManager,
     private readonly userRepo: UserRepository,
     @Inject(authConfig.KEY) private readonly config: ConfigType<typeof authConfig>,
-  ) { }
+  ) {}
 
-  private resolveToMembers(members: { domainId: string, roleId: string }[], user: User) {
+  private resolveToMembers(members: { domainId: string; roleId?: string | null }[], user: User) {
     return members.map((domain) =>
       this.em.create(DomainMember, {
         user,
         domain: this.em.getReference(Domain, domain.domainId),
-        role: this.em.getReference(DomainRole, domain.roleId),
+        role: domain.roleId ? this.em.getReference(DomainRole, domain.roleId) : null,
       }),
-    )
+    );
   }
 
   async createUser(dto: CreateUserDto) {
@@ -44,21 +44,22 @@ export class UserService {
     user.members.set(this.resolveToMembers(dto.domains, user));
 
     await this.em.flush();
-    return user as UserLoadedPartyAndMembers
+    return user as UserLoadedPartyAndMembers;
   }
 
   async updateUser(userId: string, dto: UpdateUserDto) {
     const user = await this.userRepo.findOneOrFail(
       {
-        id: userId
+        id: userId,
       },
       {
         populate: ['party'],
-        failHandler: UserNotFoundError
-      }
-    )
+        failHandler: UserNotFoundError,
+      },
+    );
 
-    this.userRepo.assign(user,
+    this.userRepo.assign(
+      user,
       {
         password: dto.password,
         email: dto.email,
@@ -69,16 +70,16 @@ export class UserService {
         },
       },
       {
-        ignoreUndefined: true
-      }
-    )
+        ignoreUndefined: true,
+      },
+    );
 
     if (dto.domains) {
       user.members.set(this.resolveToMembers(dto.domains, user));
     }
 
-    await this.em.flush()
-    await user.members.load()
-    return user as UserLoadedPartyAndMembers
+    await this.em.flush();
+    await user.members.load();
+    return user as UserLoadedPartyAndMembers;
   }
 }

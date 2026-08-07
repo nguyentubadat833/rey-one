@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/core';
-import { DomainLoadedRoles, DomainLoadedRolesAndMembers } from '@/persistence/types/domain-type';
+import { DomainLoadedParty, DomainLoadedPartyAndRoles, DomainLoadedPartyAndRolesAndMembers } from '@/persistence/types/domain-type';
 import { Domain } from '@/persistence/entities/iam-domain.entity';
 import { ClsService } from 'nestjs-cls';
 import { AppClsStore } from '@/utils/types/system';
@@ -9,6 +9,7 @@ import { DomainRepository } from '@/persistence/repositories/domain-repository';
 import { UserDomainAccess } from '@rey-one/shared';
 import { DomainMember } from '@/persistence/entities/iam-domain-member.entity';
 import { DomainMapper } from '../../mappers/domain-mapper';
+import { CreateDomainDto, UpdateDomainDto } from '../../dtos/domain-dto';
 
 @Injectable()
 export class DomainService {
@@ -27,13 +28,48 @@ export class DomainService {
     return this.clsService.get('actor');
   }
 
-  async getDomainDetailWithIAM(domainId: string = this.getDomainIdFromStore()): Promise<DomainLoadedRolesAndMembers> {
+  async createDomain(dto: CreateDomainDto) {
+    const domain = this.em.create(Domain, {
+      party: {
+        name: dto.name,
+      },
+      active: dto.active,
+      permissions: dto.permissions,
+    });
+
+    await this.em.flush();
+    return domain as DomainLoadedParty;
+  }
+
+  async updateDomain(id: string, dto: UpdateDomainDto) {
+    const domain = await this.em.findOneOrFail(Domain, id, {
+      failHandler: DomainNotFoundError,
+      populate: ['party'],
+    });
+
+    this.em.assign(
+      domain,
+      {
+        active: dto.active,
+        permissions: dto.permissions,
+        party: {
+          name: dto.name,
+        },
+      },
+      { ignoreUndefined: true },
+    );
+
+    await this.em.flush();
+    return domain;
+  }
+
+  async getDomainDetailWithIAM(domainId: string = this.getDomainIdFromStore()): Promise<DomainLoadedPartyAndRolesAndMembers> {
     return this.domainRepo.findOneOrFail(
       {
         id: domainId,
       },
       {
-        populate: ['roles', 'members.user.party'],
+        populate: ['party','roles', 'members.user.party'],
         failHandler: DomainNotFoundError,
       },
     );
@@ -45,9 +81,15 @@ export class DomainService {
 
     if (userType === 'admin_user') {
       return await this.em
-        .find(Domain, {
-          active: true,
-        })
+        .find(
+          Domain,
+          {
+            active: true,
+          },
+          {
+            populate: ['party'],
+          },
+        )
         .then((rs) => rs.map(DomainMapper.toUserDomainAccess));
     }
 
@@ -61,20 +103,20 @@ export class DomainService {
           },
         },
         {
-          populate: ['domain'],
+          populate: ['domain.party'],
         },
       )
       .then((rs) => rs.map(DomainMapper.memberToUserDomainAccess));
   }
 
-  async getAvailableDomains(): Promise<DomainLoadedRoles[]> {
+  async getAvailableDomains(): Promise<DomainLoadedPartyAndRoles[]> {
     return await this.domainRepo.find(
       {
         active: true,
       },
       {
-        populate: ['roles']
+        populate: ['party','roles'],
       },
-    )
+    );
   }
 }

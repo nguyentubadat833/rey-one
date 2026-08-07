@@ -31,9 +31,9 @@ export const CreateUserSchema = UserSchema.omit({
   domains: z.array(
     z.object({
       domainId: z.string(),
-      roleId: z.string(),
-    }),
-  ),
+      roleId: z.string().nullable().optional(),
+    })
+  ).default([]),
 });
 
 export const UpdateUserSchema = CreateUserSchema.partial()

@@ -7,13 +7,21 @@ export const DomainSummary = defineEntity({
   expression: (em) =>
     em
       .createQueryBuilder(Domain, 'd')
-      .select(['d.*', raw('count(distinct r.id) as "roleCount"'), raw('count(distinct m.id) as "memberCount"'), raw('count(distinct p.id) as "productCount"')])
+      .select([
+        'd.*',
+        'pt.name as name',
+        raw('count(distinct r.id) as "roleCount"'),
+        raw('count(distinct m.id) as "memberCount"'),
+        raw('count(distinct p.id) as "productCount"'),
+      ])
       .leftJoin('d.roles', 'r')
       .leftJoin('d.members', 'm')
       .leftJoin('d.products', 'p')
-      .groupBy('d.id'),
+      .leftJoin('d.party', 'pt')
+      .groupBy(['d.id', 'pt.name']),
   properties: (p) => ({
     id: p.uuid(),
+    name: p.string(),
     roleCount: p.integer(),
     memberCount: p.integer(),
     productCount: p.integer(),

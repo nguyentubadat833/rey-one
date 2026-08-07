@@ -55,9 +55,7 @@ export class DomainController {
   @ApiOperation({ summary: 'Create domain' })
   @Post()
   async createDomain(@Body() dto: CreateDomainDto) {
-    const domain = this.em.create(Domain, dto);
-    await this.em.flush();
-
+    const domain = await this.domainService.createDomain(dto)
     return DomainMapper.toDomainView(domain);
   }
 
@@ -65,12 +63,7 @@ export class DomainController {
   @ApiOperation({ summary: 'Update domain' })
   @Patch(`:${DOMAIN_ID_PARAMETER}`)
   async updateDomain(@Param(DOMAIN_ID_PARAMETER) id: string, @Body() dto: UpdateDomainDto) {
-    const domain = await this.em.findOneOrFail(Domain, id, {
-      failHandler: DomainNotFoundError,
-    });
-    this.em.assign(domain, dto, { ignoreUndefined: true });
-
-    await this.em.flush();
+    const domain = await this.domainService.updateDomain(id, dto)
     return DomainMapper.toDomainView(domain);
   }
 

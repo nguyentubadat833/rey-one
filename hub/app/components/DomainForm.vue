@@ -8,10 +8,10 @@
         <template #body>
             <form class="space-y-5" @submit.prevent="save">
                 <UFormField label="ID">
-                    <UInput disabled v-model="formData.id" class="w-full" />
+                    <UInput disabled v-model="formData.id" class="w-full" placeholder="Leave blank to generate automatically"/>
                 </UFormField>
                 <UFormField label="Name">
-                    <UInput v-model="formData.name" class="w-full" />
+                    <UInput v-model="formData.name" class="w-full" placeholder="Display name for this domain"/>
                 </UFormField>
                 <UFormField label="Active">
                     <USwitch v-model="formData.active" :default-value="true" />
