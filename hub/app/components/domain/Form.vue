@@ -36,8 +36,6 @@
 </template>
 <script setup lang="ts">
 import useDomain from '~/composables/domain';
-import SaveButton from './ui/button/SaveButton.vue';
-import CancelButton from './ui/button/CancelButton.vue';
 import { APP_PERMISSIONS } from '@rey-one/shared';
 
 defineProps<{
@@ -68,7 +66,7 @@ async function submit() {
     }
 }
 
-watch(formData.value, (newValue, oldValue) => {
+watch(formData.value, (newValue) => {
     permissionChecks.value.forEach(item => {
         item.active = newValue.permissions?.includes(item.permissions) ?? false
     })

@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { CreateUserDto, UpdateUserDto } from '../dtos/user-dto';
+import { CreateUserDto, UpdateUserDto, UserMemberDto } from '../dtos/user-dto';
 import { UserRepository } from '@/persistence/repositories/user-repository';
 import { authConfig } from '@/configs/auth.config';
 import type { ConfigType } from '@nestjs/config';
@@ -19,12 +19,12 @@ export class UserService {
     @Inject(authConfig.KEY) private readonly config: ConfigType<typeof authConfig>,
   ) {}
 
-  private resolveToMembers(members: { domainId: string; roleId?: string | null }[], user: User) {
-    return members.map((domain) =>
+  private resolveToMembers(members: UserMemberDto[], user: User) {
+    return members.map((member) =>
       this.em.create(DomainMember, {
         user,
-        domain: this.em.getReference(Domain, domain.domainId),
-        role: domain.roleId ? this.em.getReference(DomainRole, domain.roleId) : null,
+        domain: this.em.getReference(Domain, member.domain.id),
+        role:  member.role ? this.em.getReference(DomainRole, member.role.id) : null,
       }),
     );
   }
@@ -41,7 +41,7 @@ export class UserService {
       },
     });
 
-    user.members.set(this.resolveToMembers(dto.domains, user));
+    user.members.set(this.resolveToMembers(dto.members, user));
 
     await this.em.flush();
     return user as UserLoadedPartyAndMembers;
@@ -74,8 +74,8 @@ export class UserService {
       },
     );
 
-    if (dto.domains) {
-      user.members.set(this.resolveToMembers(dto.domains, user));
+    if (dto.members) {
+      user.members.set(this.resolveToMembers(dto.members, user));
     }
 
     await this.em.flush();

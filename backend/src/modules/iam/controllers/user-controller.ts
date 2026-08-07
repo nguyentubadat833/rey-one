@@ -1,5 +1,5 @@
 import { UserSummary } from '@/persistence/entities/query-entities/user-query';
-import { RequireAdmin, RequireAuth } from '@/utils/decorators/auth.decorator';
+import { RequireAdmin, RequireAuth, RequirePermission } from '@/utils/decorators/auth.decorator';
 import { PaginationQueryDto } from '@/utils/dtos/utils-dto';
 import { ResponseMapper } from '@/utils/mappers/response-mapper';
 import { EntityManager } from '@mikro-orm/core';
@@ -9,6 +9,8 @@ import { UserSummariesView, UserSummaryView } from '@rey-one/shared';
 import { CreateUserDto } from '../dtos/user-dto';
 import { UserService } from '../services/user-service';
 import { UserMapper } from '../mappers/user-mapper';
+import { User } from '@/persistence/entities/iam-user.entity';
+import { UserNotFoundError } from '@/utils/errors/user.error';
 
 @RequireAuth()
 @ApiTags('IAM / Users')
@@ -17,7 +19,7 @@ export class UserController {
   constructor(
     private readonly em: EntityManager,
     private readonly userService: UserService,
-  ) { }
+  ) {}
 
   @RequireAdmin()
   @ApiOperation({ summary: 'User summaries' })
@@ -60,5 +62,23 @@ export class UserController {
   @Patch(':id')
   async updateUser(@Param('id') userId: string, @Body() dto: CreateUserDto) {
     return this.userService.updateUser(userId, dto).then(UserMapper.toUserDetailView);
+  }
+
+  @RequirePermission('user:read')
+  @ApiOperation({ summary: 'Get user detail' })
+  @Get(':id/detail')
+  async getUserDetail(@Param('id') userId: string) {
+    const user = await this.em.findOneOrFail(
+      User,
+      {
+        id: userId,
+      },
+      {
+        failHandler: UserNotFoundError,
+        populate: ['members.domain.party', 'party'],
+      },
+    );
+
+    return UserMapper.toUserDetailView(user);
   }
 }

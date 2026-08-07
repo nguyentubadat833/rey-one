@@ -22,6 +22,14 @@ export class DomainRoleService {
     return this.clsService.get('domainId');
   }
 
+  async getInfoByIds(ids: string[]){
+    return this.em.find(DomainRole, {
+      id: {
+        $in: ids
+      }
+    })
+  }
+
   getRoleWithMembers(roleId: string): Promise<DomainRoleLoadedMembers> {
     return this.em.findOneOrFail(
       DomainRole,
@@ -40,9 +48,6 @@ export class DomainRoleService {
       failHandler: DomainNotFoundError,
     });
 
-    // Middleware checked
-    // domain.ensureStatus();
-
     const role = this.em.create(DomainRole, {
       domain,
       ...dto,
@@ -56,9 +61,6 @@ export class DomainRoleService {
     const role = await this.em.findOneOrFail(DomainRole, roleId, {
       failHandler: DomainRoleNotFoundError,
     });
-
-    // Middleware checked
-    // role.domain.getEntity().ensureStatus();
 
     this.em.assign(role, dto, { ignoreUndefined: true });
     await this.em.flush();

@@ -2,10 +2,7 @@
 import { useAsyncAPI } from '~/composables/api';
 import type { TableColumn, TableRow } from '@nuxt/ui';
 import type { ApiResponse, DomainSummariesView, DomainSummaryView, PaginationQuery } from '@rey-one/shared';
-import DomainForm from '~/components/DomainForm.vue';
-import RefreshButton from '~/components/ui/button/RefreshButton.vue';
 import useDomain from '~/composables/domain';
-import CreateButton from '~/components/ui/button/CreateButton.vue';
 
 definePageMeta({
     title: "Domains Management",
@@ -69,7 +66,7 @@ function handlerClickAddDomainButton() {
                 <UInput v-model="globalFilter" class="max-w-sm" placeholder="Filter..." />
             </div>
             <div class="flex items-center gap-4">
-                <RefreshButton @click="refresh" :loading="pending" />
+                <UiButtonRefresh @click="refresh" :loading="pending" />
                 <DomainForm :click-icon="handlerClickAddDomainButton">
                     <template #icon>
                         <CreateButton />

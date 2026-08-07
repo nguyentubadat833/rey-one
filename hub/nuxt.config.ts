@@ -1,37 +1,37 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  modules: ['@nuxt/eslint', '@nuxt/ui', '@nuxtjs/device', '@vueuse/nuxt'],
+  modules: ["@nuxt/eslint", "@nuxt/ui", "@nuxtjs/device", "@vueuse/nuxt"],
 
   ssr: false,
 
   devServer: {
-    port: 4008
+    port: 4008,
   },
 
   devtools: {
-    enabled: true
+    enabled: true,
   },
 
-  css: ['~/assets/css/main.css'],
+  css: ["~/assets/css/main.css"],
 
   routeRules: {
-    '/**': { ssr: false },
+    "/**": { ssr: false },
 
-    '/rmk-api/**': {
+    "/rmk-api/**": {
       proxy: {
-        to: `${process.env.NUXT_API_URL}/rmk-api/**`
-      }
-    }
+        to: `${process.env.NUXT_API_URL}/rmk-api/**`,
+      },
+    },
   },
 
-  compatibilityDate: '2026-06-30',
+  compatibilityDate: "2026-06-30",
 
   eslint: {
     config: {
       stylistic: {
-        commaDangle: 'never',
-        braceStyle: '1tbs'
-      }
-    }
-  }
-})
+        commaDangle: "never",
+        braceStyle: "1tbs",
+      },
+    },
+  },
+});

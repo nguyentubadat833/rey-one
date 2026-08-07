@@ -2,9 +2,6 @@
 import type { TableColumn, TableRow } from '@nuxt/ui';
 import type { ApiResponse, UserSummariesView, UserSummaryView } from '@rey-one/shared';
 import { useAsyncAPI } from '~/composables/api';
-import RefreshButton from '~/components/ui/button/RefreshButton.vue';
-import UserForm from '~/components/UserForm.vue';
-import CreateButton from '~/components/ui/button/CreateButton.vue';
 import useUser from '~/composables/user';
 
 definePageMeta({
@@ -23,7 +20,7 @@ const columns = [
     { id: 'actions' }
 ] satisfies TableColumn<UserSummaryView>[]
 
-const { userFormState } = useUser()
+const { resetForm: resetUserForm, loadFormData: loadUserData } = useUser()
 
 const { data: response, pending, refresh } = await useAsyncAPI<ApiResponse<UserSummariesView>>('/users')
 const users = computed(() => response.value?.data.data ?? [])
@@ -43,12 +40,12 @@ function onSelect(e: Event, row: TableRow<UserSummaryView>) {
 }
 
 async function handlerClickUserButton(row: TableRow<UserSummaryView>) {
-
+    await loadUserData(row.original.id)
     await nextTick()
 }
 
 function handlerClickAddUserButton() {
-
+    resetUserForm()
 }
 </script>
 
@@ -59,10 +56,10 @@ function handlerClickAddUserButton() {
                 <UInput v-model="globalFilter" class="max-w-sm" placeholder="Filter..." />
             </div>
             <div class="flex items-center gap-4">
-                <RefreshButton @click="refresh" :loading="pending" />
+                <UiButtonRefresh @click="refresh" :loading="pending" />
                 <UserForm :click-icon="handlerClickAddUserButton">
                     <template #icon>
-                        <CreateButton />
+                        <UiButtonCreate />
                     </template>
                 </UserForm>
             </div>

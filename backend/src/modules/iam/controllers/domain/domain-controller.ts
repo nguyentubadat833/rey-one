@@ -1,9 +1,8 @@
 import { EntityManager } from '@mikro-orm/core';
 import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RequireAdmin, RequireAuth, RequirePermission } from '@/utils/decorators/auth.decorator';
 import { CreateDomainDto, UpdateDomainDto } from '../../dtos/domain-dto';
-import { Domain } from '@/persistence/entities/iam-domain.entity';
 import { DomainMapper } from '../../mappers/domain-mapper';
 import { DOMAIN_ID_PARAMETER } from '@/utils/types/utils';
 import { DomainSummary } from '@/persistence/entities/query-entities/domain-query';
@@ -12,6 +11,7 @@ import { DomainService } from '../../services/domain/domain-service';
 import { DomainNotFoundError } from '@/utils/errors/domain.error';
 import { PaginationQueryDto } from '@/utils/dtos/utils-dto';
 import { ResponseMapper } from '@/utils/mappers/response-mapper';
+import { Domain } from '@/persistence/entities/iam-domain.entity';
 
 @RequireAuth()
 @ApiTags('IAM / Domains')
@@ -51,11 +51,13 @@ export class DomainController {
     return await this.domainService.getAvailableDomains().then((rs) => rs.map((item) => DomainMapper.toDomainAndRolesView(item)));
   }
 
+
+
   @RequireAdmin()
   @ApiOperation({ summary: 'Create domain' })
   @Post()
   async createDomain(@Body() dto: CreateDomainDto) {
-    const domain = await this.domainService.createDomain(dto)
+    const domain = await this.domainService.createDomain(dto);
     return DomainMapper.toDomainView(domain);
   }
 
@@ -63,7 +65,7 @@ export class DomainController {
   @ApiOperation({ summary: 'Update domain' })
   @Patch(`:${DOMAIN_ID_PARAMETER}`)
   async updateDomain(@Param(DOMAIN_ID_PARAMETER) id: string, @Body() dto: UpdateDomainDto) {
-    const domain = await this.domainService.updateDomain(id, dto)
+    const domain = await this.domainService.updateDomain(id, dto);
     return DomainMapper.toDomainView(domain);
   }
 
@@ -81,7 +83,7 @@ export class DomainController {
       )
       .then((data) => DomainMapper.toDomainSummary(data));
   }
-
+  
   @RequirePermission('domain:manage:read', false)
   @ApiOperation({ summary: 'Domain detail' })
   @Get(`:${DOMAIN_ID_PARAMETER}/detail`)

@@ -12,6 +12,20 @@ export const BaseLoginSchema = z.object({
   password: z.string({ error: "Password is required" }),
 });
 
+export const UserMemberSchema = z.object({
+  domain: z.object({
+    id: z.string(),
+    name: z.string(),
+  }),
+  role: z
+    .object({
+      id: z.string(),
+      name: z.string(),
+    })
+    .nullable()
+    .optional(),
+});
+
 export const UserSchema = z.object({
   id: z.string().readonly(),
   type: z.enum(USER_TYPES, { error: "User type is required" }),
@@ -23,17 +37,16 @@ export const UserSchema = z.object({
   image: imageSchema,
 });
 
-export const CreateUserSchema = UserSchema.omit({
+export const UserWithMembersSchema = UserSchema.extend({
+  members: z.array(UserMemberSchema).default([]),
+});
+
+const UserFormSchema = UserWithMembersSchema.omit({
   id: true,
   type: true,
 }).extend({
   password: z.string().optional(),
-  domains: z.array(
-    z.object({
-      domainId: z.string(),
-      roleId: z.string().nullable().optional(),
-    })
-  ).default([]),
 });
 
-export const UpdateUserSchema = CreateUserSchema.partial()
+export const CreateUserSchema = UserFormSchema
+export const UpdateUserSchema = UserFormSchema.partial()

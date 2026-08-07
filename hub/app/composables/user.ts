@@ -21,12 +21,16 @@ const defaultState = {
 const userFormState = reactive<typeof defaultState>(defaultState);
 
 export default function useUser() {
-  function resetState() {
-    Object.assign(userFormState, defaultState);
-  }
 
   function resetForm() {
-    Object.assign(userFormState.data, defaultData);
+    userFormState.data = structuredClone(nullToUndefined(defaultData))
+  }
+
+  async function loadFormData(userId = userFormState.data.id){
+    if(typeof userId !== 'string') return
+
+    const result = await useAPI<ApiResponse<UserDetailView>>(`/users/${userId}/detail`)
+    userFormState.data = nullToUndefined(result.data)
   }
 
   async function save(
@@ -34,7 +38,6 @@ export default function useUser() {
   ) {
     const { pushToast } = useNotification();
     const data = userFormState.data;
-    console.log(data)
 
     const action = async () => {
       let result;
@@ -83,7 +86,7 @@ export default function useUser() {
   return {
     userFormState,
 
-    resetState,
+    loadFormData,
     resetForm,
     save,
   };

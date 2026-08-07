@@ -5,10 +5,10 @@
         <template #header>
             <div class="w-full space-y-5 py-4">
                 <div class="flex justify-between items-center gap-2">
-                    <Brand :show-name="openSidebar" />
+                    <UiBrand :show-name="openSidebar" />
                     <UIcon v-if="isMobile" name="ic:twotone-close" size="25" @click="openSidebar = false" />
                 </div>
-                <AccessDomainButton />
+                <DomainChooseAccess />
             </div>
         </template>
 
@@ -16,7 +16,7 @@
 
         <template #footer>
             <div class="w-full" :class="[{ 'flex justify-between items-center gap-2': isMobile }]">
-                <UserCard />
+                <UiUserCard />
             </div>
         </template>
     </USidebar>
@@ -25,9 +25,6 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from '@nuxt/ui';
 import useUI from '~/composables/ui/ui';
-import Brand from './Brand.vue';
-import AccessDomainButton from './button/AccessDomainButton.vue';
-import UserCard from './UserCard.vue';
 import useAuth from '~/composables/auth.ts';
 import useDomain from '~/composables/domain.ts';
 

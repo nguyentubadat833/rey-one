@@ -69,7 +69,7 @@ export class DomainService {
         id: domainId,
       },
       {
-        populate: ['party','roles', 'members.user.party'],
+        populate: ['party', 'roles', 'members.user.party'],
         failHandler: DomainNotFoundError,
       },
     );
@@ -115,7 +115,7 @@ export class DomainService {
         active: true,
       },
       {
-        populate: ['party','roles'],
+        populate: ['party', 'roles'],
       },
     );
   }

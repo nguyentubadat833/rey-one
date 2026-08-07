@@ -1,6 +1,7 @@
 import {
   CreateDomainSchema,
   type ApiResponse,
+  type DomainAndRolesView,
   type DomainView,
   type UserDomainAccess,
 } from "@rey-one/shared";
@@ -8,7 +9,12 @@ import { useAPI } from "./api";
 import { UpdateDomainSchema } from "@rey-one/shared";
 import useAuth from "./auth";
 
-type DomainForm = DomainView
+type DomainForm = DomainView;
+
+const domainAvailableState = reactive({
+  data: [] as DomainAndRolesView[],
+  loading: false,
+});
 
 const domainFormState = reactive({
   data: {} as Partial<DomainForm>,
@@ -24,13 +30,17 @@ const accessDomainState = reactive({
 
 export default function useDomain() {
   const { loadAuthState } = useAuth();
-  const router = useRouter()
+  const router = useRouter();
 
   function resetForm() {
     domainFormState.data.id = undefined;
     domainFormState.data.name = undefined;
     domainFormState.data.active = true;
     domainFormState.data.permissions = [];
+  }
+
+  async function loadAvailable() {
+    return useAPI<ApiResponse<DomainAndRolesView[]>>("/domains/available");
   }
 
   function accessDomain() {
@@ -52,7 +62,7 @@ export default function useDomain() {
       accessDomainState.domain = domain;
       localStorage.setItem(`${userAuthId}:working_domain`, domain.domainId);
 
-      await router.push('/')
+      await router.push("/");
     };
 
     const leaveDomain = async () => {
@@ -62,7 +72,7 @@ export default function useDomain() {
       accessDomainState.domain = undefined;
       localStorage.removeItem(`${userAuthId}:working_domain`);
 
-      await router.push('/')
+      await router.push("/");
     };
 
     const loadWorkingDomain = async () => {
@@ -137,9 +147,12 @@ export default function useDomain() {
 
   return {
     domainFormState,
+    domainAvailableState,
     accessDomainState,
     resetForm,
+
     save,
     accessDomain,
+    loadAvailable
   };
 }

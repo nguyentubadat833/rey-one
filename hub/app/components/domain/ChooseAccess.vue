@@ -38,14 +38,13 @@
                     </div>
                 </template>
             </USelectMenu>
-            <RefreshButton :loading="accessDomainState.loading" @click="loadDomains" />
+            <UiButtonRefresh :loading="accessDomainState.loading" @click="loadDomains" />
         </template>
     </UModal>
 </template>
 <script setup lang="ts">
 import useDomain from '~/composables/domain';
 import { useClipboard } from '@vueuse/core'
-import RefreshButton from './RefreshButton.vue';
 
 const { copy, copied } = useClipboard()
 const { accessDomain, accessDomainState } = useDomain()

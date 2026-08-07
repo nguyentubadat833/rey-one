@@ -21,6 +21,7 @@ export function zodValidate<T extends z.ZodTypeAny>(
       });
     });
 
+    console.log(result.error)
     throw new ValidateInputError(errorMessage);
   }
 
