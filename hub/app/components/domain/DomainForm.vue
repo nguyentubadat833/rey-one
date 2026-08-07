@@ -37,6 +37,8 @@
 <script setup lang="ts">
 import useDomain from '~/composables/domain';
 import { APP_PERMISSIONS } from '@rey-one/shared';
+import SaveButton from '../ui/button/SaveButton.vue';
+import CancelButton from '../ui/button/CancelButton.vue';
 
 defineProps<{
     clickIcon?: () => void

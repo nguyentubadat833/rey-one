@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import type { SidebarProps } from '@nuxt/ui'
 import Brand from '~/components/ui/Brand.vue';
-import UserCard from '~/components/ui/UserCard.vue';
 import useUI from '~/composables/ui/ui';
 import Sidebar from '~/components/ui/Sidebar.vue';
 import useDomain from '~/composables/domain';
+import UserProfileCard from '~/components/user/UserProfileCard.vue';
 
 defineProps<Pick<SidebarProps, 'variant' | 'collapsible' | 'side'>>()
 
@@ -38,7 +38,7 @@ onBeforeMount(() => {
                     <UButton :icon="side === 'left' ? 'i-lucide-panel-left' : 'i-lucide-panel-right'" color="neutral"
                         variant="ghost" aria-label="Toggle sidebar" @click="openSidebar = !openSidebar" />
                     <div v-if="!isMobile">
-                        <UserCard />
+                        <UserProfileCard />
                     </div>
                 </div>
             </div>

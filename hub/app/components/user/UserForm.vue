@@ -29,10 +29,7 @@
                                 trailing-icon="ic:outline-contact-phone" />
                         </UFormField>
                         <UFormField description="Password" help="Leave blank to generate a password automatically">
-                            <UiInputPassword v-model:model-value="formData.password" class="w-full" />
-                        </UFormField>
-                        <UFormField label="Domain Memebers">
-                            <DomainChooseWithRoles/>
+                            <PasswordInput v-model:model-value="formData.password" class="w-full" />
                         </UFormField>
                     </div>
                 </UFormField>
@@ -40,29 +37,37 @@
                     <USelect v-model="formData.status" :items="[...USER_STATUSES]" default-value="active"
                         class="w-40" />
                 </UFormField>
+                <UFormField label="Domain Memebers">
+                    <ChooseDomainWithRoles />
+                </UFormField>
             </form>
         </template>
 
         <template #footer>
             <div class="flex justify-end gap-3 w-full">
-                <UiButtonCancel />
-                <UiButtonSave :loading="userFormState.loading" @click="save()" />
+                <CancelButton />
+                <SaveButton :loading="userFormState.loading" @click="save()" />
             </div>
         </template>
     </UModal>
 </template>
 <script setup lang="ts">
-import { USER_STATUSES } from '@rey-one/shared';
-import useUser from '~/composables/user';
+import { USER_STATUSES } from "@rey-one/shared";
+import useUser from "~/composables/user";
+import PasswordInput from "../ui/input/PasswordInput.vue";
+import CancelButton from "../ui/button/CancelButton.vue";
+import ChooseDomainWithRoles from "../domain/ChooseDomainWithRoles.vue";
+import SaveButton from "../ui/button/SaveButton.vue";
 
 defineProps<{
-    clickIcon?: () => void
-}>()
+    clickIcon?: () => void;
+}>();
 
-const { userFormState,save } = useUser()
+const { userFormState, save } = useUser();
 
-const open = ref(false)
-const formData = toRef(userFormState, 'data')
-const modalTitle = computed(() => formData.value.id ? formData.value.name : '*New User')
-
+const open = ref(false);
+const formData = toRef(userFormState, "data");
+const modalTitle = computed(() =>
+    formData.value.id ? formData.value.name : "*New User",
+);
 </script>

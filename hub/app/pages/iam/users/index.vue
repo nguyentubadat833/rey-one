@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import type { TableColumn, TableRow } from '@nuxt/ui';
 import type { ApiResponse, UserSummariesView, UserSummaryView } from '@rey-one/shared';
+import CreateButton from '~/components/ui/button/CreateButton.vue';
+import RefreshButton from '~/components/ui/button/RefreshButton.vue';
+import UserForm from '~/components/user/UserForm.vue';
 import { useAsyncAPI } from '~/composables/api';
 import useUser from '~/composables/user';
 
@@ -56,10 +59,10 @@ function handlerClickAddUserButton() {
                 <UInput v-model="globalFilter" class="max-w-sm" placeholder="Filter..." />
             </div>
             <div class="flex items-center gap-4">
-                <UiButtonRefresh @click="refresh" :loading="pending" />
+                <RefreshButton @click="refresh" :loading="pending" />
                 <UserForm :click-icon="handlerClickAddUserButton">
                     <template #icon>
-                        <UiButtonCreate />
+                        <CreateButton />
                     </template>
                 </UserForm>
             </div>

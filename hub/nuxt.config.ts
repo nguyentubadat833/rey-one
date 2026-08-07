@@ -12,6 +12,10 @@ export default defineNuxtConfig({
     enabled: true,
   },
 
+  components: {
+    dirs: []
+  },
+
   css: ["~/assets/css/main.css"],
 
   routeRules: {
