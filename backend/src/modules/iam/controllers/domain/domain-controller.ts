@@ -6,12 +6,11 @@ import { CreateDomainDto, UpdateDomainDto } from '../../dtos/domain-dto';
 import { DomainMapper } from '../../mappers/domain-mapper';
 import { DOMAIN_ID_PARAMETER } from '@/utils/types/utils';
 import { DomainSummary } from '@/persistence/entities/query-entities/domain-query';
-import { DomainSummaryView, DomainSummariesView, DomainWithIAMView } from '@rey-one/shared';
+import { DomainSummaryView, DomainSummariesView, DomainWithIAMView, DomainWithRolesView } from '@rey-one/shared';
 import { DomainService } from '../../services/domain/domain-service';
 import { DomainNotFoundError } from '@/utils/errors/domain.error';
 import { PaginationQueryDto } from '@/utils/dtos/utils-dto';
 import { ResponseMapper } from '@/utils/mappers/response-mapper';
-import { Domain } from '@/persistence/entities/iam-domain.entity';
 
 @RequireAuth()
 @ApiTags('IAM / Domains')
@@ -20,7 +19,7 @@ export class DomainController {
   constructor(
     private readonly em: EntityManager,
     private readonly domainService: DomainService,
-  ) {}
+  ) { }
 
   @RequireAdmin()
   @ApiOperation({ summary: 'Domain summaries' })
@@ -48,10 +47,8 @@ export class DomainController {
   @ApiOperation({ summary: 'Available Domains' })
   @Get('/available')
   async availableDomains() {
-    return await this.domainService.getAvailableDomains().then((rs) => rs.map((item) => DomainMapper.toDomainAndRolesView(item)));
+    return await this.domainService.getAvailableDomains().then((rs) => rs.map((item) => DomainMapper.toDomainWithRolesView(item)));
   }
-
-
 
   @RequireAdmin()
   @ApiOperation({ summary: 'Create domain' })
@@ -69,9 +66,17 @@ export class DomainController {
     return DomainMapper.toDomainView(domain);
   }
 
+
+  @RequirePermission('domain:manage:read')
+  @ApiOperation({ summary: 'Domain info with roles' })
+  @Get(`:${DOMAIN_ID_PARAMETER}`)
+  async getInfo(@Param(DOMAIN_ID_PARAMETER) id: string): Promise<DomainWithRolesView> {
+    return this.domainService.getDomainWithRoles(id).then(DomainMapper.toDomainWithRolesView)
+  }
+
   @RequirePermission('domain:manage:read', false)
   @ApiOperation({ summary: 'Domain summary' })
-  @Get(`:${DOMAIN_ID_PARAMETER}`)
+  @Get(`:${DOMAIN_ID_PARAMETER}/summary`)
   async getSummary(@Param(DOMAIN_ID_PARAMETER) id: string): Promise<DomainSummaryView> {
     return this.em
       .findOneOrFail(
@@ -83,7 +88,7 @@ export class DomainController {
       )
       .then((data) => DomainMapper.toDomainSummary(data));
   }
-  
+
   @RequirePermission('domain:manage:read', false)
   @ApiOperation({ summary: 'Domain detail' })
   @Get(`:${DOMAIN_ID_PARAMETER}/detail`)

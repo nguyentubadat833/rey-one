@@ -18,7 +18,7 @@ export class DomainService {
     private readonly em: EntityManager,
     private readonly domainRepo: DomainRepository,
     // private readonly domainCache: DomainCache,
-  ) {}
+  ) { }
 
   private getDomainIdFromStore() {
     return this.clsService.get('domainId');
@@ -61,6 +61,18 @@ export class DomainService {
 
     await this.em.flush();
     return domain;
+  }
+
+  async getDomainWithRoles(domainId: string = this.getDomainIdFromStore()): Promise<DomainLoadedPartyAndRoles> {
+    return this.domainRepo.findOneOrFail(
+      {
+        id: domainId,
+      },
+      {
+        populate: ['party', 'roles'],
+        failHandler: DomainNotFoundError,
+      },
+    );
   }
 
   async getDomainDetailWithIAM(domainId: string = this.getDomainIdFromStore()): Promise<DomainLoadedPartyAndRolesAndMembers> {

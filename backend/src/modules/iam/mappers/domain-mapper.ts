@@ -11,7 +11,7 @@ import {
   DomainRoleLoadedMembers,
 } from '@/persistence/types/domain-type';
 import {
-  DomainAndRolesView,
+  DomainWithRolesView,
   DomainMemberDetailView,
   DomainMemberView,
   DomainRoleView,
@@ -66,11 +66,11 @@ export class DomainMapper {
     } satisfies DomainRoleView;
   }
 
-  static toDomainAndRolesView(domain: DomainLoadedPartyAndRoles) {
+  static toDomainWithRolesView(domain: DomainLoadedPartyAndRoles) {
     return {
       ...DomainMapper.toDomainView(domain),
       roles: domain.roles.getItems().map(item => DomainMapper.toDomainRoleView(item))
-    } satisfies DomainAndRolesView;
+    } satisfies DomainWithRolesView;
   }
 
   static toDomainRoleWithMembers(role: DomainRoleLoadedMembers) {

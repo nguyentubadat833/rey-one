@@ -1,11 +1,11 @@
 <template>
-    <UModal title="Working Organization" v-model:open="open">
-        <UButton :label="!selectedDomain?.domainName ? 'No Oraganization' : selectedDomain.domainName"
+    <UModal title="Working Domain" v-model:open="open">
+        <UButton :label="!selectedDomain?.domainName ? 'No Domain' : selectedDomain.domainName"
             icon="ic:twotone-domain" color="neutral" variant="subtle" block />
 
         <template #body>
             <form class="space-y-5">
-                <UFormField label="Organization ID">
+                <UFormField label="Domain ID">
                     <UInput disabled :model-value="selectedDomain?.domainId" :ui="{ trailing: 'pr-0.5' }"
                         icon="ic:baseline-code" class="w-full">
                         <template v-if="selectedDomain?.domainId.length" #trailing>
@@ -17,7 +17,7 @@
                         </template>
                     </UInput>
                 </UFormField>
-                <UFormField label="Organization Name">
+                <UFormField label="Domain Name">
                     <div class="flex gap-2">
                         <UInput disabled :model-value="selectedDomain?.domainName" icon="ic:round-domain"
                             class="w-full" />

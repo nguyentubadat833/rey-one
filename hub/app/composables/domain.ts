@@ -1,7 +1,7 @@
 import {
   CreateDomainSchema,
   type ApiResponse,
-  type DomainAndRolesView,
+  type DomainWithRolesView,
   type DomainView,
   type UserDomainAccess,
 } from "@rey-one/shared";
@@ -12,7 +12,7 @@ import useAuth from "./auth";
 type DomainForm = DomainView;
 
 const domainAvailableState = reactive({
-  data: [] as DomainAndRolesView[],
+  data: [] as DomainWithRolesView[],
   loading: false,
 });
 
@@ -39,8 +39,10 @@ export default function useDomain() {
     domainFormState.data.permissions = [];
   }
 
+
+
   async function loadAvailable() {
-    return useAPI<ApiResponse<DomainAndRolesView[]>>("/domains/available");
+    return useAPI<ApiResponse<DomainWithRolesView[]>>("/domains/available");
   }
 
   function accessDomain() {

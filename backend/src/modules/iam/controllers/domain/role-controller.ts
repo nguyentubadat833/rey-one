@@ -3,7 +3,7 @@ import { RequireAuth, RequirePermission } from '@/utils/decorators/auth.decorato
 import { ApiDomainHeader } from '@/utils/decorators/utils.decorator';
 import { EntityManager } from '@mikro-orm/core';
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateDomainRoleDto, UpdateDomainRoleDto } from '../../dtos/domain-dto';
 import { DomainMapper } from '../../mappers/domain-mapper';
 import { DomainRoleService } from '../../services/domain/role-service';

@@ -46,7 +46,7 @@ defineProps<{
 
 const permissionChecks = ref(
     APP_PERMISSIONS.map((name) => ({
-        permissions: name,
+        permission: name,
         active: false,
     }))
 )
@@ -58,7 +58,7 @@ const formLoading = toRef(domainFormState, 'loading')
 const modalTitle = computed(() => formData.value.id ? formData.value.name : '*New Domain')
 
 async function submit() {
-    formData.value.permissions = permissionChecks.value.filter(item => item.active === true).map(item => item.permissions)
+    formData.value.permissions = permissionChecks.value.filter(item => item.active === true).map(item => item.permission)
 
     formLoading.value = true
     try {
@@ -70,7 +70,7 @@ async function submit() {
 
 watch(formData.value, (newValue) => {
     permissionChecks.value.forEach(item => {
-        item.active = newValue.permissions?.includes(item.permissions) ?? false
+        item.active = newValue.permissions?.includes(item.permission) ?? false
     })
 })
 </script>

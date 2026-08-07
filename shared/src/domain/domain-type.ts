@@ -16,7 +16,7 @@ export type DomainSummaryView = DomainView & {
   registeredAt: string;
 };
 export type DomainSummariesView = PaginatedResponse<DomainSummaryView>;
-export type DomainAndRolesView = DomainView & {
+export type DomainWithRolesView = DomainView & {
   roles: DomainRoleView[];
 };
 

@@ -91,12 +91,14 @@ const domainItems: NavigationMenuItem[] = [
         icon: 'ic:twotone-vpn-lock',
         children: [
             {
-                label: "Roles",
-                icon: 'ic:twotone-settings-accessibility',
+                label: "Domain",
+                icon: 'ic:outline-business',
+                to: '/iam/domain'
             },
             {
                 label: "Members",
                 icon: 'ic:baseline-supervisor-account',
+                to: '/iam/members'
             }
         ]
     },
