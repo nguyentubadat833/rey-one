@@ -44,12 +44,7 @@ defineProps<{
     clickIcon?: () => void
 }>()
 
-const permissionChecks = ref(
-    APP_PERMISSIONS.map((name) => ({
-        permission: name,
-        active: false,
-    }))
-)
+const permissionChecks = ref(permissionsToChecks([...APP_PERMISSIONS]))
 
 const { domainFormState, save } = useDomain()
 const formData = toRef(domainFormState, 'data')

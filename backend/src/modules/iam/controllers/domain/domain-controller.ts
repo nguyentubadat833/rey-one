@@ -19,7 +19,7 @@ export class DomainController {
   constructor(
     private readonly em: EntityManager,
     private readonly domainService: DomainService,
-  ) { }
+  ) {}
 
   @RequireAdmin()
   @ApiOperation({ summary: 'Domain summaries' })
@@ -66,12 +66,11 @@ export class DomainController {
     return DomainMapper.toDomainView(domain);
   }
 
-
   @RequirePermission('domain:manage:read')
   @ApiOperation({ summary: 'Domain info with roles' })
   @Get(`:${DOMAIN_ID_PARAMETER}`)
   async getInfo(@Param(DOMAIN_ID_PARAMETER) id: string): Promise<DomainWithRolesView> {
-    return this.domainService.getDomainWithRoles(id).then(DomainMapper.toDomainWithRolesView)
+    return this.domainService.getDomainWithRoles(id).then(DomainMapper.toDomainWithRolesView);
   }
 
   @RequirePermission('domain:manage:read', false)

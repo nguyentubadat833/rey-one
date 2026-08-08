@@ -115,7 +115,7 @@ async function saveHandler(args: EventArgs<User>) {
   const changePassword = args.changeSet?.payload.password;
 
   if (changeSetType === ChangeSetType.CREATE) {
-    entity.party.getEntity().code = generatePartyCode();
+    // entity.party.getEntity().code = generatePartyCode();
 
     if (!changeEmail && !changeUsername && !changePhone) {
       throw AppError.withMessage('PROPERTY_REQUIRED', 'At least one of email, username, or phone is required');
@@ -148,10 +148,10 @@ async function saveHandler(args: EventArgs<User>) {
   }
 }
 
-function generatePartyCode() {
-  const string = randomstring.generate({
-    length: 12,
-    charset: '123456789QWERTYUPASDFGHJKLMNBVCXZ',
-  });
-  return `USR${string}`;
-}
+// function generatePartyCode() {
+//   const string = randomstring.generate({
+//     length: 12,
+//     charset: '123456789QWERTYUPASDFGHJKLMNBVCXZ',
+//   });
+//   return `USR${string}`;
+// }

@@ -39,8 +39,6 @@ export default function useDomain() {
     domainFormState.data.permissions = [];
   }
 
-
-
   async function loadAvailable() {
     return useAPI<ApiResponse<DomainWithRolesView[]>>("/domains/available");
   }
@@ -63,8 +61,6 @@ export default function useDomain() {
 
       accessDomainState.domain = domain;
       localStorage.setItem(`${userAuthId}:working_domain`, domain.domainId);
-
-      await router.push("/");
     };
 
     const leaveDomain = async () => {
@@ -155,6 +151,6 @@ export default function useDomain() {
 
     save,
     accessDomain,
-    loadAvailable
+    loadAvailable,
   };
 }

@@ -1,7 +1,13 @@
 <template>
     <div class="md:grid grid-cols-2 gap-5">
-        <UCard title="Domain information">
-            <form class="space-y-5" @submit.prevent="save">
+        <UCard>
+             <template #title>
+                <div class="flex justify-between items-center h-6">
+                    Domain
+                    <RefreshButton :loading="pending" @click="refresh"/>
+                </div>
+            </template>
+            <form class="space-y-5">
                 <UFormField label="ID">
                     <UInput disabled :model-value="domain?.id" class="w-full" />
                 </UFormField>
@@ -20,16 +26,40 @@
                 </UFormField>
             </form>
         </UCard>
-        <UCard title="Domain roles">
-            <UTable :columns="roleColumns" />
+        <UCard>
+            <template #title>
+                <div class="flex justify-between items-center h-6">
+                    Roles
+                    <RoleForm v-model:role="selectedRole" :domain-name="data?.data.name"
+                        :permissions="domain?.permissions ?? []" :leave-action="() => refresh()" action="create">
+                        <template #icon>
+                            <CreateButton size="sm" />
+                        </template>
+                    </RoleForm>
+                </div>
+            </template>
+            <UTable :columns="roleColumns" :data="data?.data.roles" :sorting="rolesSorting">
+                <template #no-cell="{ row }">{{ row.index + 1 }}</template>
+                <template #active-cell="{ row }">
+                    <UBadge :color="row.original.active ? 'success' : 'neutral'" label="Active" />
+                </template>
+                <template #actions-cell="{ row }">
+                    <RoleForm v-model:role="row.original" :domain-name="data?.data.name"
+                        :permissions="domain?.permissions ?? []" :leave-action="() => refresh()" action="update">
+                    </RoleForm>
+                </template>
+            </UTable>
         </UCard>
     </div>
 </template>
 
 <script setup lang="ts">
 import type { ApiResponse, DomainRoleView, DomainWithRolesView } from '@rey-one/shared';
-import { useAPI } from '~/composables/api';
+import RoleForm from '~/components/domain/RoleForm.vue';
+import CreateButton from '~/components/ui/button/CreateButton.vue';
 import useDomain from '~/composables/domain';
+import RefreshButton from '~/components/ui/button/RefreshButton.vue';
+import { useAPI } from '~/composables/api';
 
 definePageMeta({
     middleware: ['domain']
@@ -38,7 +68,7 @@ definePageMeta({
 const roleColumns = [
     { id: "no" },
     { accessorKey: "name", header: "Name" },
-    { accessorKey: 'status', header: "Status" },
+    { accessorKey: 'active', header: "Status" },
     { id: 'actions' }
 ]
 
@@ -54,22 +84,15 @@ const { data, refresh, pending } = await useAsyncData(`${accessDomainState.domai
     }
     return useAPI<ApiResponse<DomainWithRolesView>>(`/domains/${accessDomainState.domain.domainId}`)
 })
-
 const domain = computed(() => data.value?.data)
+const selectedRole = ref<Partial<DomainRoleView>>()
+const rolesSorting = ref([
+    {
+        id: 'name',
+        desc: false
+    }
+])
 
-const permissions = ref(
-    domain.value?.permissions.map((name) => ({
-        permission: name,
-        active: true,
-    }))
-)
+const permissions = permissionsToChecks(domain.value?.permissions ?? [], true)
 
-const form = reactive({
-    data: null as DomainRoleView | null,
-    loading: false
-})
-
-function save() {
-
-}
 </script>

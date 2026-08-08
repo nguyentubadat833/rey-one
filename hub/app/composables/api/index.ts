@@ -6,7 +6,7 @@ export const useAPI = $fetch.create({
   baseURL: "/rmk-api",
   credentials: "include",
   onRequest({ options }) {
-    requestOptionsConfig(options)
+    requestOptionsConfig(options);
   },
   onResponseError({ response }) {
     handlerResponseError(response);
@@ -17,7 +17,7 @@ export const useAsyncAPI = createUseFetch({
   baseURL: "/rmk-api",
   credentials: "include",
   onRequest({ options }) {
-    requestOptionsConfig(options)
+    requestOptionsConfig(options);
   },
   onResponseError({ response }) {
     handlerResponseError(response);
@@ -27,7 +27,7 @@ export const useAsyncAPI = createUseFetch({
 export const useGuestAPI = $fetch.create({
   baseURL: "/rmk-api",
   onRequest({ options }) {
-    requestOptionsConfig(options)
+    requestOptionsConfig(options);
   },
   onResponseError({ response }) {
     handlerResponseError(response);
@@ -37,16 +37,26 @@ export const useGuestAPI = $fetch.create({
 function requestOptionsConfig(options: ResolvedFetchOptions<any>) {
   const nuxtApp = useNuxtApp();
   nuxtApp.runWithContext(() => {
-    const { accessDomainState } = useDomain()
+    const { accessDomainState } = useDomain();
     if (accessDomainState.domain) {
-      options.headers.set('x-domain-id', accessDomainState.domain.domainId)
+      options.headers.set("x-domain-id", accessDomainState.domain.domainId);
     }
-  })
+  });
 }
 
 function handlerResponseError(response: FetchResponse<any>) {
   if (!response.ok) {
     const nuxtApp = useNuxtApp();
+
+    if (response.status === 401) {
+      nuxtApp.runWithContext(() => {
+        const router = useRouter();
+        if (router.currentRoute.value.path !== "/auth/login") {
+          router.push("/auth/login");
+        }
+      });
+      return;
+    }
 
     const parseError = apiErrorResponseSchema.safeParse(response._data);
     const message = parseError.success

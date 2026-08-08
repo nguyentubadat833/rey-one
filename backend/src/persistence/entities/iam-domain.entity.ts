@@ -108,15 +108,16 @@ async function saveHandler(args: EventArgs<Domain>) {
     });
   }
 
-  if(changeSetType === ChangeSetType.CREATE){
-    entity.party.getEntity().code = generatePartyCode()
-  }
+  // if (changeSetType === ChangeSetType.CREATE) {
+  //   console.log('domain')
+  //   entity.party.getEntity().code = generatePartyCode();
+  // }
 }
 
-function generatePartyCode() {
-  const string = randomstring.generate({
-    length: 12,
-    charset: '123456789QWERTYUPASDFGHJKLMNBVCXZ',
-  });
-  return `DOM${string}`;
-}
+// function generatePartyCode() {
+//   const string = randomstring.generate({
+//     length: 12,
+//     charset: '123456789QWERTYUPASDFGHJKLMNBVCXZ',
+//   });
+//   return `DOM${string}`;
+// }

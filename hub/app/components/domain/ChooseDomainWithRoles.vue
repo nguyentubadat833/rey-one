@@ -14,7 +14,7 @@
 </template>
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui';
-import type { DomainAndRolesView } from '@rey-one/shared';
+import type { DomainWithRolesView } from '@rey-one/shared';
 import useDomain from '~/composables/domain';
 
 defineProps<{
@@ -25,7 +25,7 @@ const columns = [
     { id: "no" },
     { accessorKey: "name", header: "Name" },
     { id: 'type', header: "Selected Role" },
-] satisfies TableColumn<DomainAndRolesView>[]
+] satisfies TableColumn<DomainWithRolesView>[]
 
 const { loadAvailable } = useDomain()
 
