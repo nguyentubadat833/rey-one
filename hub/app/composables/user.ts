@@ -43,6 +43,7 @@ export default function useUser() {
       let result;
 
       if (data.id) {
+        console.log(data)
         const payload = zodValidate(CreateUserSchema, data);
         result = await useAPI<ApiResponse<UserDetailView>>(
           `/users/${data.id}`,

@@ -1,10 +1,10 @@
 <template>
     <div class="md:grid grid-cols-2 gap-5">
         <UCard>
-             <template #title>
+            <template #title>
                 <div class="flex justify-between items-center h-6">
                     Domain
-                    <RefreshButton :loading="pending" @click="refresh"/>
+                    <RefreshButton :loading="pending" @click="refresh" />
                 </div>
             </template>
             <form class="space-y-5">
@@ -60,35 +60,32 @@ import CreateButton from '~/components/ui/button/CreateButton.vue';
 import useDomain from '~/composables/domain';
 import RefreshButton from '~/components/ui/button/RefreshButton.vue';
 import { useAPI } from '~/composables/api';
+import type { TableColumn, TableRow } from '@nuxt/ui';
 
 definePageMeta({
     middleware: ['domain']
 })
+
+type Response = ApiResponse<DomainWithRolesView>
 
 const roleColumns = [
     { id: "no" },
     { accessorKey: "name", header: "Name" },
     { accessorKey: 'active', header: "Status" },
     { id: 'actions' }
-]
+] satisfies TableColumn<DomainRoleView>[]
 
-const { accessDomainState } = useDomain()
+const { accessDomainId } = useDomain()
 
-const { data, refresh, pending } = await useAsyncData(`domain_${accessDomainState.domain?.domainId}`, () => {
-    if (!accessDomainState.domain) {
+const { data, refresh, pending } = await useAsyncData(`domain:${accessDomainId.value}`, () => {
+    if (!accessDomainId) {
         throw createError({
             status: 400,
             statusText: "API ERROR",
             message: "Domain required"
         })
     }
-    return useAPI<ApiResponse<DomainWithRolesView>>(`/domains/${accessDomainState.domain.domainId}`)
-})
-
-const {data: roles}  = await useAsyncData(`domain_${accessDomainState.domain?.domainId}_roles`, () => {
-    return Promise.resolve(
-        data.value?.data.roles ?? []
-    )
+    return useAPI<Response>(`/domains/${accessDomainId.value}`)
 })
 
 const domain = computed(() => data.value?.data)
@@ -101,5 +98,4 @@ const rolesSorting = ref([
 ])
 
 const permissions = permissionsToChecks(domain.value?.permissions ?? [], true)
-
 </script>

@@ -28,6 +28,8 @@ const accessDomainState = reactive({
   loading: false,
 });
 
+const accessDomainId = computed(() => accessDomainState.domain?.domainId)
+
 export default function useDomain() {
   const { loadAuthState } = useAuth();
   const router = useRouter();
@@ -147,6 +149,7 @@ export default function useDomain() {
     domainFormState,
     domainAvailableState,
     accessDomainState,
+    accessDomainId,
     resetForm,
 
     save,

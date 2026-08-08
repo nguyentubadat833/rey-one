@@ -13,7 +13,7 @@ useHead({
   }
 })
 
-const title = 'R-One'
+const title = 'RONE'
 const description = 'An all-in-one platform for managing content, digital products, courses, users, and online payments.'
 
 useSeoMeta({

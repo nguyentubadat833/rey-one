@@ -1,5 +1,5 @@
 <template>
-    <UModal :title="modalTitle" v-model:open="open">
+    <UModal :title="modalTitle" v-model:open="open" :ui="{ content: 'min-w-[40vw]' }">
         <div @click="clickIcon">
             <slot name="icon"></slot>
             <UButton v-if="!$slots.icon" icon="ic:baseline-edit-note" color="neutral" variant="subtle" />
@@ -37,8 +37,18 @@
                     <USelect v-model="formData.status" :items="[...USER_STATUSES]" default-value="active"
                         class="w-40" />
                 </UFormField>
-                <UFormField label="Domain Memebers">
-                    <ChooseDomainWithRoles />
+                <UFormField label="Domain Members">
+                    <div class="space-y-5">
+                        <ChooseDomainWithRoles v-model:members="members" />
+                        <UTable :data="members">
+                            <template #domain-cell="{ row }">
+                                {{ row.original.domain.name }}
+                            </template>
+                            <template #role-cell="{row}">
+                                {{ row.original.role?.name }}
+                            </template>
+                        </UTable>
+                    </div>
                 </UFormField>
             </form>
         </template>
@@ -67,7 +77,10 @@ const { userFormState, save } = useUser();
 
 const open = ref(false);
 const formData = toRef(userFormState, "data");
+const members = toRef(formData.value, 'members')
+
 const modalTitle = computed(() =>
     formData.value.id ? formData.value.name : "*New User",
+    
 );
 </script>

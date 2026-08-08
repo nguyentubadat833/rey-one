@@ -33,7 +33,7 @@
                 @update:model-value="chooseDomain" @update:open="openMenu">
                 <template #content-bottom>
                     <div class="p-2 font-bold text-sm">
-                        Total organizations:
+                        Total Domains:
                         {{ accessDomainState.list?.length ?? 0 }}
                     </div>
                 </template>
