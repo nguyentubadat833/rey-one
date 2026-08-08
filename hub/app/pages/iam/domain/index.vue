@@ -74,7 +74,7 @@ const roleColumns = [
 
 const { accessDomainState } = useDomain()
 
-const { data, refresh, pending } = await useAsyncData(`${accessDomainState.domain?.domainId}_roles`, () => {
+const { data, refresh, pending } = await useAsyncData(`domain_${accessDomainState.domain?.domainId}`, () => {
     if (!accessDomainState.domain) {
         throw createError({
             status: 400,
@@ -84,6 +84,13 @@ const { data, refresh, pending } = await useAsyncData(`${accessDomainState.domai
     }
     return useAPI<ApiResponse<DomainWithRolesView>>(`/domains/${accessDomainState.domain.domainId}`)
 })
+
+const {data: roles}  = await useAsyncData(`domain_${accessDomainState.domain?.domainId}_roles`, () => {
+    return Promise.resolve(
+        data.value?.data.roles ?? []
+    )
+})
+
 const domain = computed(() => data.value?.data)
 const selectedRole = ref<Partial<DomainRoleView>>()
 const rolesSorting = ref([
