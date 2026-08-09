@@ -50,7 +50,7 @@ const props = defineProps<{
     clickIcon?: () => void
     leaveAction?: () => void
     domainName?: string
-    permissions: AppPermission[]
+    referencePermissions: AppPermission[]
     action?: 'create' | 'update'
 }>()
 
@@ -59,7 +59,7 @@ const { pushToast } = useNotification()
 const open = ref(false)
 const loading = ref(false)
 const verion = ref(0)
-const permissionChecks = ref(permissionsToChecks(props.permissions))
+const permissionChecks = ref<ReturnType<typeof permissionsToChecks>>([])
 const snapshotData = ref<Partial<DomainRoleView>>({})
 const modalDescription = computed(() => props.domainName ? props.domainName : undefined)
 

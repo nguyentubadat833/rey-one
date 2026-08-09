@@ -30,7 +30,7 @@
         <template #footer>
             <USelectMenu v-model="accessDomainState.domain" :loading="accessDomainState.loading"
                 loading-icon="i-lucide-loader" :items="accessDomainState.list" label-key="domainName" class="w-full"
-                @update:model-value="chooseDomain" @update:open="openMenu">
+                @update:model-value="selecteDomain" @update:open="openMenu">
                 <template #content-bottom>
                     <div class="p-2 font-bold text-sm">
                         Total Domains:
@@ -46,6 +46,7 @@
 import useDomain from '~/composables/domain';
 import { useClipboard } from '@vueuse/core'
 import RefreshButton from '../ui/button/RefreshButton.vue';
+import type { UserDomainAccess } from '@rey-one/shared';
 
 const { copy, copied } = useClipboard()
 const { accessDomain, accessDomainState } = useDomain()
@@ -64,5 +65,10 @@ async function leaveDomain(){
     await leave()
 
     open.value = false
+}
+
+async function selecteDomain(value: UserDomainAccess) {
+   await chooseDomain(value)
+   await navigateTo('/')
 }
 </script>

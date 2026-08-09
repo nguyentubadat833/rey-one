@@ -53,7 +53,7 @@ export class UserService {
         id: userId,
       },
       {
-        populate: ['party'],
+        populate: ['party', 'members.domain.party'],
         failHandler: UserNotFoundError,
       },
     );
@@ -79,7 +79,8 @@ export class UserService {
     }
 
     await this.em.flush();
-    await user.members.load();
+
+    // console.log(user)
     return user as UserLoadedPartyAndMembers;
   }
 }

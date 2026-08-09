@@ -71,8 +71,6 @@ export default function useDomain() {
 
       accessDomainState.domain = undefined;
       localStorage.removeItem(`${userAuthId}:working_domain`);
-
-      await router.push("/");
     };
 
     const loadWorkingDomain = async () => {

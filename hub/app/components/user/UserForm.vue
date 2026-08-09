@@ -8,7 +8,15 @@
         <template #body>
             <form class="space-y-5" @submit.prevent="save">
                 <UFormField v-if="formData.id" label="ID">
-                    <UInput disabled v-model="formData.id" class="w-full" />
+                    <UInput disabled :model-value="formData.id" :ui="{ trailing: 'pr-0.5' }" class="w-full">
+                        <template v-if="formData.id?.length" #trailing>
+                            <UTooltip text="Copy to clipboard" :content="{ side: 'right' }">
+                                <UButton :color="copied ? 'success' : 'neutral'" variant="link" size="sm"
+                                    :icon="copied ? 'i-lucide-copy-check' : 'i-lucide-copy'"
+                                    aria-label="Copy to clipboard" @click="copy(formData.id)" />
+                            </UTooltip>
+                        </template>
+                    </UInput>
                 </UFormField>
                 <UFormField label="Name" required>
                     <UInput v-model="formData.name" class="w-full" placeholder="e.g. John Doe" />
@@ -38,13 +46,15 @@
                         class="w-40" />
                 </UFormField>
                 <UFormField label="Domain Members">
-                    <div class="space-y-5">
+                    <template #hint>
                         <ChooseDomainWithRoles v-model:members="members" />
+                    </template>
+                    <div class="space-y-5">
                         <UTable :data="members">
                             <template #domain-cell="{ row }">
                                 {{ row.original.domain.name }}
                             </template>
-                            <template #role-cell="{row}">
+                            <template #role-cell="{ row }">
                                 {{ row.original.role?.name }}
                             </template>
                         </UTable>
@@ -62,6 +72,7 @@
     </UModal>
 </template>
 <script setup lang="ts">
+import { useClipboard } from '@vueuse/core'
 import { USER_STATUSES } from "@rey-one/shared";
 import useUser from "~/composables/user";
 import PasswordInput from "../ui/input/PasswordInput.vue";
@@ -74,13 +85,20 @@ defineProps<{
 }>();
 
 const { userFormState, save } = useUser();
+const { copy, copied } = useClipboard()
 
 const open = ref(false);
 const formData = toRef(userFormState, "data");
-const members = toRef(formData.value, 'members')
+const members = computed({
+  get: () => formData.value.members,
+  set: (val) => { formData.value.members = val }
+})
 
 const modalTitle = computed(() =>
     formData.value.id ? formData.value.name : "*New User",
-    
 );
+
+watchEffect(() => {
+    console.log(formData.value)
+})
 </script>

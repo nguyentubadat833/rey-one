@@ -31,6 +31,11 @@ export class UserController {
       {
         limit,
         offset: (page - 1) * limit,
+        orderBy: [
+          {
+            createdAt: 'desc'
+          }
+        ]
       },
     );
 

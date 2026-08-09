@@ -15,6 +15,7 @@ export const UserSummary = defineEntity({
         raw('u.username'),
         raw('u.email'),
         raw('u.phone'),
+        raw('u.created_at'),
         raw('p.name as name'),
         em
           .createQueryBuilder(DomainMember, 'm')
@@ -25,6 +26,7 @@ export const UserSummary = defineEntity({
       .leftJoin('u.party', 'p'),
   properties: (p) => ({
     id: p.uuid(),
+    createdAt: p.datetime(),
     name: p.string(),
     memberCount: p.integer(),
   }),

@@ -25,7 +25,7 @@
                 <template #no-cell="{ row }">{{ row.index + 1 }}</template>
                 <template #domain-cell="{ row }">{{ row.original.domain.name }}</template>
                 <template #role-cell="{ row }">
-                    <USelectMenu :default-value="findDomainRole(row.original.domain.id, row.original.role?.id)" :items="getDomainRoles(row.original.domain.id)" class="w-full" label-key="name"
+                    <USelectMenu :default-value="findDomainRole(row.original.domain.id, row.original.role?.id)" :items="getDomainRoles(row.original.domain.id)" class="min-w-36" label-key="name"
                         @update:model-value="(values) => selectedDomainRole(values, toRef(row.original, 'role'))" />
                 </template>
                 <template #actions-cell="{ row }">
