@@ -1,9 +1,9 @@
 <script setup lang="ts">
+import { useAccessDomains } from '~/composables/domain';
 import type { SidebarProps } from '@nuxt/ui'
 import Brand from '~/components/ui/Brand.vue';
 import useUI from '~/composables/ui/ui';
 import Sidebar from '~/components/ui/Sidebar.vue';
-import useDomain from '~/composables/domain';
 import UserProfileCard from '~/components/user/UserProfileCard.vue';
 
 defineProps<Pick<SidebarProps, 'variant' | 'collapsible' | 'side'>>()
@@ -11,8 +11,7 @@ defineProps<Pick<SidebarProps, 'variant' | 'collapsible' | 'side'>>()
 const { isMobile } = useDevice()
 const { openSidebar } = useUI()
 
-const { accessDomain } = useDomain()
-const { loadWorkingDomain } = accessDomain()
+const { loadWorkingDomain } = useAccessDomains()
 
 onBeforeMount(() => {
     loadWorkingDomain()

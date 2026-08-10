@@ -1,6 +1,7 @@
 <template>
     <UModal v-model:open="open" title="Domain Available"
-        :ui="{ content: 'min-h-[70vh] min-w-[35vw]', body: 'space-y-5', footer: 'flex justify-end' }" @after:leave="modalLeave">
+        :ui="{ content: 'min-h-[70vh] min-w-[35vw]', body: 'space-y-5', footer: 'flex justify-end' }"
+        @after:leave="modalLeave">
         <div @click="clickIcon">
             <slot name="icon"></slot>
             <UButton v-if="!$slots.icon" icon="ic:baseline-edit-note" color="neutral" variant="subtle" />
@@ -25,7 +26,8 @@
                 <template #no-cell="{ row }">{{ row.index + 1 }}</template>
                 <template #domain-cell="{ row }">{{ row.original.domain.name }}</template>
                 <template #role-cell="{ row }">
-                    <USelectMenu :default-value="findDomainRole(row.original.domain.id, row.original.role?.id)" :items="getDomainRoles(row.original.domain.id)" class="min-w-36" label-key="name"
+                    <USelectMenu :default-value="findDomainRole(row.original.domain.id, row.original.role?.id)"
+                        :items="getDomainRoles(row.original.domain.id)" class="min-w-36" label-key="name"
                         @update:model-value="(values) => selectedDomainRole(values, toRef(row.original, 'role'))" />
                 </template>
                 <template #actions-cell="{ row }">
@@ -35,15 +37,15 @@
         </template>
 
         <template #footer>
-            <UButton label="Finish" @click="open = false"/>
+            <UButton label="Finish" @click="open = false" />
         </template>
     </UModal>
 </template>
 <script setup lang="ts">
+import type z from 'zod';
 import type { TableColumn } from '@nuxt/ui';
 import type { ApiResponse, DomainRoleView, DomainWithRolesView, UserMemberSchema } from '@rey-one/shared';
-import useDomain from '~/composables/domain';
-import type z from 'zod';
+import { useDomainUtils } from '~/composables/domain';
 
 type UserMember = z.infer<typeof UserMemberSchema>
 type MemberRole = UserMember['role']
@@ -62,7 +64,7 @@ const columns = [
     { id: 'actions' }
 ] satisfies TableColumn<DomainWithRolesView>[]
 
-const { loadAvailable } = useDomain()
+const { loadAvailable } = useDomainUtils()
 
 const { data: domainAvailable, pending: domainAvailableLoaidng, refresh } = useLazyAsyncData('domain-available', () => loadAvailable(), {
     transform: (value: ApiResponse<DomainWithRolesView[]>) => {
@@ -100,8 +102,8 @@ function getDomainRoles(domainId: string,) {
     return domainAvailable.value?.find(item => item.id === domainId)?.roles ?? []
 }
 
-function findDomainRole(domainId: string, roleId?: string){
-    if(!roleId) return undefined
+function findDomainRole(domainId: string, roleId?: string) {
+    if (!roleId) return undefined
 
     return getDomainRoles(domainId).find(item => item.id === roleId)
 }
@@ -111,7 +113,7 @@ async function removeDomain(index: number) {
     selectDomains.value = []
 }
 
-async function modalLeave(){
+async function modalLeave() {
     data.value = data.value.filter(item => !!item.role)
     selectDomains.value = []
 }

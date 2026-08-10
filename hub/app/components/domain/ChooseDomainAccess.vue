@@ -1,7 +1,7 @@
 <template>
     <UModal title="Working Domain" v-model:open="open">
-        <UButton :label="!selectedDomain?.domainName ? 'No Domain' : selectedDomain.domainName"
-            icon="ic:twotone-domain" color="neutral" variant="subtle" block />
+        <UButton :label="!selectedDomain?.domainName ? 'No Domain' : selectedDomain.domainName" icon="ic:twotone-domain"
+            color="neutral" variant="subtle" block />
 
         <template #body>
             <form class="space-y-5">
@@ -21,7 +21,8 @@
                     <div class="flex gap-2">
                         <UInput disabled :model-value="selectedDomain?.domainName" icon="ic:round-domain"
                             class="w-full" />
-                        <UButton v-if="selectedDomain" label="Leave" icon="ic:baseline-power-off" color="neutral" variant="subtle" @click="leaveDomain"/>
+                        <UButton v-if="selectedDomain" label="Leave" icon="ic:baseline-power-off" color="neutral"
+                            variant="subtle" @click="leaveDomain" />
                     </div>
                 </UFormField>
             </form>
@@ -43,32 +44,31 @@
     </UModal>
 </template>
 <script setup lang="ts">
-import useDomain from '~/composables/domain';
+import type { UserDomainAccess } from '@rey-one/shared';
+import { useAccessDomains } from '~/composables/domain';
 import { useClipboard } from '@vueuse/core'
 import RefreshButton from '../ui/button/RefreshButton.vue';
-import type { UserDomainAccess } from '@rey-one/shared';
 
 const { copy, copied } = useClipboard()
-const { accessDomain, accessDomainState } = useDomain()
-const { loadDomains, chooseDomain, leaveDomain: leave } = accessDomain()
+const { accessDomainState, loadDomains, chooseDomain, leaveDomain: leave } = useAccessDomains()
 
 const open = ref(false)
 const selectedDomain = toRef(accessDomainState, 'domain')
 
-function openMenu(){
-    if(!accessDomainState.list){
+function openMenu() {
+    if (!accessDomainState.list) {
         loadDomains()
     }
 }
 
-async function leaveDomain(){
+async function leaveDomain() {
     await leave()
 
     open.value = false
 }
 
 async function selecteDomain(value: UserDomainAccess) {
-   await chooseDomain(value)
-   await navigateTo('/')
+    await chooseDomain(value)
+    await navigateTo('/')
 }
 </script>

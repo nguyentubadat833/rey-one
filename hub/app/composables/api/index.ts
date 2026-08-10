@@ -1,6 +1,6 @@
 import { apiErrorResponseSchema } from "@rey-one/shared";
+import { useAccessDomains } from "../domain";
 import type { FetchResponse, ResolvedFetchOptions } from "ofetch";
-import useDomain from "../domain";
 
 export const useAPI = $fetch.create({
   baseURL: "/rmk-api",
@@ -37,7 +37,7 @@ export const useGuestAPI = $fetch.create({
 function requestOptionsConfig(options: ResolvedFetchOptions<any>) {
   const nuxtApp = useNuxtApp();
   nuxtApp.runWithContext(() => {
-    const { accessDomainState } = useDomain();
+    const { accessDomainState } = useAccessDomains();
     if (accessDomainState.domain) {
       options.headers.set("x-domain-id", accessDomainState.domain.domainId);
     }

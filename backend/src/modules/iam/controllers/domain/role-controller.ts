@@ -22,7 +22,16 @@ export class DomainRoleController {
   @ApiOperation({ summary: 'Domain roles' })
   @Get()
   async domainRoles() {
-    return this.em.find(DomainRole, {}).then((rs) => rs.map(DomainMapper.toDomainRoleView));
+    return this.em.find(DomainRole, 
+      {}, 
+      {
+        orderBy: [
+          {
+            createdAt: 'desc'
+          }
+        ]
+      }
+    ).then((rs) => rs.map(DomainMapper.toDomainRoleView));
   }
 
   @RequirePermission('domain:role:manage')

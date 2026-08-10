@@ -1,9 +1,8 @@
-import useDomain from "~/composables/domain";
+import {useAccessDomains} from "~/composables/domain";
 
 export default defineNuxtRouteMiddleware(async (to, from) => {
-  const { accessDomainState, accessDomain } = useDomain();
-  const { loadWorkingDomain } = accessDomain();
-
+  const { accessDomainState, loadWorkingDomain } = useAccessDomains();
+  
   await loadWorkingDomain()
   if (!accessDomainState.domain) {
     return abortNavigation(

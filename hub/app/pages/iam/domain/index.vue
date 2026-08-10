@@ -7,21 +7,21 @@
                     <RefreshButton :loading="pending" @click="refresh" />
                 </div>
             </template>
-            <DomainForm/>
+            <DomainForm />
         </UCard>
         <UCard>
             <template #title>
                 <div class="flex justify-between items-center h-6">
                     Roles
                     <!-- <RoleForm v-model:role="selectedRole" :domain-name="data?.data.name"
-                        :reference-permissions="domain?.permissions ?? []" :leave-action="() => refresh()" action="create">
+                        :reference-permissions="permissions" :leave-action="() => refresh()" action="create">
                         <template #icon>
                             <CreateButton size="sm" />
                         </template>
-                    </RoleForm> -->
+    </RoleForm> -->
                 </div>
             </template>
-            <UTable :columns="roleColumns" :data="data?.data.roles" :sorting="rolesSorting">
+            <UTable :columns="roleColumns" :data="data?.data.roles">
                 <template #no-cell="{ row }">{{ row.index + 1 }}</template>
                 <template #active-cell="{ row }">
                     <UBadge :color="row.original.active ? 'success' : 'neutral'" label="Active" />
@@ -40,9 +40,9 @@
 import type { ApiResponse, DomainRoleView, DomainWithRolesView } from '@rey-one/shared';
 import type { TableColumn } from '@nuxt/ui';
 import { useAPI } from '~/composables/api';
+import { useDomainForm } from '~/composables/domain';
 import RoleForm from '~/components/domain/RoleForm.vue';
 import CreateButton from '~/components/ui/button/CreateButton.vue';
-import useDomain from '~/composables/domain';
 import RefreshButton from '~/components/ui/button/RefreshButton.vue';
 import DomainForm from '~/components/domain/DomainForm.vue';
 
@@ -53,13 +53,17 @@ definePageMeta({
 type Response = ApiResponse<DomainWithRolesView>
 
 const roleColumns = [
-    { id: "no" },
+    {
+        id: 'no'
+    },
     { accessorKey: "name", header: "Name" },
     { accessorKey: 'active', header: "Status" },
     { id: 'actions' }
 ] satisfies TableColumn<DomainRoleView>[]
 
-const { accessDomainId, domainFormState, createPermissionsChecks} = useDomain()
+const { domainFormState } = useDomainForm()
+const { createPermissionsChecks } = useDomainUtils()
+const { accessDomainId } = useAccessDomains()
 
 const { data, refresh, pending } = await useAsyncData(`domain:${accessDomainId.value}`, () => {
     if (!accessDomainId) {
@@ -70,22 +74,19 @@ const { data, refresh, pending } = await useAsyncData(`domain:${accessDomainId.v
         })
     }
     return useAPI<Response>(`/domains/${accessDomainId.value}`, {
-        onResponse({response}){
-            if(response.ok){
+        onResponse({ response }) {
+            if (response.ok) {
                 const result = response._data as Response
                 Object.assign(domainFormState.data, result.data)
-                domainFormState.permissionChecks = createPermissionsChecks()
+                domainFormState.permissionChecks = createPermissionsChecks({
+                    currentPermissions: domainFormState.data.permissions
+                })
             }
         }
     })
 })
+const permissions = computed(() => data.value?.data.permissions ?? [])
 
 const selectedRole = ref<Partial<DomainRoleView>>()
-const rolesSorting = ref([
-    {
-        id: 'name',
-        desc: false
-    }
-])
 
 </script>

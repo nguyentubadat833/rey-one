@@ -1,6 +1,6 @@
 <template>
     <UModal :title="modalTitle" v-model:open="open" :ui="{ content: 'min-w-[40vw]' }">
-        <div @click="clickIcon">
+        <div>
             <slot name="icon"></slot>
             <UButton v-if="!$slots.icon" icon="ic:baseline-edit-note" color="neutral" variant="subtle" />
         </div>
@@ -80,10 +80,6 @@ import CancelButton from "../ui/button/CancelButton.vue";
 import ChooseDomainWithRoles from "../domain/ChooseDomainWithRoles.vue";
 import SaveButton from "../ui/button/SaveButton.vue";
 
-defineProps<{
-    clickIcon?: () => void;
-}>();
-
 const { userFormState, save } = useUser();
 const { copy, copied } = useClipboard()
 
@@ -97,8 +93,4 @@ const members = computed({
 const modalTitle = computed(() =>
     formData.value.id ? formData.value.name : "*New User",
 );
-
-watchEffect(() => {
-    console.log(members.value)
-})
 </script>

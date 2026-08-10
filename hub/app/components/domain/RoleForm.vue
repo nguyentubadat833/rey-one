@@ -12,16 +12,16 @@
                         placeholder="Leave blank to generate automatically" />
                 </UFormField>
                 <UFormField label="Name">
-                    <UInput :disabled="!action" v-model="data.name" class="w-full"
+                    <UInput :disabled="isView" v-model="data.name" class="w-full"
                         placeholder="Display name for this role" />
                 </UFormField>
                 <UFormField label="Active">
-                    <USwitch :disabled="!action" v-model="data.active" :default-value="true" />
+                    <USwitch :disabled="isView" v-model="data.active" :default-value="true" />
                 </UFormField>
                 <UFormField label="Permissions">
                     <UTable :data="permissionChecks" sticky class="max-h-[50vh]">
                         <template #active-cell="{ row }">
-                            <UCheckbox :disabled="!action" v-model="row.original.active" />
+                            <UCheckbox :disabled="isView" v-model="row.original.active" />
                         </template>
                     </UTable>
                 </UFormField>
@@ -31,7 +31,7 @@
         <template #footer>
             <div class="flex justify-end gap-3 w-full">
                 <CancelButton @click="open = false" />
-                <SaveButton v-if="action" :loading="loading" @click="submit()" />
+                <SaveButton v-if="!isView" :loading="loading" @click="submit()" />
             </div>
         </template>
     </UModal>
@@ -39,8 +39,8 @@
 
 <script setup lang="ts">
 import { CreateDomainRoleSchema, type ApiResponse, type AppPermission, type DomainRoleView } from '@rey-one/shared';
-import CancelButton from '../ui/button/CancelButton.vue';
 import { useAPI } from '~/composables/api/index.ts';
+import CancelButton from '../ui/button/CancelButton.vue';
 import SaveButton from '../ui/button/SaveButton.vue';
 
 const data = defineModel<Partial<DomainRoleView>>('role', {
@@ -49,28 +49,32 @@ const data = defineModel<Partial<DomainRoleView>>('role', {
 
 const props = defineProps<{
     leaveAction?: () => void
-    action?: 'create' | 'update'
+    type: 'view' | 'edit'
     domainName?: string
     referencePermissions?: AppPermission[]
 }>()
 
 const { pushToast } = useNotification()
 
+const isView = props.type === 'view'
 const open = ref(false)
 const loading = ref(false)
 const verion = ref(0)
-const permissionChecks = ref<ReturnType<typeof permissionsToChecks>>([])
-const snapshotData = ref<Partial<DomainRoleView>>({})
 const modalDescription = computed(() => props.domainName ? props.domainName : undefined)
 
+const permissionChecks = ref<ReturnType<typeof permissionsToChecks>>([])
+const snapshotData = ref<Partial<DomainRoleView>>({})
+
 async function submit() {
-    if (!props.action) return
+    if (!isView) return
 
     const process = async () => {
         let response
 
         data.value.permissions = permissionChecks.value.filter(item => item.active).map(item => item.permission)
-        if (props.action === 'create') {
+        const isCreate = data.value.id  === undefined
+
+        if (isCreate) {
             const payload = zodValidate(CreateDomainRoleSchema, data.value)
             response = await useAPI<ApiResponse<DomainRoleView>>('/domain-roles', {
                 method: 'POST',
@@ -106,7 +110,7 @@ async function submit() {
 }
 
 function onLeave() {
-    if (props.action) {
+    if (!isView) {
         if (verion.value && props.leaveAction) {
             props.leaveAction()
         } else {
@@ -116,17 +120,7 @@ function onLeave() {
 }
 
 onMounted(() => {
-    if (props.action) {
-        permissionChecks.value = permissionsToChecks(props.referencePermissions ?? [])
-        if (props.action === 'update') {
-            permissionChecks.value.forEach(pms => {
-                pms.active = data.value.permissions?.includes(pms.permission) ?? false
-            })
-        }
-    } else {
-        permissionChecks.value = permissionsToChecks(data.value.permissions ?? [], true)
-    }
-
+   
     if (data.value) {
         snapshotData.value = structuredClone(toRaw(data.value))
     }

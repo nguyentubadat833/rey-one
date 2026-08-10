@@ -26,7 +26,7 @@
 import type { NavigationMenuItem } from '@nuxt/ui';
 import useUI from '~/composables/ui/ui';
 import useAuth from '~/composables/auth.ts';
-import useDomain from '~/composables/domain.ts';
+import { useAccessDomains } from '~/composables/domain.ts';
 import Brand from './Brand.vue';
 import UserProfileCard from '../user/UserProfileCard.vue';
 import ChooseDomainAccess from '../domain/ChooseDomainAccess.vue';
@@ -43,7 +43,7 @@ withDefaults(
 const { isMobile } = useDevice()
 const { openSidebar } = useUI()
 const { authState } = useAuth()
-const { accessDomainState } = useDomain()
+const { accessDomainState } = useAccessDomains()
 
 const domainAccess = computed(() => accessDomainState.domain)
 const userType = computed(() => authState.userAuth?.type)

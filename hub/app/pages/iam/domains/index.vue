@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useAsyncAPI } from '~/composables/api';
 import { APP_PERMISSIONS, type ApiResponse, type DomainSummariesView, type DomainSummaryView, type PaginationQuery } from '@rey-one/shared';
-import useDomain from '~/composables/domain';
+import { useDomainForm } from '~/composables/domain';
 import DomainForm from '~/components/domain/DomainForm.vue';
 import CreateButton from '~/components/ui/button/CreateButton.vue';
 import EditButton from '~/components/ui/button/EditButton.vue';
@@ -27,7 +27,9 @@ const columns = [
     { id: 'actions' }
 ] satisfies TableColumn<DomainSummaryView>[]
 
-const { domainFormState: domainState, resetForm: resetDomainFormState, createPermissionsChecks, save } = useDomain()
+const { domainFormState: domainState, resetForm: resetDomainFormState, save } = useDomainForm()
+const { createPermissionsChecks } = useDomainUtils()
+
 const domainFormData = toRef(domainState, 'data')
 const domainFormStateVersion = toRef(domainState, 'version')
 
@@ -59,7 +61,6 @@ function onSelect(e: Event, row: TableRow<DomainSummaryView>) {
 function DomainButton(type: 'edit' | 'add', rowData?: DomainSummaryView) {
     const isAdd = type === 'add'
 
-    domainState.permissionChecks = createPermissionsChecks([...APP_PERMISSIONS])
     return h(Modal,
         {
             title: isAdd ? '*New Domain' : domainFormData.value.name
@@ -70,8 +71,15 @@ function DomainButton(type: 'edit' | 'add', rowData?: DomainSummaryView) {
                     onClick: () => {
                         if (isAdd) {
                             resetDomainFormState()
+                            domainState.permissionChecks = createPermissionsChecks({
+                                referencePermissions: [...APP_PERMISSIONS]
+                            })
                         } else {
                             Object.assign(domainFormData.value, rowData)
+                            domainState.permissionChecks = createPermissionsChecks({
+                                referencePermissions: [...APP_PERMISSIONS],
+                                currentPermissions: domainFormData.value.permissions
+                            })
                         }
                     }
                 }
@@ -117,7 +125,7 @@ const UpdateDomainButton = (row: DomainSummaryView) => DomainButton('edit', row)
                 <NuxtTime :datetime="row.original.registeredAt" dateStyle="medium" locale="vi-VN" />
             </template>
             <template #actions-cell="{ row }">
-                 <component :is="UpdateDomainButton(row.original)" />
+                <component :is="UpdateDomainButton(row.original)" />
             </template>
         </UTable>
         <div class="flex justify-end border-t border-default pt-4 px-4">
