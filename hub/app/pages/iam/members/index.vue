@@ -38,7 +38,6 @@ import type { ApiResponse, DomainMemberView, DomainRoleView } from '@rey-one/sha
 import RoleForm from '~/components/domain/RoleForm.vue';
 import RefreshButton from '~/components/ui/button/RefreshButton.vue';
 import { useAPI } from '~/composables/api';
-import useDomain from '~/composables/domain';
 
 definePageMeta({
     middleware: ['domain']
@@ -55,7 +54,7 @@ const memberColumns = [
     { id: 'actions' }
 ] satisfies TableColumn<DomainMemberView>[]
 
-const { accessDomainId } = useDomain()
+const { accessDomainId } = useAccessDomains()
 
 const { data: members, refresh, pending } = await useAsyncData(`domain_members:${accessDomainId.value}`, () => useAPI<ApiResponse<DomainMemberView[]>>('/domain-members'))
 // const { data: roles } = await useLazyAsyncData(`domain_roles:${accessDomainId.value}`, () => useAPI<ApiResponse<DomainRoleView>>('/domain-roles'))

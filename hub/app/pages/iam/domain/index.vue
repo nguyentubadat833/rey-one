@@ -13,12 +13,7 @@
             <template #title>
                 <div class="flex justify-between items-center h-6">
                     Roles
-                    <!-- <RoleForm v-model:role="selectedRole" :domain-name="data?.data.name"
-                        :reference-permissions="permissions" :leave-action="() => refresh()" action="create">
-                        <template #icon>
-                            <CreateButton size="sm" />
-                        </template>
-    </RoleForm> -->
+                    <component :is="roleButtonRender().createButton()" />
                 </div>
             </template>
             <UTable :columns="roleColumns" :data="data?.data.roles">
@@ -27,9 +22,7 @@
                     <UBadge :color="row.original.active ? 'success' : 'neutral'" label="Active" />
                 </template>
                 <template #actions-cell="{ row }">
-                    <!-- <RoleForm v-model:role="row.original" :domain-name="data?.data.name"
-                        :reference-permissions="domain?.permissions ?? []" :leave-action="() => refresh()" action="update">
-                    </RoleForm> -->
+                    <component :is="roleButtonRender().updateButton(row.original)" />
                 </template>
             </UTable>
         </UCard>
@@ -40,17 +33,22 @@
 import type { ApiResponse, DomainRoleView, DomainWithRolesView } from '@rey-one/shared';
 import type { TableColumn } from '@nuxt/ui';
 import { useAPI } from '~/composables/api';
-import { useDomainForm } from '~/composables/domain';
-import RoleForm from '~/components/domain/RoleForm.vue';
-import CreateButton from '~/components/ui/button/CreateButton.vue';
 import RefreshButton from '~/components/ui/button/RefreshButton.vue';
 import DomainForm from '~/components/domain/DomainForm.vue';
+import useDomainForm from '~/components/domain/composables/useDomainForm';
+import RoleForm from '~/components/domain/RoleForm.vue';
+import useRoleForm from '~/components/domain/composables/useRoleForm';
+import CreateButton from '~/components/ui/button/CreateButton.vue';
+import SaveButton from '~/components/ui/button/SaveButton.vue';
+import EditButton from '~/components/ui/button/EditButton.vue';
 
 definePageMeta({
     middleware: ['domain']
 })
 
 type Response = ApiResponse<DomainWithRolesView>
+
+const Modal = resolveComponent('UModal')
 
 const roleColumns = [
     {
@@ -64,6 +62,7 @@ const roleColumns = [
 const { domainFormState } = useDomainForm()
 const { createPermissionsChecks } = useDomainUtils()
 const { accessDomainId } = useAccessDomains()
+const { resetForm: resetRoleForm, roleFormState, save: saveRole } = useRoleForm()
 
 const { data, refresh, pending } = await useAsyncData(`domain:${accessDomainId.value}`, () => {
     if (!accessDomainId) {
@@ -77,6 +76,7 @@ const { data, refresh, pending } = await useAsyncData(`domain:${accessDomainId.v
         onResponse({ response }) {
             if (response.ok) {
                 const result = response._data as Response
+
                 Object.assign(domainFormState.data, result.data)
                 domainFormState.permissionChecks = createPermissionsChecks({
                     currentPermissions: domainFormState.data.permissions
@@ -85,8 +85,50 @@ const { data, refresh, pending } = await useAsyncData(`domain:${accessDomainId.v
         }
     })
 })
-const permissions = computed(() => data.value?.data.permissions ?? [])
 
-const selectedRole = ref<Partial<DomainRoleView>>()
+const referencePermissions = computed(() => data.value?.data.permissions ?? [])
 
+const roleButtonRender = () => {
+    const Form = h(RoleForm, { referencePermissions: referencePermissions.value })
+    const ModalFooter = h('div',
+        { class: 'flex justify-end gap-3 w-full' },
+        [
+            h(SaveButton, {
+                loading: roleFormState.loading,
+                onClick: () => saveRole()
+            })
+        ]
+    )
+
+    return {
+        createButton: () => h(Modal,
+            { title: "*New Role" },
+            {
+                default: () => h(CreateButton,
+                    {
+                        onClick: () => {
+                            resetRoleForm()
+                        }
+                    }
+                ),
+                body: () => Form,
+                footer: () => ModalFooter
+            }
+        ),
+        updateButton: (rowData: DomainRoleView) => h(Modal,
+            { title: roleFormState.data.name ?? "Update Role" },
+            {
+                default: () => h(EditButton,
+                    {
+                        onClick: () => {
+                            Object.assign(roleFormState.data, rowData)
+                        }
+                    }
+                ),
+                body: () => Form,
+                footer: () => ModalFooter
+            }
+        ),
+    }
+}
 </script>

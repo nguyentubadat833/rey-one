@@ -20,8 +20,7 @@
     </form>
 </template>
 <script setup lang="ts">
-import { useDomainForm } from '~/composables/domain';
+import useDomainForm from './composables/useDomainForm'
 
 const { domainFormState } = useDomainForm()
-
 </script>

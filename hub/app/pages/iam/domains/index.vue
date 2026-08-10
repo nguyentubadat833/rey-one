@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { useAsyncAPI } from '~/composables/api';
 import { APP_PERMISSIONS, type ApiResponse, type DomainSummariesView, type DomainSummaryView, type PaginationQuery } from '@rey-one/shared';
-import { useDomainForm } from '~/composables/domain';
 import DomainForm from '~/components/domain/DomainForm.vue';
 import CreateButton from '~/components/ui/button/CreateButton.vue';
 import EditButton from '~/components/ui/button/EditButton.vue';
 import SaveButton from '~/components/ui/button/SaveButton.vue';
 import RefreshButton from '~/components/ui/button/RefreshButton.vue';
 import type { TableColumn, TableRow } from '@nuxt/ui';
+import useDomainForm from '~/components/domain/composables/useDomainForm';
 
 definePageMeta({
     title: "Domains Management",
