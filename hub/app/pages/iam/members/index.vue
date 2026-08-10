@@ -18,7 +18,7 @@
             <template #role-cell="{ row }">
                 <RoleForm v-if="row.original.role" v-model:role="row.original.role">
                     <template #icon>
-                        <UButton icon="ic:baseline-more-horiz"  variant="outline" color="neutral"/>
+                        <UButton icon="ic:baseline-more-horiz" variant="outline" color="neutral" />
                     </template>
                 </RoleForm>
             </template>
@@ -34,7 +34,7 @@
 </template>
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui';
-import type { ApiResponse, DomainMemberView, DomainRoleView } from '@rey-one/shared';
+import type { ApiResponse, DomainMemberView, DomainRoleView, UserStatus } from '@rey-one/shared';
 import RoleForm from '~/components/domain/RoleForm.vue';
 import RefreshButton from '~/components/ui/button/RefreshButton.vue';
 import { useAPI } from '~/composables/api';
@@ -43,10 +43,31 @@ definePageMeta({
     middleware: ['domain']
 })
 
+const Input = resolveComponent('UInput')
+const Select = resolveComponent('USelect')
+
 const memberColumns = [
     { id: "no" },
-    { accessorKey: "name", header: "Name" },
-    { accessorKey: 'status', header: "Status" },
+    {
+        accessorKey: "name",
+        header: "Name",
+        cell: ({ row }) => rowIndexSelected.value === row.index
+            ? h(Input, {
+                modelValue: row.getValue('name'),
+                'onUpdate:modelValue': (value: string) => row.original.name = value,
+            })
+            : row.getValue('name')
+    },
+    {
+        accessorKey: 'status',
+        header: "Status",
+        cell: ({ row }) => rowIndexSelected.value === row.index
+            ? h(Select, {
+                modelValue: row.getValue('status'),
+                'onUpdate:modelValue': (value: UserStatus) => row.original.status = value,
+            })
+            : row.getValue('status')
+    },
     { accessorKey: 'email', header: "Email" },
     { accessorKey: 'username', header: "Username" },
     { accessorKey: 'phone', header: "Phone" },
@@ -65,4 +86,5 @@ const pagination = ref({
     pageIndex: 0,
     pageSize: 5
 })
+const rowIndexSelected = ref<number>()
 </script>
