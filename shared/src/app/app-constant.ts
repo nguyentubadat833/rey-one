@@ -1,5 +1,3 @@
-export const APP_DOMAIN_PERMISSIONS = [];
-
 export const APP_PERMISSIONS = [
 
   "order:read",

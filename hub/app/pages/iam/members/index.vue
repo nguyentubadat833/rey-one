@@ -14,7 +14,15 @@
             </div>
         </div>
 
-        <UTable v-model:pagination="pagination" :data="members?.data ?? []" :columns="memberColumns" />
+        <UTable v-model:pagination="pagination" :data="members?.data ?? []" :columns="memberColumns">
+            <template #role-cell="{ row }">
+                <RoleForm v-if="row.original.role" v-model:role="row.original.role">
+                    <template #icon>
+                        <UButton icon="ic:baseline-more-horiz"  variant="outline" color="neutral"/>
+                    </template>
+                </RoleForm>
+            </template>
+        </UTable>
 
         <div class="flex justify-end border-t border-default pt-4 px-4">
             <UPagination :page="(membersTable?.tableApi?.getState().pagination.pageIndex || 0) + 1"
@@ -27,6 +35,7 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui';
 import type { ApiResponse, DomainMemberView, DomainRoleView } from '@rey-one/shared';
+import RoleForm from '~/components/domain/RoleForm.vue';
 import RefreshButton from '~/components/ui/button/RefreshButton.vue';
 import { useAPI } from '~/composables/api';
 import useDomain from '~/composables/domain';
@@ -49,7 +58,7 @@ const memberColumns = [
 const { accessDomainId } = useDomain()
 
 const { data: members, refresh, pending } = await useAsyncData(`domain_members:${accessDomainId.value}`, () => useAPI<ApiResponse<DomainMemberView[]>>('/domain-members'))
-const { data: roles } = await useLazyAsyncData(`domain_roles:${accessDomainId.value}`, () => useAPI<ApiResponse<DomainRoleView>>('/domain-roles'))
+// const { data: roles } = await useLazyAsyncData(`domain_roles:${accessDomainId.value}`, () => useAPI<ApiResponse<DomainRoleView>>('/domain-roles'))
 
 const membersTable = useTemplateRef('membersTable')
 const globalFilter = ref()

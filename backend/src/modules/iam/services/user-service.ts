@@ -2,7 +2,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import { CreateUserDto, UpdateUserDto, UserMemberDto } from '../dtos/user-dto';
 import { UserRepository } from '@/persistence/repositories/user-repository';
 import { authConfig } from '@/configs/auth.config';
-import type { ConfigType } from '@nestjs/config';
 import { EntityManager } from '@mikro-orm/core';
 import { DomainMember } from '@/persistence/entities/iam-domain-member.entity';
 import { Domain } from '@/persistence/entities/iam-domain.entity';
@@ -10,6 +9,7 @@ import { DomainRole } from '@/persistence/entities/iam-domain-role.entity';
 import { UserNotFoundError } from '@/utils/errors/user.error';
 import { User } from '@/persistence/entities/iam-user.entity';
 import { UserLoadedPartyAndMembers } from '@/persistence/types/user-type';
+import type { ConfigType } from '@nestjs/config';
 
 @Injectable()
 export class UserService {
@@ -54,7 +54,7 @@ export class UserService {
       },
       {
         populate: ['party', 'members.domain.party'],
-        failHandler: UserNotFoundError,
+        failHandler: UserNotFoundError
       },
     );
 
@@ -79,8 +79,8 @@ export class UserService {
     }
 
     await this.em.flush();
-
-    // console.log(user)
+    await this.em.populate(user, ['members.domain.party'])
+    
     return user as UserLoadedPartyAndMembers;
   }
 }

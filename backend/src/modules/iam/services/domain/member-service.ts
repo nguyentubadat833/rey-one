@@ -113,6 +113,9 @@ export class DomainMemberService {
       DomainMember,
       {
         domain: domainId,
+        user: {
+          type: 'domain_user'
+        }
       },
       {
         populate: ['user.party', 'role'],

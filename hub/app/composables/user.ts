@@ -21,16 +21,17 @@ const defaultState = {
 const userFormState = reactive<typeof defaultState>(defaultState);
 
 export default function useUser() {
-
   function resetForm() {
-    userFormState.data = structuredClone(nullToUndefined(defaultData))
+    userFormState.data = structuredClone(nullToUndefined(defaultData));
   }
 
-  async function loadFormData(userId = userFormState.data.id){
-    if(typeof userId !== 'string') return
+  async function loadFormData(userId = userFormState.data.id) {
+    if (typeof userId !== "string") return;
 
-    const result = await useAPI<ApiResponse<UserDetailView>>(`/users/${userId}/detail`)
-    userFormState.data = nullToUndefined(result.data)
+    const result = await useAPI<ApiResponse<UserDetailView>>(
+      `/users/${userId}/detail`,
+    );
+    userFormState.data = nullToUndefined(result.data);
   }
 
   async function save(
@@ -43,8 +44,7 @@ export default function useUser() {
       let result;
 
       if (data.id) {
-        console.log(data)
-        const payload = zodValidate(CreateUserSchema, data);
+        const payload = zodValidate(UpdateUserSchema, data);
         result = await useAPI<ApiResponse<UserDetailView>>(
           `/users/${data.id}`,
           {
@@ -58,7 +58,7 @@ export default function useUser() {
           description: "Updated",
         });
       } else {
-        const payload = zodValidate(UpdateUserSchema, data);
+        const payload = zodValidate(CreateUserSchema, data);
         result = await useAPI<ApiResponse<UserDetailView>>("/users", {
           method: "POST",
           body: payload,

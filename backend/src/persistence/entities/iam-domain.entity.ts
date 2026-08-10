@@ -10,7 +10,6 @@ import { uuidv7 } from 'uuidv7';
 import { BaseEntitySchema } from './base.entity';
 import { Order } from './commerce-order.entity';
 import { Party } from './iam-party.entity';
-import randomstring from 'randomstring';
 
 const BaseDomainSchema = defineEntity({
   name: 'IAMBaseDomain',

@@ -99,6 +99,6 @@ const modalTitle = computed(() =>
 );
 
 watchEffect(() => {
-    console.log(formData.value)
+    console.log(members.value)
 })
 </script>

@@ -4,10 +4,12 @@ import {
   type DomainWithRolesView,
   type DomainView,
   type UserDomainAccess,
+  type AppPermission,
 } from "@rey-one/shared";
 import { useAPI } from "./api";
 import { UpdateDomainSchema } from "@rey-one/shared";
 import useAuth from "./auth";
+import type { PermissionCheck } from "~/types/domain-types";
 
 type DomainForm = DomainView;
 
@@ -17,6 +19,7 @@ const domainAvailableState = reactive({
 });
 
 const domainFormState = reactive({
+  permissionChecks: [] as PermissionCheck[],
   data: {} as Partial<DomainForm>,
   version: Date.now(),
   loading: false,
@@ -28,11 +31,28 @@ const accessDomainState = reactive({
   loading: false,
 });
 
-const accessDomainId = computed(() => accessDomainState.domain?.domainId)
+const accessDomainId = computed(() => accessDomainState.domain?.domainId);
 
 export default function useDomain() {
   const { loadAuthState } = useAuth();
-  const router = useRouter();
+
+  function createPermissionsChecks(
+    referencePermissions?: AppPermission[],
+  ): PermissionCheck[] {
+    if (referencePermissions) {
+      return referencePermissions.map((pms) => ({
+        name: pms,
+        active: domainFormState.data.permissions?.includes(pms) ?? false,
+      }));
+    } else {
+      return (
+        domainFormState.data.permissions?.map((pms) => ({
+          name: pms,
+          active: true,
+        })) ?? []
+      );
+    }
+  }
 
   function resetForm() {
     domainFormState.data.id = undefined;
@@ -51,6 +71,7 @@ export default function useDomain() {
       try {
         const result =
           await useAPI<ApiResponse<UserDomainAccess[]>>("/me/domains");
+
         accessDomainState.list = result.data;
       } finally {
         accessDomainState.loading = false;
@@ -71,6 +92,8 @@ export default function useDomain() {
 
       accessDomainState.domain = undefined;
       localStorage.removeItem(`${userAuthId}:working_domain`);
+
+      await navigateTo("/");
     };
 
     const loadWorkingDomain = async () => {
@@ -100,47 +123,55 @@ export default function useDomain() {
     };
   }
 
-  async function save(
-    onSuccess: () => Promise<void> = () => Promise.resolve(),
-  ) {
-    const { pushToast } = useNotification();
+  async function save() {
+    // onSuccess: () => Promise<void> = () => Promise.resolve(),
+    const process = async () => {
+      const { pushToast } = useNotification();
 
-    if (domainFormState.data.id) {
-      const payload = zodValidate(UpdateDomainSchema, domainFormState.data);
-      const result = await useAPI<ApiResponse<DomainView>>(
-        `/domains/${domainFormState.data.id}`,
-        {
-          method: "PATCH",
+      domainFormState.data.permissions = domainFormState.permissionChecks
+        .filter((item) => item.active)
+        .map((item) => item.name);
+
+      if (domainFormState.data.id) {
+        const payload = zodValidate(UpdateDomainSchema, domainFormState.data);
+        const result = await useAPI<ApiResponse<DomainView>>(
+          `/domains/${domainFormState.data.id}`,
+          {
+            method: "PATCH",
+            body: payload,
+          },
+        );
+
+        Object.assign(domainFormState.data, result.data);
+
+        pushToast({
+          title: payload.name,
+          description: "Updated",
+        });
+      } else {
+        const payload = zodValidate(CreateDomainSchema, domainFormState.data);
+        const result = await useAPI<ApiResponse<DomainView>>("/domains", {
+          method: "POST",
           body: payload,
-        },
-      );
+        });
 
-      Object.assign(domainFormState.data, result.data);
+        Object.assign(domainFormState.data, result.data);
 
-      pushToast({
-        title: payload.name,
-        description: "Updated",
-      });
+        pushToast({
+          title: payload.name,
+          description: "Created",
+        });
+      }
 
-      await onSuccess();
-    } else {
-      const payload = zodValidate(CreateDomainSchema, domainFormState.data);
-      const result = await useAPI<ApiResponse<DomainView>>("/domains", {
-        method: "POST",
-        body: payload,
-      });
+      ++domainFormState.version;
+    };
 
-      Object.assign(domainFormState.data, result.data);
-
-      pushToast({
-        title: payload.name,
-        description: "Created",
-      });
-
-      await onSuccess();
+    try {
+      domainFormState.loading = true;
+      await process();
+    } finally {
+      domainFormState.loading = false;
     }
-
-    ++domainFormState.version;
   }
 
   return {
@@ -153,5 +184,6 @@ export default function useDomain() {
     save,
     accessDomain,
     loadAvailable,
+    createPermissionsChecks,
   };
 }

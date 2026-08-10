@@ -35,7 +35,6 @@ export class UserMapper {
     return {
       ...UserMapper.toUserView(user),
       members: user.members.map((item) => {
-        console.log(item)
         const domain = item.domain.unwrap() as DomainLoadedParty
         return {
           domain: DomainMapper.toDomainView(domain),

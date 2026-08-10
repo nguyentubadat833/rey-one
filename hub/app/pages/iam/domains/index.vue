@@ -1,15 +1,20 @@
 <script setup lang="ts">
 import { useAsyncAPI } from '~/composables/api';
-import type { TableColumn, TableRow } from '@nuxt/ui';
-import type { ApiResponse, DomainSummariesView, DomainSummaryView, PaginationQuery } from '@rey-one/shared';
+import { APP_PERMISSIONS, type ApiResponse, type DomainSummariesView, type DomainSummaryView, type PaginationQuery } from '@rey-one/shared';
 import useDomain from '~/composables/domain';
 import DomainForm from '~/components/domain/DomainForm.vue';
 import CreateButton from '~/components/ui/button/CreateButton.vue';
+import EditButton from '~/components/ui/button/EditButton.vue';
+import SaveButton from '~/components/ui/button/SaveButton.vue';
+import RefreshButton from '~/components/ui/button/RefreshButton.vue';
+import type { TableColumn, TableRow } from '@nuxt/ui';
 
 definePageMeta({
     title: "Domains Management",
     middleware: ['admin']
 });
+
+const Modal = resolveComponent('UModal')
 
 const columns = [
     { id: "no" },
@@ -22,7 +27,7 @@ const columns = [
     { id: 'actions' }
 ] satisfies TableColumn<DomainSummaryView>[]
 
-const { domainFormState: domainState, resetForm: resetDomainFormState } = useDomain()
+const { domainFormState: domainState, resetForm: resetDomainFormState, createPermissionsChecks, save } = useDomain()
 const domainFormData = toRef(domainState, 'data')
 const domainFormStateVersion = toRef(domainState, 'version')
 
@@ -51,14 +56,43 @@ function onSelect(e: Event, row: TableRow<DomainSummaryView>) {
     Object.assign(domainFormData.value, row.original)
 }
 
-async function handlerClickDomainButton(row: TableRow<DomainSummaryView>) {
-    Object.assign(domainFormData.value, row.original)
-    await nextTick()
+function DomainButton(type: 'edit' | 'add', rowData?: DomainSummaryView) {
+    const isAdd = type === 'add'
+
+    domainState.permissionChecks = createPermissionsChecks([...APP_PERMISSIONS])
+    return h(Modal,
+        {
+            title: isAdd ? '*New Domain' : domainFormData.value.name
+        },
+        {
+            default: () => h(isAdd ? CreateButton : EditButton,
+                {
+                    onClick: () => {
+                        if (isAdd) {
+                            resetDomainFormState()
+                        } else {
+                            Object.assign(domainFormData.value, rowData)
+                        }
+                    }
+                }
+            ),
+            body: () => h(DomainForm, {}),
+            footer: () => h('div',
+                { class: 'flex justify-end gap-3 w-full' },
+                [
+                    h(SaveButton, {
+                        loading: domainState.loading,
+                        onClick: () => save()
+                    })
+                ]
+            )
+        }
+    )
 }
 
-function handlerClickAddDomainButton() {
-    resetDomainFormState()
-}
+const AddDomainButton = () => DomainButton('add')
+const UpdateDomainButton = (row: DomainSummaryView) => DomainButton('edit', row)
+
 </script>
 
 <template>
@@ -69,11 +103,7 @@ function handlerClickAddDomainButton() {
             </div>
             <div class="flex items-center gap-4">
                 <RefreshButton @click="refresh" :loading="pending" />
-                <DomainForm :click-icon="handlerClickAddDomainButton">
-                    <template #icon>
-                        <CreateButton />
-                    </template>
-                </DomainForm>
+                <AddDomainButton />
             </div>
         </div>
         <UTable v-model:row-selection="rowSelection" :data="domains" :columns="columns"
@@ -87,7 +117,7 @@ function handlerClickAddDomainButton() {
                 <NuxtTime :datetime="row.original.registeredAt" dateStyle="medium" locale="vi-VN" />
             </template>
             <template #actions-cell="{ row }">
-                <DomainForm :click-icon="() => handlerClickDomainButton(row)" />
+                 <component :is="UpdateDomainButton(row.original)" />
             </template>
         </UTable>
         <div class="flex justify-end border-t border-default pt-4 px-4">

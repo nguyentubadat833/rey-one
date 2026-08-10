@@ -1,6 +1,6 @@
 <template>
     <UModal v-model:open="open" title="Roles" :description="modalDescription" @after:leave="onLeave">
-        <div @click="clickIcon">
+        <div>
             <slot name="icon"></slot>
             <UButton v-if="!$slots.icon" icon="ic:baseline-edit-note" color="neutral" variant="subtle" />
         </div>
@@ -12,15 +12,16 @@
                         placeholder="Leave blank to generate automatically" />
                 </UFormField>
                 <UFormField label="Name">
-                    <UInput v-model="data.name" class="w-full" placeholder="Display name for this role" />
+                    <UInput :disabled="!action" v-model="data.name" class="w-full"
+                        placeholder="Display name for this role" />
                 </UFormField>
                 <UFormField label="Active">
-                    <USwitch v-model="data.active" :default-value="true" />
+                    <USwitch :disabled="!action" v-model="data.active" :default-value="true" />
                 </UFormField>
                 <UFormField label="Permissions">
                     <UTable :data="permissionChecks" sticky class="max-h-[50vh]">
                         <template #active-cell="{ row }">
-                            <UCheckbox v-model="row.original.active" />
+                            <UCheckbox :disabled="!action" v-model="row.original.active" />
                         </template>
                     </UTable>
                 </UFormField>
@@ -47,11 +48,10 @@ const data = defineModel<Partial<DomainRoleView>>('role', {
 })
 
 const props = defineProps<{
-    clickIcon?: () => void
     leaveAction?: () => void
-    domainName?: string
-    referencePermissions: AppPermission[]
     action?: 'create' | 'update'
+    domainName?: string
+    referencePermissions?: AppPermission[]
 }>()
 
 const { pushToast } = useNotification()
@@ -117,14 +117,17 @@ function onLeave() {
 
 onMounted(() => {
     if (props.action) {
+        permissionChecks.value = permissionsToChecks(props.referencePermissions ?? [])
         if (props.action === 'update') {
             permissionChecks.value.forEach(pms => {
                 pms.active = data.value.permissions?.includes(pms.permission) ?? false
             })
         }
+    } else {
+        permissionChecks.value = permissionsToChecks(data.value.permissions ?? [], true)
     }
 
-    if(data.value){
+    if (data.value) {
         snapshotData.value = structuredClone(toRaw(data.value))
     }
 })
