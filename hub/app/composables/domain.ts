@@ -198,6 +198,7 @@ export function useDomainUtils() {
 
   return {
     domainAvailableState,
+    
     loadAvailable,
     createPermissionsChecks,
   };
