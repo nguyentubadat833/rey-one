@@ -6,3 +6,4 @@ export type OrderStatus = (typeof ORDER_STATUSES)[number];
 export type OrderPaymentType = (typeof ORDER_PAYMENT_TYPES)[number];
 
 export type OrderView = z.infer<typeof OrderSchema>;
+export type OrderSummaryView = Omit<OrderView, 'items'>

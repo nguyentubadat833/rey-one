@@ -8,6 +8,8 @@ import { OrderMapper } from '../mappers/order-mapper';
 import { EntityManager } from '@mikro-orm/core';
 import { Order } from '@/persistence/entities/commerce-order.entity';
 import { OrderNotFoundError } from '@/utils/errors/order.error';
+import { PaginationQueryDto } from '@/utils/dtos/utils-dto';
+import { ResponseMapper } from '@/utils/mappers/response-mapper';
 
 @RequireAuth()
 @RequireTenant()
@@ -20,8 +22,31 @@ export class OrderController {
     private readonly orderService: OrderService,
   ) {}
 
+  @RequirePermission('order:read', false)
+  @ApiOperation({ summary: 'Orders summaries' })
+  @Get()
+  async summaries(@Query() { limit, page }: PaginationQueryDto) {
+    const [data, total] = await this.em.findAndCount(
+      Order,
+      {},
+      {
+        populate: ['customer', 'createdBy.party'],
+        limit,
+        offset: (page - 1) * limit,
+        orderBy: [
+          {
+            createdAt: 'DESC',
+          },
+        ],
+      },
+    );
+
+    const orders = data.map((item) => OrderMapper.toOrderSummaryView(item));
+    return ResponseMapper.toPaginatedResponse(orders, total, page, limit);
+  }
+
   @ApiOperation({ summary: 'Create order' })
-  @RequirePermission('order:manage')
+  @RequirePermission('order:manage', true)
   @Post()
   async createOrder(@Query() query: CreateOrderQueryDto, @Body() dto: CreateOrderDto) {
     const order = await this.orderService.createOrder(query.paymentType, dto);
@@ -29,7 +54,7 @@ export class OrderController {
   }
 
   @ApiOperation({ summary: 'Update order' })
-  @RequirePermission('order:manage')
+  @RequirePermission('order:manage', true)
   @Patch(':orderId')
   async updateOrder(@Param('orderId') orderId: string, dto: UpdateOrderDto) {
     const order = await this.orderService.updateOrder(orderId, dto);
