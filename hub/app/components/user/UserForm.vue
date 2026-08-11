@@ -30,14 +30,14 @@
 </template>
 <script setup lang="ts">
 import ChooseDomainWithRoles from "../domain/ChooseDomainWithRoles.vue";
-import CopyableField from '../ui/input/binding-input/CopyableField.vue';
+import CopyableField from '../ui/input/fields/CopyableField.vue';
 import useUserForm from './composables/useUserForm.ts';
-import NameField from "../ui/input/binding-input/NameField.vue";
-import UsernameField from "../ui/input/binding-input/UsernameField.vue";
-import EmailField from "../ui/input/binding-input/EmailField.vue";
-import PhoneField from "../ui/input/binding-input/PhoneField.vue";
-import PasswordField from "../ui/input/binding-input/PasswordField.vue";
-import UserStatusField from "../ui/input/binding-input/UserStatusField.vue";
+import NameField from "../ui/input/fields/NameField.vue";
+import UsernameField from "../ui/input/fields/UsernameField.vue";
+import EmailField from "../ui/input/fields/EmailField.vue";
+import PhoneField from "../ui/input/fields/PhoneField.vue";
+import PasswordField from "../ui/input/fields/PasswordField.vue";
+import UserStatusField from "../ui/input/fields/UserStatusField.vue";
 
 const { userFormState } = useUserForm()
 const formData = toRef(userFormState, 'data')

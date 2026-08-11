@@ -18,14 +18,14 @@
 </template>
 <script setup lang="ts">
 import { useAsyncAPI } from '~/composables/api';
-import CopyableField from '../ui/input/binding-input/CopyableField.vue';
+import CopyableField from '../ui/input/fields/CopyableField.vue';
 import useMemberForm from './composables/useMemberForm';
-import UsernameField from '../ui/input/binding-input/UsernameField.vue';
-import EmailField from '../ui/input/binding-input/EmailField.vue';
-import PhoneField from '../ui/input/binding-input/PhoneField.vue';
-import UserStatusField from '../ui/input/binding-input/UserStatusField.vue';
+import UsernameField from '../ui/input/fields/UsernameField.vue';
+import EmailField from '../ui/input/fields/EmailField.vue';
+import PhoneField from '../ui/input/fields/PhoneField.vue';
+import UserStatusField from '../ui/input/fields/UserStatusField.vue';
 import type { ApiResponse, DomainRoleView } from '@rey-one/shared';
-import NameField from '../ui/input/binding-input/NameField.vue';
+import NameField from '../ui/input/fields/NameField.vue';
 
 const { accessDomainId } = useAccessDomains()
 const { memberFormState, loadMember } = useMemberForm()

@@ -13,9 +13,9 @@
     </form>
 </template>
 <script setup lang="ts">
-import ActiveField from '../ui/input/binding-input/ActiveField.vue';
-import CopyableField from '../ui/input/binding-input/CopyableField.vue';
-import NameField from '../ui/input/binding-input/NameField.vue';
+import ActiveField from '../ui/input/fields/ActiveField.vue';
+import CopyableField from '../ui/input/fields/CopyableField.vue';
+import NameField from '../ui/input/fields/NameField.vue';
 import useDomainForm from './composables/useDomainForm'
 
 const { domainFormState } = useDomainForm()

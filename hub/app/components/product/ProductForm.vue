@@ -20,15 +20,15 @@
   </form>
 </template>
 <script setup lang="ts">
-import ActiveField from "../ui/input/binding-input/ActiveField.vue";
-import CopyableField from "../ui/input/binding-input/CopyableField.vue";
-import CostField from "../ui/input/binding-input/CostField.vue";
-import CurrencyField from "../ui/input/binding-input/CurrencyField.vue";
-import NameField from "../ui/input/binding-input/NameField.vue";
-import ProductStatusField from "../ui/input/binding-input/ProductStatusField.vue";
-import ProductTypeField from "../ui/input/binding-input/ProductTypeField.vue";
-import SkuField from "../ui/input/binding-input/SkuField.vue";
-import TextField from "../ui/input/binding-input/TextField.vue";
+import ActiveField from "../ui/input/fields/ActiveField.vue";
+import CopyableField from "../ui/input/fields/CopyableField.vue";
+import CostField from "../ui/input/fields/CostField.vue";
+import CurrencyField from "../ui/input/fields/CurrencyField.vue";
+import NameField from "../ui/input/fields/NameField.vue";
+import ProductStatusField from "../ui/input/fields/ProductStatusField.vue";
+import ProductTypeField from "../ui/input/fields/ProductTypeField.vue";
+import SkuField from "../ui/input/fields/SkuField.vue";
+import TextField from "../ui/input/fields/TextField.vue";
 import useProductForm from "./composables/useProductForm";
 
 const { productFormState } = useProductForm();
