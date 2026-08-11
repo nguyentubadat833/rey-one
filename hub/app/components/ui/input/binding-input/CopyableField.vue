@@ -3,6 +3,7 @@ import { ref } from 'vue'
 
 const props = defineProps<{
   label?: string
+  placeholder?: string
   modelValue: string | undefined
 }>()
 
@@ -27,6 +28,7 @@ async function copy() {
       disabled
       :model-value="modelValue"
       :ui="{ trailing: 'pr-0.5' }"
+      :placeholder="placeholder ?? 'Leave blank to generate'"
       class="w-full"
     >
       <template #trailing>

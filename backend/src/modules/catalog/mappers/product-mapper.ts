@@ -6,7 +6,7 @@ export class ProductMapper {
     return {
       id: product.id,
       sku: product.sku,
-      defaultCost: Number(product.defaultCost),
+      defaultCost: product.defaultCost ? Number(product.defaultCost) : undefined,
       currency: product.currency,
       trackingInventory: product.trackInventory,
       name: product.info.name,
@@ -20,7 +20,7 @@ export class ProductMapper {
     return {
       id: product.id,
       sku: product.sku,
-      defaultCost: Number(product.defaultCost),
+      defaultCost: product.defaultCost ? Number(product.defaultCost) : undefined,
       currency: product.currency,
       trackingInventory: product.trackInventory,
       name: product.info.name,

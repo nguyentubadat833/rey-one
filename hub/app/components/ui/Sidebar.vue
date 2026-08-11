@@ -108,7 +108,8 @@ const domainItems: NavigationMenuItem[] = [
         children: [
             {
                 label: 'Products',
-                icon: 'ic:outline-web-stories'
+                icon: 'ic:outline-web-stories',
+                to: '/commerce/products'
             },
             {
                 label: 'Orders',
