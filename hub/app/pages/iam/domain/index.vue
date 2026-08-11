@@ -43,17 +43,15 @@ import SaveButton from '~/components/ui/button/SaveButton.vue';
 import EditButton from '~/components/ui/button/EditButton.vue';
 
 definePageMeta({
+    title: "Domain management",
     middleware: ['domain']
 })
 
 type Response = ApiResponse<DomainWithRolesView>
-
 const Modal = resolveComponent('UModal')
 
 const roleColumns = [
-    {
-        id: 'no'
-    },
+    { id: 'no' },
     { accessorKey: "name", header: "Name" },
     { accessorKey: 'active', header: "Status" },
     { id: 'actions' }
@@ -95,7 +93,9 @@ const roleButtonRender = () => {
         [
             h(SaveButton, {
                 loading: roleFormState.loading,
-                onClick: () => saveRole()
+                onClick: () => saveRole().then(() => {
+                    refresh()
+                })
             })
         ]
     )

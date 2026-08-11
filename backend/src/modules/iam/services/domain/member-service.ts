@@ -11,6 +11,10 @@ import { DomainRole } from '@/persistence/entities/iam-domain-role.entity';
 import { DomainMember } from '@/persistence/entities/iam-domain-member.entity';
 import { DomainMemberLoadedDomain, DomainMemberLoadedUserAndRole, DomainMemberLoadedUserAndRoleAndDomain } from '@/persistence/types/domain-type';
 import type { ConfigType } from '@nestjs/config';
+import { PaginationQueryDto } from '@/utils/dtos/utils-dto';
+import { ResponseMapper } from '@/utils/mappers/response-mapper';
+import { DomainMemberView, PaginatedResponse } from '@rey-one/shared';
+import { DomainMapper } from '../../mappers/domain-mapper';
 
 @Injectable()
 export class DomainMemberService {
@@ -108,25 +112,37 @@ export class DomainMemberService {
     return member as DomainMemberLoadedUserAndRole;
   }
 
-  async getMembers(domainId: string = this.getDomainIdFromStore()): Promise<DomainMemberLoadedUserAndRole[]> {
-    return this.em.find(
+  async getMembers({ limit, page }: PaginationQueryDto, domainId: string = this.getDomainIdFromStore()): Promise<PaginatedResponse<DomainMemberView>> {
+    const [data, total] = await this.em.findAndCount(
       DomainMember,
       {
         domain: domainId,
         user: {
-          type: 'domain_user'
-        }
+          type: 'domain_user',
+        },
       },
       {
+        limit,
+        offset: (page - 1) * limit,
+        orderBy: [
+          {
+            createdAt: 'desc',
+          },
+        ],
         populate: ['user.party', 'role'],
       },
+    );
+    return ResponseMapper.toPaginatedResponse(
+      data.map((item) => DomainMapper.toDomainMemberView(item)),
+      total,
+      page,
+      limit,
     );
   }
 
   async getMembersByUser(user = this.getActorFromStore()): Promise<DomainMemberLoadedDomain[]> {
     const userId = user.id;
-    const userType = user.type;
-    
+
     return this.em.find(
       DomainMember,
       {

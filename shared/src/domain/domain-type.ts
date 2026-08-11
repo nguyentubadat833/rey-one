@@ -28,6 +28,7 @@ export type DomainRoleWithMembersView = DomainRoleView & {
 
 // Domain member
 export type DomainMemberView = z.infer<typeof DomainMemberViewSchema>;
+export type DomainMemberSummariesView = PaginatedResponse<DomainMemberView>
 export type DomainMemberDetailView = DomainMemberView & {
   domain: Omit<DomainView, "active" | "permissions">;
 };

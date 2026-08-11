@@ -1,11 +1,11 @@
 import { RequireAuth, RequirePermission } from '@/utils/decorators/auth.decorator';
 import { ApiDomainHeader } from '@/utils/decorators/utils.decorator';
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateDomainMemberDto, UpdateDomainMemberDto } from '../../dtos/domain-dto';
 import { DomainMapper } from '../../mappers/domain-mapper';
-import { DomainMemberView } from '@rey-one/shared';
 import { DomainMemberService } from '../../services/domain/member-service';
+import { PaginationQueryDto } from '@/utils/dtos/utils-dto';
 
 @RequireAuth()
 @ApiDomainHeader()
@@ -17,8 +17,8 @@ export class DomainMemberController {
   @RequirePermission('domain:member:read', false)
   @ApiOperation({ summary: 'Domain members' })
   @Get()
-  async members(): Promise<DomainMemberView[]> {
-    return this.memberService.getMembers().then((rs) => rs.map(DomainMapper.toDomainMemberView));
+  async members(@Query() queries: PaginationQueryDto) {
+    return this.memberService.getMembers(queries)
   }
 
   @RequirePermission('domain:member:manage')

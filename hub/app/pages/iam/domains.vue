@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { useAsyncAPI } from '~/composables/api';
-import { APP_PERMISSIONS, type ApiResponse, type DomainSummariesView, type DomainSummaryView, type PaginationQuery } from '@rey-one/shared';
+import { APP_PERMISSIONS, type DomainSummaryView } from '@rey-one/shared';
+import { createPaginationQuery } from '~/composables/api/pagination-query';
 import DomainForm from '~/components/domain/DomainForm.vue';
 import CreateButton from '~/components/ui/button/CreateButton.vue';
 import EditButton from '~/components/ui/button/EditButton.vue';
 import SaveButton from '~/components/ui/button/SaveButton.vue';
 import RefreshButton from '~/components/ui/button/RefreshButton.vue';
-import type { TableColumn, TableRow } from '@nuxt/ui';
 import useDomainForm from '~/components/domain/composables/useDomainForm';
+import Pagination from '~/components/ui/Pagination.vue';
+import type { TableColumn, TableRow } from '@nuxt/ui';
 
 definePageMeta({
     title: "Domains Management",
@@ -29,26 +30,15 @@ const columns = [
 
 const { domainFormState: domainState, resetForm: resetDomainFormState, save } = useDomainForm()
 const { createPermissionsChecks } = useDomainUtils()
-
 const domainFormData = toRef(domainState, 'data')
-const domainFormStateVersion = toRef(domainState, 'version')
 
-const globalFilter = ref()
-const paginationQuery = ref<PaginationQuery>({
-    page: 1,
-    limit: 30
-})
+const paginationQuery = createPaginationQuery<DomainSummaryView>('/domains', 5)
+const { searchInput, TableGlobalSearch } = createTableGlobalFilter()
+
+const { fetch, data } = paginationQuery
+const { pending, refresh } = await fetch()
+
 const rowSelection = ref<Record<string, boolean>>({})
-
-const { data: response, pending, refresh } = await useAsyncAPI<ApiResponse<DomainSummariesView>>('/domains', {
-    query: paginationQuery,
-    watch: [
-        domainFormStateVersion,
-        paginationQuery.value
-    ]
-})
-const domains = computed(() => response.value?.data.data ?? [])
-const totalRows = computed(() => response.value?.data.total)
 
 function onSelect(e: Event, row: TableRow<DomainSummaryView>) {
     rowSelection.value = {
@@ -106,16 +96,14 @@ const UpdateDomainButton = (row: DomainSummaryView) => DomainButton('edit', row)
 <template>
     <div>
         <div class="flex justify-between items-center px-4 py-3.5 border-b border-accented">
-            <div>
-                <UInput v-model="globalFilter" class="max-w-sm" placeholder="Filter..." />
-            </div>
+            <TableGlobalSearch />
             <div class="flex items-center gap-4">
                 <RefreshButton @click="refresh" :loading="pending" />
                 <AddDomainButton />
             </div>
         </div>
-        <UTable v-model:row-selection="rowSelection" :data="domains" :columns="columns"
-            v-model:global-filter="globalFilter" :loading="pending" loading-color="primary" loading-animation="carousel"
+        <UTable v-model:row-selection="rowSelection" :data="data" :columns="columns"
+            v-model:global-filter="searchInput" :loading="pending" loading-color="primary" loading-animation="carousel"
             sticky class="h-[70vh]" @select="onSelect">
             <template #no-cell="{ row }">{{ row.index + 1 }}</template>
             <template #active-cell="{ row }">
@@ -128,11 +116,6 @@ const UpdateDomainButton = (row: DomainSummaryView) => DomainButton('edit', row)
                 <component :is="UpdateDomainButton(row.original)" />
             </template>
         </UTable>
-        <div class="flex justify-end border-t border-default pt-4 px-4">
-            <UPagination :page="paginationQuery.page" :items-per-page="paginationQuery.limit" :total="totalRows"
-                @update:page="(p) => {
-                    paginationQuery.page = p
-                }" />
-        </div>
+        <Pagination :data="paginationQuery" />
     </div>
 </template>

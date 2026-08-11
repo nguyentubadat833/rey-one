@@ -98,7 +98,7 @@ const domainItems: NavigationMenuItem[] = [
             {
                 label: "Members",
                 icon: 'ic:baseline-supervisor-account',
-                to: '/iam/members'
+                to: '/iam/domain/members'
             }
         ]
     },
