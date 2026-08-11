@@ -1,15 +1,8 @@
 <template>
     <form class="space-y-5">
-        <UFormField label="ID">
-            <UInput disabled v-model="domainFormState.data.id" class="w-full"
-                placeholder="Leave blank to generate automatically" />
-        </UFormField>
-        <UFormField label="Name">
-            <UInput v-model="domainFormState.data.name" class="w-full" placeholder="Display name for this domain" />
-        </UFormField>
-        <UFormField label="Active">
-            <USwitch v-model="domainFormState.data.active" :default-value="true" />
-        </UFormField>
+        <CopyableField :model-value="domainFormState.data.id"/>
+        <NameField v-model:name="domainFormState.data.name"/>
+        <ActiveField v-model:active="domainFormState.data.active"/>
         <UFormField label="Permissions">
             <UTable :data="domainFormState.permissionChecks" sticky class="max-h-[50vh]">
                 <template #active-cell="{ row }">
@@ -20,6 +13,9 @@
     </form>
 </template>
 <script setup lang="ts">
+import ActiveField from '../ui/input/binding-input/ActiveField.vue';
+import CopyableField from '../ui/input/binding-input/CopyableField.vue';
+import NameField from '../ui/input/binding-input/NameField.vue';
 import useDomainForm from './composables/useDomainForm'
 
 const { domainFormState } = useDomainForm()

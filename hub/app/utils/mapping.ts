@@ -1,5 +1,3 @@
-import type { AppPermission } from "@rey-one/shared";
-
 export function nullToUndefined<T extends Record<string, any>>(
   obj: T,
 ): {
@@ -13,9 +11,17 @@ export function nullToUndefined<T extends Record<string, any>>(
   ) as any;
 }
 
-export function permissionsToChecks(permissions: AppPermission[], defaultActive?: boolean) {
-  return permissions.map((name) => ({
-    permission: name,
-    active: defaultActive ?? false,
-  }));
-}
+// export function propertyNullToUndefined<T>(
+//   value: T | null | undefined,
+// ): Exclude<T, null> | undefined {
+//   return value === null
+//     ? undefined
+//     : value as Exclude<T, null> | undefined
+// }
+
+// export function permissionsToChecks(permissions: AppPermission[], defaultActive?: boolean) {
+//   return permissions.map((name) => ({
+//     permission: name,
+//     active: defaultActive ?? false,
+//   }));
+// }

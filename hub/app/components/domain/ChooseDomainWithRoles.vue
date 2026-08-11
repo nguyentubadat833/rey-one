@@ -20,7 +20,6 @@
                         </div>
                     </template>
                 </USelectMenu>
-                <!-- <RefreshButton :loading="domainAvailableLoaidng" @click="refresh" /> -->
             </div>
             <UTable :data="data" :columns="columns" sticky>
                 <template #no-cell="{ row }">{{ row.index + 1 }}</template>
@@ -66,7 +65,7 @@ const columns = [
 
 const { loadAvailable } = useDomainUtils()
 
-const { data: domainAvailable, pending: domainAvailableLoaidng, refresh } = useLazyAsyncData('domain-available', () => loadAvailable(), {
+const { data: domainAvailable, pending: domainAvailableLoaidng } = useLazyAsyncData('domain-available', () => loadAvailable(), {
     transform: (value: ApiResponse<DomainWithRolesView[]>) => {
         return value.data
     }

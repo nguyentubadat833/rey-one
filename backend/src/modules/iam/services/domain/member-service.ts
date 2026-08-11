@@ -44,9 +44,6 @@ export class DomainMemberService {
       },
     );
 
-    // Middleware checked
-    // domain.ensureStatus();
-
     const role = dto.roleId ? this.em.getReference(DomainRole, dto.roleId) : null;
     const member = this.em.create(DomainMember, {
       role,
@@ -63,12 +60,13 @@ export class DomainMemberService {
       }),
     });
 
-    domain.members.add(member);
-    await this.domainRepo.save(domain);
+    await this.em.flush();
 
     if (role) {
       await this.em.populate(member, ['role']);
     }
+
+    console.log(member);
 
     return member as DomainMemberLoadedUserAndRole;
   }
@@ -92,16 +90,32 @@ export class DomainMemberService {
       member,
       {
         role: dto.roleId,
-        user: {
-          username: dto.username,
-          email: dto.email,
-          phone: dto.phone,
-          password: dto.password,
-          status: dto.status,
-          party: {
-            name: dto.name,
-          },
-        },
+      },
+      {
+        ignoreUndefined: true,
+      },
+    );
+
+    const user = member.user.getEntity();
+    this.em.assign(
+      user,
+      {
+        username: dto.username,
+        email: dto.email,
+        phone: dto.phone,
+        password: dto.password,
+        status: dto.status,
+      },
+      {
+        ignoreUndefined: true,
+      },
+    );
+
+    const party = user.party.getEntity();
+    this.em.assign(
+      party,
+      {
+        name: dto.name,
       },
       {
         ignoreUndefined: true,
@@ -116,7 +130,7 @@ export class DomainMemberService {
     const [data, total] = await this.em.findAndCount(
       DomainMember,
       {
-        domain: domainId,
+        // domain: domainId,
         user: {
           type: 'domain_user',
         },

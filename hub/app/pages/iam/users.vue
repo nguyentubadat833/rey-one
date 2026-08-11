@@ -2,16 +2,20 @@
 import type { TableColumn, TableRow } from '@nuxt/ui';
 import type { UserSummaryView } from '@rey-one/shared';
 import CreateButton from '~/components/ui/button/CreateButton.vue';
+import EditButton from '~/components/ui/button/EditButton.vue';
 import RefreshButton from '~/components/ui/button/RefreshButton.vue';
+import SaveButton from '~/components/ui/button/SaveButton.vue';
 import Pagination from '~/components/ui/Pagination.vue';
+import useUserForm from '~/components/user/composables/useUserForm';
 import UserForm from '~/components/user/UserForm.vue';
 import { createPaginationQuery } from '~/composables/api/pagination-query';
-import useUser from '~/composables/user';
 
 definePageMeta({
     title: "Users Management",
     middleware: ['admin']
 });
+
+const Modal = resolveComponent('UModal')
 
 const columns = [
     { id: "no" },
@@ -24,7 +28,7 @@ const columns = [
     { id: 'actions' }
 ] satisfies TableColumn<UserSummaryView>[]
 
-const { resetForm: resetUserForm, loadFormData: loadUserData } = useUser()
+const { resetForm: resetUserForm, loadFormData: loadUserData, userFormState, save } = useUserForm()
 
 const paginationQuery = createPaginationQuery<UserSummaryView>('/users')
 const { searchInput, TableGlobalSearch } = createTableGlobalFilter()
@@ -40,27 +44,45 @@ function onSelect(e: Event, row: TableRow<UserSummaryView>) {
     }
 }
 
-async function handlerClickUserButton(row: TableRow<UserSummaryView>) {
-    await loadUserData(row.original.id)
-    await nextTick()
+function UserButton(user?: UserSummaryView) {
+    const isAdd = !user
+
+    return h(Modal,
+        {},
+        {
+            default: () => h(isAdd ? CreateButton : EditButton,
+                {
+                    onClick: async () => {
+                        resetUserForm()
+                        if (!isAdd) {
+                            await loadUserData(user?.id)
+                        }
+                    }
+                }
+            ),
+            body: () => h(UserForm),
+            footer: () => h('div',
+                { class: 'flex justify-end gap-3 w-full' },
+                [
+                    h(SaveButton, {
+                        loading: userFormState.loading,
+                        onClick: () => save()
+                    })
+                ]
+            )
+        }
+    )
 }
 
-function handlerClickAddUserButton() {
-    resetUserForm()
-}
 </script>
 
 <template>
     <div class="flex flex-col">
         <div class="flex justify-between px-4 py-3.5 border-b border-accented">
-            <TableGlobalSearch/>
+            <TableGlobalSearch />
             <div class="flex items-center gap-4">
                 <RefreshButton @click="refresh" :loading="pending" />
-                <UserForm :click-icon="handlerClickAddUserButton">
-                    <template #icon>
-                        <CreateButton />
-                    </template>
-                </UserForm>
+                <component :is="UserButton()" />
             </div>
         </div>
 
@@ -69,7 +91,7 @@ function handlerClickAddUserButton() {
             sticky class="flex-1 overflow-auto" @select="onSelect">
             <template #no-cell="{ row }">{{ row.index + 1 }}</template>
             <template #actions-cell="{ row }">
-                <UserForm :click-icon="() => handlerClickUserButton(row)" />
+                <component :is="() => UserButton(row.original)" />
             </template>
         </UTable>
 

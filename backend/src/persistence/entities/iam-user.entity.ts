@@ -9,7 +9,6 @@ import { uuidv7 } from 'uuidv7';
 import { BaseEntitySchema } from './base.entity';
 import { InvalidUserStatusError, UserNotFoundError } from '@/utils/errors/user.error';
 import { Order } from './commerce-order.entity';
-import randomstring from 'randomstring';
 
 // User Base Entity
 export const BaseUserEntitySchema = defineEntity({
