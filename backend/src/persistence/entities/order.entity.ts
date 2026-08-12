@@ -1,6 +1,5 @@
 import { ChangeSetType, defineEntity, EventArgs } from '@mikro-orm/core';
 import { uuidv7 } from 'uuidv7';
-// import { Party } from './iam-party.entity';
 import { BaseEntitySchema } from './base.entity';
 import { AppError } from '@/utils/errors/app.error';
 import { Domain } from './domain.entity';
@@ -10,7 +9,6 @@ import { CURRENCIES, ORDER_PAYMENT_TYPES, ORDER_STATUS_TRANSITIONS, ORDER_STATUS
 import { tenantFilterConfig } from './configs/doamin-tenant.filter';
 import { User } from './user.entity';
 import randomstring from 'randomstring'
-import { Customer } from './customer.entity';
 
 const OrderEntitySchema = defineEntity({
   name: 'OrderEntity',
@@ -46,8 +44,8 @@ const OrderEntitySchema = defineEntity({
     completedAt: p.datetime().nullable().fieldName('completed_at'),
     cancelledAt: p.datetime().nullable().fieldName('cancelled_at'),
 
-    createdBy: () => p.manyToOne(User).fieldName('created_by'),
-    customer: () => p.manyToOne(Customer),
+    createdBy: () => p.manyToOne(User).mapToPk().fieldName('created_by'),
+    // customer: () => p.manyToOne(Customer),
     domain: () => p.manyToOne(Domain),
     
     items: () =>

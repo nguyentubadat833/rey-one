@@ -10,7 +10,7 @@ import { UserDomainAccess } from '@rey-one/shared';
 import { DomainMember } from '@/persistence/entities/domain-member.entity';
 import { DomainMapper } from '../../mappers/domain-mapper';
 import { CreateDomainDto, UpdateDomainDto } from '../../dtos/domain-dto';
-import { DomainSubscription } from '@/persistence/entities/domain-subscription.entity';
+import { DomainSubscription } from '@/persistence/entities/subscription.entity';
 
 @Injectable()
 export class DomainService {

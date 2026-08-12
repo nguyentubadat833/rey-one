@@ -2,16 +2,13 @@ import { AppError } from '@/utils/errors/app.error';
 import { ChangeSetType, defineEntity, EventArgs } from '@mikro-orm/core';
 import { APP_PERMISSIONS, AppPermission } from '@rey-one/shared';
 import { Role } from './role.entity';
-import { DomainMember } from './domain-member.entity';
 import { DomainRepository } from '../repositories/domain-repository';
 import { Product } from './product.entity';
-import { InvalidDomainStatusError } from '@/utils/errors/domain.error';
 import { uuidv7 } from 'uuidv7';
 import { BaseEntitySchema } from './base.entity';
 import { Order } from './order.entity';
+import { Subscription } from './subscription.entity';
 import randomstring from 'randomstring';
-import { DomainSubscription } from './domain-subscription.entity';
-import { Customer } from './customer.entity';
 
 const DomainInfoSchema = defineEntity({
   name: 'DomainInfo',
@@ -30,11 +27,11 @@ const DomainEntitySchema = defineEntity({
   properties: (p) => ({
     id: p.uuid().primary().onCreate(uuidv7),
     code: p.string().length(15).unique().onCreate(generateCode),
-    // active: p.boolean().default(true),
     active: p.boolean().persist(false),
     permissions: p.enum(APP_PERMISSIONS).array().default([]),
     info: p.embedded(DomainInfoSchema).lazy(),
-    subscription: () => p.oneToOne(DomainSubscription).owner().nullable().eager(),
+
+    subscription: () => p.oneToOne(Subscription).owner().nullable().eager(),
     roles: () =>
       p
         .oneToMany(Role)
@@ -51,12 +48,6 @@ const DomainEntitySchema = defineEntity({
       p
         .oneToMany(Order)
         .mappedBy((order) => order.domain)
-        .orphanRemoval()
-        .ref(),
-    customers: () =>
-      p
-        .oneToMany(Customer)
-        .mappedBy((customer) => customer.domain)
         .orphanRemoval()
         .ref()
   }),

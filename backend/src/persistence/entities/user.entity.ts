@@ -7,9 +7,9 @@ import { uuidv7 } from 'uuidv7';
 import { BaseEntitySchema } from './base.entity';
 import { InvalidUserStatusError, UserNotFoundError } from '@/utils/errors/user.error';
 import { Order } from './order.entity';
-import randomstring from 'randomstring';
 import { Role } from './role.entity';
-import { Customer } from './customer.entity';
+import randomstring from 'randomstring';
+import { Domain } from 'domain';
 
 const UserInfoSchema = defineEntity({
   name: 'UserInfoEntity',
@@ -19,21 +19,6 @@ const UserInfoSchema = defineEntity({
     image: p.string().nullable(),
   }),
 });
-
-// User Base Entity
-// export const BaseUserEntitySchema = defineEntity({
-//   name: 'BaseUser',
-//   abstract: true,
-//   extends: BaseEntitySchema,
-//   properties: {
-//     type: p.enum(USER_TYPES),
-//     username: p.string().unique().nullable(),
-//     email: p.string().unique().nullable(),
-//     phone: p.string().unique().nullable(),
-//     status: p.enum(USER_STATUSES).default('active'),
-//     info: p.embedded(UserInfoSchema).lazy()
-//   },
-// });
 
 // User Entity
 const UserEntitySchema = defineEntity({
@@ -52,28 +37,23 @@ const UserEntitySchema = defineEntity({
     password: p.string().hidden().lazy().ref(),
     emailVerified: p.boolean().default(false).fieldName('email_verified'),
     phoneVerified: p.boolean().default(false).fieldName('phone_verified'),
-    failedLoginAttempts: p.integer().nullable().fieldName('failed_login_attempts'),
-    lastFailedLoginAttemptAt: p.datetime().nullable().fieldName('last_failed_login_attempt_at'),
-    lastSuccessfulLoginAt: p.datetime().nullable().fieldName('last_successful_login_at'),
+    // failedLoginAttempts: p.integer().nullable().fieldName('failed_login_attempts'),
+    // lastFailedLoginAttemptAt: p.datetime().nullable().fieldName('last_failed_login_attempt_at'),
+    // lastSuccessfulLoginAt: p.datetime().nullable().fieldName('last_successful_login_at'),
     token: p.string().persist(false).nullable(),
     info: p.embedded(UserInfoSchema).lazy(),
   
-    role: () => p.manyToOne(Role).nullable().eager(),
-    createOrders: () =>
-      p
-        .oneToMany(Order)
-        .mappedBy((order) => order.createdBy)
-        .ref(),
+    domain: () => p.manyToOne(Domain).nullable(),
+    role: () => p.manyToOne(Role).nullable()
   },
 });
 export class User extends UserEntitySchema.class {
 
   static statusAllowedTransitions: Record<UserStatus, UserStatus[]> = {
-    pending: ['active', 'deleted'], // verify hoặc tự xóa
-    active: ['inactive', 'banned', 'deleted'],
-    inactive: ['active', 'deleted'], // có thể quay lại active
-    banned: ['deleted'], // banned không thể active lại
-    deleted: [], // không thể đổi gì nữa
+    pending: ['active'], // verify hoặc tự xóa
+    active: ['inactive', 'banned'],
+    inactive: ['active'], // có thể quay lại active
+    banned: [], // banned không thể active lại
   };
 
   static ensureExists(user: User | null): asserts user is User {
@@ -164,7 +144,7 @@ async function saveHandler(args: EventArgs<User>) {
 function generateCode() {
   const string = randomstring.generate({
     length: 12,
-    charset: '123456789QWERTYUPASDFGHJKLMNBVCXZ',
+    charset: '23456789QWERTYUPASDFGHKLMNBVCXZ',
   });
   return `USR${string}`;
 }

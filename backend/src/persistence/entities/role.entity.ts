@@ -1,13 +1,10 @@
-import { AppError } from '@/utils/errors/app.error';
-import { ChangeSetType, defineEntity, EventArgs, p } from '@mikro-orm/core';
+import { defineEntity, p } from '@mikro-orm/core';
 import { APP_PERMISSIONS } from '@rey-one/shared';
 import { Domain } from './domain.entity';
-import { DomainMember } from './domain-member.entity';
-import { tenantFilterConfig } from './configs/doamin-tenant.filter';
 import { BaseEntitySchema } from './base.entity';
+import { User } from './user.entity';
 import slugify from 'slugify';
 import randomstring from 'randomstring';
-import { User } from './user.entity';
 
 export const RoleEntitySchema = defineEntity({
   name: 'RoleEntity',
