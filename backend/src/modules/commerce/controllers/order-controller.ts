@@ -6,7 +6,7 @@ import { OrderService } from '../services/order-service';
 import { CreateOrderDto, CreateOrderQueryDto, UpdateOrderDto } from '../dtos/order-dto';
 import { OrderMapper } from '../mappers/order-mapper';
 import { EntityManager } from '@mikro-orm/core';
-import { Order } from '@/persistence/entities/commerce-order.entity';
+import { Order } from '@/persistence/entities/order.entity';
 import { OrderNotFoundError } from '@/utils/errors/order.error';
 import { PaginationQueryDto } from '@/utils/dtos/utils-dto';
 import { ResponseMapper } from '@/utils/mappers/response-mapper';

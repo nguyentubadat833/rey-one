@@ -6,7 +6,7 @@ import { RequireAuth, RequirePermission } from '@/utils/decorators/auth.decorato
 import { CreateProductDto, UpdateProductDto } from '../dtos/product-dto';
 import { ProductMapper } from '../mappers/product-mapper';
 import { EntityManager } from '@mikro-orm/core';
-import { Product } from '@/persistence/entities/catalog-product.entity';
+import { Product } from '@/persistence/entities/product.entity';
 import { PaginationQueryDto } from '@/utils/dtos/utils-dto';
 import { ResponseMapper } from '@/utils/mappers/response-mapper';
 

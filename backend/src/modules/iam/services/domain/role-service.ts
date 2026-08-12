@@ -3,8 +3,8 @@ import { CreateDomainRoleDto, UpdateDomainRoleDto } from '../../dtos/domain-dto'
 import { EntityManager } from '@mikro-orm/core';
 import { DomainRoleLoadedMembers } from '@/persistence/types/domain-type';
 import { authConfig } from '@/configs/auth.config';
-import { DomainRole } from '@/persistence/entities/iam-domain-role.entity';
-import { Domain } from '@/persistence/entities/iam-domain.entity';
+import { DomainRole } from '@/persistence/entities/role.entity';
+import { Domain } from '@/persistence/entities/domain.entity';
 import { ClsService } from 'nestjs-cls';
 import { AppClsStore } from '@/utils/types/system';
 import { DomainNotFoundError, DomainRoleNotFoundError } from '@/utils/errors/domain.error';

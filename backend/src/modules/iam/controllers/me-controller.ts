@@ -5,7 +5,7 @@ import { Controller, Delete, ForbiddenException, Get, HttpCode, HttpStatus, Para
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthService } from '../services/auth-service';
 import { CurrentUser } from '@/utils/decorators/utils.decorator';
-import { User } from '@/persistence/entities/iam-user.entity';
+import { User } from '@/persistence/entities/user.entity';
 import { UserMapper } from '../mappers/user-mapper';
 import { DomainMemberService } from '../services/domain/member-service';
 import { DomainMapper } from '../mappers/domain-mapper';

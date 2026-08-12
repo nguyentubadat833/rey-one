@@ -1,6 +1,6 @@
 import { defineEntity } from '@mikro-orm/core';
 import { uuidv7 } from 'uuidv7';
-import { Order } from './commerce-order.entity';
+import { Order } from './order.entity';
 import { CURRENCIES, PAYMENT_METHODS, PAYMENT_STATUS_TRANSITIONS, PAYMENT_STATUSES, PaymentStatus } from '@rey-one/shared';
 import { AppError } from '@/utils/errors/app.error';
 import { BaseEntitySchema } from './base.entity';
@@ -8,8 +8,8 @@ import { tenantFilterConfig } from './configs/doamin-tenant.filter';
 import randomstring from 'randomstring'
 
 const PaymentEntitySchema = defineEntity({
-  name: 'CommercePayment',
-  tableName: 'commerce_payment',
+  name: 'PaymentEntity',
+  tableName: 'payment',
   extends: BaseEntitySchema,
   filters: tenantFilterConfig,
   properties: (p) => ({

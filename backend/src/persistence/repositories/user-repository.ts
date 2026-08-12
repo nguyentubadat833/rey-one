@@ -1,4 +1,4 @@
-import { User } from '@/persistence/entities/iam-user.entity';
+import { User } from '@/persistence/entities/user.entity';
 import { EntityRepository, wrap } from '@mikro-orm/core';
 import { Injectable } from '@nestjs/common';
 import { IdentifierType } from '../types/user-type';

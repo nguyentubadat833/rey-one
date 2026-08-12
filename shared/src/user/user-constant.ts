@@ -1,12 +1,9 @@
-export const LOCAL_PROVIDER = "local" as const;
-export const OAUTH_PROVIDERS = ["google", "facebook"] as const;
-export const USER_PROVIDERS = [...OAUTH_PROVIDERS, LOCAL_PROVIDER] as const;
 export const USER_STATUSES = [
-  "active",
-  "banned",
-  "deleted",
-  "inactive",
-  "pending",
+  "pending", // chưa từng kích hoạt
+  "inactive", // đã từng kích hoạt nhưng vì lý do gì đó phải inactive
+  "active", // đang kích hoạt
+  "banned", // chặn vĩnh viễn
+  // "deleted",
 ] as const;
 
 export const USER_ADMIN_TYPE = "admin_user" as const;

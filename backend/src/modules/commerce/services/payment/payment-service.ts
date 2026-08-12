@@ -2,7 +2,7 @@ import { EntityManager } from '@mikro-orm/core';
 import { Injectable } from '@nestjs/common';
 import { PaymentMethod } from '@rey-one/shared';
 import { CommerceService } from '../commerce-service';
-import { Payment } from '@/persistence/entities/commerce-payment.entity';
+import { Payment } from '@/persistence/entities/payment.entity';
 import { OrderLoadedCustomerAndDomainAndPayments } from '@/persistence/types/order-type';
 import { PaymentLoadedOrder } from '@/persistence/types/payment-type';
 

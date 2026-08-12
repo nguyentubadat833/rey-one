@@ -1,5 +1,5 @@
 import { EntityManager, EventArgs, EventSubscriber } from '@mikro-orm/core';
-import { Domain } from '../entities/iam-domain.entity';
+import { Domain } from '../entities/domain.entity';
 import { Injectable } from '@nestjs/common';
 import { DomainCache } from '@/utils/cache/domain-cache';
 

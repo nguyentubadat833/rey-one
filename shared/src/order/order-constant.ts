@@ -17,21 +17,29 @@ export const ORDER_PAYMENT_TYPES = [
   "recurring",
 ] as const;
 
-export const INSTALLMENT_STATUSES = [
-  "pending",
-  "paid",
-  "overdue",
-  "waived",
-  "cancelled",
-] as const;
+// export const INSTALLMENT_STATUSES = [
+//   "pending",
+//   "paid",
+//   "overdue",
+//   "waived",
+//   "cancelled",
+// ] as const;
 
-export const BILLING_INTERVALS = ["month", "year"] as const;
+// export const BILLING_INTERVALS = ["month", "year"] as const;
 
-export const SUBSCRIPTION_STATUSES = [
-  "trialing",
-  "active",
-  "past_due",
-  "paused",
-  "cancelled",
-  "expired",
-] as const;
+// export const SUBSCRIPTION_STATUSES = [
+//   "trialing",
+//   "active",
+//   "past_due",
+//   "paused",
+//   "cancelled",
+//   "expired",
+// ] as const;
+
+export const SUBSCRIPTION_PLANS = [
+  'free', // gói free
+  'monthly', // gói thanh toán hàng tháng
+  'quarterly', // gói thanh toán mỗi 3 tháng
+  'half_year', // gói thanh toán mỗi 6 tháng
+  'year' // gói thanh toán hàng năm
+] as const

@@ -1,6 +1,6 @@
 import { defineEntity, InferEntity, raw } from '@mikro-orm/core';
-import { User, BaseUserEntitySchema } from '../iam-user.entity';
-import { DomainMember } from '../iam-domain-member.entity';
+import { User, BaseUserEntitySchema } from '../user.entity';
+import { DomainMember } from '../domain-member.entity';
 
 export const UserSummary = defineEntity({
   name: 'UserSummary',

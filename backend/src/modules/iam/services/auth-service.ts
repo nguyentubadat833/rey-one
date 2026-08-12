@@ -4,7 +4,7 @@ import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import { BaseLoginDto } from '../dtos/auth-dto';
 import { IdentifierType } from '@/persistence/types/user-type';
 import z from 'zod';
-import { User } from '@/persistence/entities/iam-user.entity';
+import { User } from '@/persistence/entities/user.entity';
 import { verify } from 'argon2';
 import { AppError } from '@/utils/errors/app.error';
 

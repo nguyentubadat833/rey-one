@@ -3,7 +3,7 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import guardHelper from './_helper';
 import { DomainRequiredError } from '@/utils/errors/domain.error';
-import { Domain } from '@/persistence/entities/iam-domain.entity';
+import { Domain } from '@/persistence/entities/domain.entity';
 import { AUTH_METADATA, TenantRequirement } from '@/utils/types/tokens';
 
 @Injectable()

@@ -1,5 +1,5 @@
 import { defineEntity, InferEntity, raw } from '@mikro-orm/core';
-import { BaseDomain, Domain } from '../iam-domain.entity';
+import { BaseDomain, Domain } from '../domain.entity';
 
 export const DomainSummary = defineEntity({
   name: 'IAMDomainSummary',

@@ -7,15 +7,15 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ClsService } from 'nestjs-cls';
 import { CreateDomainMemberDto, UpdateDomainMemberDto } from '../../dtos/domain-dto';
 import { DomainMemberNotFoundError, DomainNotFoundError } from '@/utils/errors/domain.error';
-import { DomainRole } from '@/persistence/entities/iam-domain-role.entity';
-import { DomainMember } from '@/persistence/entities/iam-domain-member.entity';
+import { DomainRole } from '@/persistence/entities/role.entity';
+import { DomainMember } from '@/persistence/entities/domain-member.entity';
 import { DomainMemberLoadedDomain, DomainMemberLoadedUserAndRole, DomainMemberLoadedUserAndRoleAndDomain } from '@/persistence/types/domain-type';
 import type { ConfigType } from '@nestjs/config';
 import { PaginationQueryDto } from '@/utils/dtos/utils-dto';
 import { ResponseMapper } from '@/utils/mappers/response-mapper';
 import { DomainMemberView, PaginatedResponse } from '@rey-one/shared';
 import { DomainMapper } from '../../mappers/domain-mapper';
-import { User } from '@/persistence/entities/iam-user.entity';
+import { User } from '@/persistence/entities/user.entity';
 
 @Injectable()
 export class DomainMemberService {

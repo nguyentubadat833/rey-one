@@ -1,15 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/core';
 import { DomainLoadedParty, DomainLoadedPartyAndRoles, DomainLoadedPartyAndRolesAndMembers } from '@/persistence/types/domain-type';
-import { Domain } from '@/persistence/entities/iam-domain.entity';
+import { Domain } from '@/persistence/entities/domain.entity';
 import { ClsService } from 'nestjs-cls';
 import { AppClsStore } from '@/utils/types/system';
 import { DomainNotFoundError } from '@/utils/errors/domain.error';
 import { DomainRepository } from '@/persistence/repositories/domain-repository';
 import { UserDomainAccess } from '@rey-one/shared';
-import { DomainMember } from '@/persistence/entities/iam-domain-member.entity';
+import { DomainMember } from '@/persistence/entities/domain-member.entity';
 import { DomainMapper } from '../../mappers/domain-mapper';
 import { CreateDomainDto, UpdateDomainDto } from '../../dtos/domain-dto';
+import { DomainSubscription } from '@/persistence/entities/domain-subscription.entity';
 
 @Injectable()
 export class DomainService {

@@ -1,38 +1,54 @@
 import { ChangeSetType, defineEntity, EventArgs, p } from '@mikro-orm/core';
-import { AppPermission, USER_STATUSES, USER_TYPES, UserStatus } from '@rey-one/shared';
+import { USER_STATUSES, UserStatus } from '@rey-one/shared';
 import { AppError } from '@/utils/errors/app.error';
 import { UserRepository } from '../repositories/user-repository';
-import { DomainMember } from './iam-domain-member.entity';
 import { hash } from 'argon2';
-import { Party } from './iam-party.entity';
 import { uuidv7 } from 'uuidv7';
 import { BaseEntitySchema } from './base.entity';
 import { InvalidUserStatusError, UserNotFoundError } from '@/utils/errors/user.error';
-import { Order } from './commerce-order.entity';
-import randomstring from 'randomstring'
+import { Order } from './order.entity';
+import randomstring from 'randomstring';
+import { Role } from './role.entity';
+import { Customer } from './customer.entity';
+
+const UserInfoSchema = defineEntity({
+  name: 'UserInfoEntity',
+  embeddable: true,
+  properties: (p) => ({
+    name: p.string(),
+    image: p.string().nullable(),
+  }),
+});
 
 // User Base Entity
-export const BaseUserEntitySchema = defineEntity({
-  name: 'IAMBaseUser',
-  abstract: true,
-  extends: BaseEntitySchema,
-  properties: {
-    type: p.enum(USER_TYPES),
-    username: p.string().unique().nullable(),
-    email: p.string().unique().nullable(),
-    phone: p.string().unique().nullable(),
-    status: p.enum(USER_STATUSES).default('active' satisfies UserStatus),
-  },
-});
+// export const BaseUserEntitySchema = defineEntity({
+//   name: 'BaseUser',
+//   abstract: true,
+//   extends: BaseEntitySchema,
+//   properties: {
+//     type: p.enum(USER_TYPES),
+//     username: p.string().unique().nullable(),
+//     email: p.string().unique().nullable(),
+//     phone: p.string().unique().nullable(),
+//     status: p.enum(USER_STATUSES).default('active'),
+//     info: p.embedded(UserInfoSchema).lazy()
+//   },
+// });
 
 // User Entity
 const UserEntitySchema = defineEntity({
-  name: 'IAMUser',
-  tableName: 'iam_user',
-  extends: BaseUserEntitySchema,
+  name: 'UserEntity',
+  tableName: 'user',
+  extends: BaseEntitySchema,
   repository: () => UserRepository,
   properties: {
     id: p.uuid().primary().onCreate(uuidv7),
+    code: p.string().length(15).unique().onCreate(generateCode),
+    // type: p.enum(USER_TYPES),
+    username: p.string().unique().nullable(),
+    email: p.string().unique().nullable(),
+    phone: p.string().unique().nullable(),
+    status: p.enum(USER_STATUSES).default('active'),
     password: p.string().hidden().lazy().ref(),
     emailVerified: p.boolean().default(false).fieldName('email_verified'),
     phoneVerified: p.boolean().default(false).fieldName('phone_verified'),
@@ -40,13 +56,9 @@ const UserEntitySchema = defineEntity({
     lastFailedLoginAttemptAt: p.datetime().nullable().fieldName('last_failed_login_attempt_at'),
     lastSuccessfulLoginAt: p.datetime().nullable().fieldName('last_successful_login_at'),
     token: p.string().persist(false).nullable(),
-    party: () => p.oneToOne(Party).unique().ref(),
-    members: () =>
-      p
-        .oneToMany(DomainMember)
-        .mappedBy((member) => member.user)
-        .orphanRemoval()
-        .ref(),
+    info: p.embedded(UserInfoSchema).lazy(),
+  
+    role: () => p.manyToOne(Role).nullable().eager(),
     createOrders: () =>
       p
         .oneToMany(Order)
@@ -55,7 +67,6 @@ const UserEntitySchema = defineEntity({
   },
 });
 export class User extends UserEntitySchema.class {
-  static partyPrefix = 'USR' as const
 
   static statusAllowedTransitions: Record<UserStatus, UserStatus[]> = {
     pending: ['active', 'deleted'], // verify hoặc tự xóa
@@ -64,14 +75,6 @@ export class User extends UserEntitySchema.class {
     banned: ['deleted'], // banned không thể active lại
     deleted: [], // không thể đổi gì nữa
   };
-
-  static generatePartyCode() {
-    const code =  randomstring.generate({
-      length: 12,
-      charset: '123456789QWERTYUPASDFGHJKLMNBVCXZ',
-    });
-    return `${User.partyPrefix}${code}`
-  }
 
   static ensureExists(user: User | null): asserts user is User {
     if (!user) {
@@ -86,24 +89,24 @@ export class User extends UserEntitySchema.class {
   }
 
   async loadDomainAccess() {
-    const members = await this.members.load();
+    // const members = await this.members.load();
 
-    const result: Record<string, AppPermission[]> = {};
+    // const result: Record<string, AppPermission[]> = {};
 
-    members.getItems().forEach((item) => {
-      result[item.domain.id] = item.role?.permissions ?? [];
-    });
+    // members.getItems().forEach((item) => {
+    //   result[item.domain.id] = item.role?.permissions ?? [];
+    // });
 
-    return result;
+    // return result;
   }
 
   isActive() {
     return this.status === 'active';
   }
 
-  isDomainUser() {
-    return this.type === 'domain_user';
-  }
+  // isDomainUser() {
+  //   return this.type === 'domain_user';
+  // }
 }
 
 UserEntitySchema.setClass(User);
@@ -151,17 +154,17 @@ async function saveHandler(args: EventArgs<User>) {
     entity.password.set(hashed);
   }
 
-  if (entity.type === 'domain_user') {
-    if (entity.members.count() > 1) {
-      throw AppError.withMessage('BUSINESS_RULE_VIOLATION', 'A domain user cannot belong to more than one domain.');
-    }
-  }
+  // if (entity.type === 'domain_user') {
+  //   if (entity.members.count() > 1) {
+  //     throw AppError.withMessage('BUSINESS_RULE_VIOLATION', 'A domain user cannot belong to more than one domain.');
+  //   }
+  // }
 }
 
-// function generatePartyCode() {
-//   const string = randomstring.generate({
-//     length: 12,
-//     charset: '123456789QWERTYUPASDFGHJKLMNBVCXZ',
-//   });
-//   return `USR${string}`;
-// }
+function generateCode() {
+  const string = randomstring.generate({
+    length: 12,
+    charset: '123456789QWERTYUPASDFGHJKLMNBVCXZ',
+  });
+  return `USR${string}`;
+}

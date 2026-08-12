@@ -1,7 +1,7 @@
 import { Loaded } from '@mikro-orm/core';
-import { DomainMember } from '../entities/iam-domain-member.entity';
-import { Domain } from '../entities/iam-domain.entity';
-import { DomainRole } from '../entities/iam-domain-role.entity';
+import { DomainMember } from '../entities/domain-member.entity';
+import { Domain } from '../entities/domain.entity';
+import { DomainRole } from '../entities/role.entity';
 
 // Domain type
 export type DomainLoadedParty = Loaded<Domain, 'party'>

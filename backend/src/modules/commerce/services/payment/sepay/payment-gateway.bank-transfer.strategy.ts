@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InitPaymentInput, PaymentMethod } from '@rey-one/shared';
-import { Order } from '@/persistence/entities/commerce-order.entity';
+import { Order } from '@/persistence/entities/order.entity';
 import { PaymentStrategy, SepayGatewayStrategy } from '../provider-strategies/payment-strategy';
 import { AppError } from '@/utils/errors/app.error';
 import { SePayPgClient } from 'sepay-pg-node';

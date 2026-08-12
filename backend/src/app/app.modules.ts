@@ -50,7 +50,7 @@ import { CommerceModule } from '@/modules/commerce/commerce.module';
     }),
     IAMModule,
     CatalogModule,
-    CommerceModule
+    // CommerceModule
   ],
   controllers: [AppController],
   providers: [],

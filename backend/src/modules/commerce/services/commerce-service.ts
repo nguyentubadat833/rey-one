@@ -1,4 +1,4 @@
-import { Product } from '@/persistence/entities/catalog-product.entity';
+import { Product } from '@/persistence/entities/product.entity';
 import { Party } from '@/persistence/entities/iam-party.entity';
 import { OrderLoadedCustomerAndDomainAndPayments } from '@/persistence/types/order-type';
 import { AppError } from '@/utils/errors/app.error';

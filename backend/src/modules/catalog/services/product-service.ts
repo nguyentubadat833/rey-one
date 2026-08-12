@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { CreateProductDto, UpdateProductDto } from '../dtos/product-dto';
 import { EntityManager } from '@mikro-orm/core';
-import { Product } from '@/persistence/entities/catalog-product.entity';
-import { Domain } from '@/persistence/entities/iam-domain.entity';
+import { Product } from '@/persistence/entities/product.entity';
+import { Domain } from '@/persistence/entities/domain.entity';
 import { ClsService } from 'nestjs-cls';
 import { AppClsStore } from '@/utils/types/system';
 import { ProductLoadedInfo } from '@/persistence/types/product-type';

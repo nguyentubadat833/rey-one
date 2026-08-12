@@ -33,11 +33,11 @@ async function bootstrap() {
 
     // await orm.schema.refresh();
 
-    const diff = await orm.schema.getUpdateSchemaSQL();
-    if (diff.length) {
-      console.log(diff);
-      await orm.schema.update();
-    }
+    // const diff = await orm.schema.getUpdateSchemaSQL();
+    // if (diff.length) {
+    //   console.log(diff);
+    //   await orm.schema.update();
+    // }
 
     // await orm.seeder.seed(DatabaseSeeder);
   }

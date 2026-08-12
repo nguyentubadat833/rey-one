@@ -3,16 +3,16 @@ import { EntityManager } from '@mikro-orm/core';
 import { Injectable } from '@nestjs/common';
 import { ClsService } from 'nestjs-cls';
 import { AddOrderItemsDto, CreateOrderDto, UpdateOrderDto } from '../dtos/order-dto';
-import { Order, OrderItem } from '@/persistence/entities/commerce-order.entity';
+import { Order, OrderItem } from '@/persistence/entities/order.entity';
 import { Party } from '@/persistence/entities/iam-party.entity';
-import { Domain } from '@/persistence/entities/iam-domain.entity';
-import { Product } from '@/persistence/entities/catalog-product.entity';
+import { Domain } from '@/persistence/entities/domain.entity';
+import { Product } from '@/persistence/entities/product.entity';
 import { OrderNotFoundError } from '@/utils/errors/order.error';
 import { CommerceService } from './commerce-service';
 import { AppError } from '@/utils/errors/app.error';
 import { OrderPaymentType } from '@rey-one/shared';
 import { PartyNotFoundError } from '@/utils/errors/party.error';
-import { User } from '@/persistence/entities/iam-user.entity';
+import { User } from '@/persistence/entities/user.entity';
 import { OrderLoadedCustomerAndCreatedByAndItems, OrderLoadedCustomerAndDomainAndPayments } from '@/persistence/types/order-type';
 
 @Injectable()

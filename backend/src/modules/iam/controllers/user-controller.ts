@@ -9,7 +9,7 @@ import { UserSummariesView, UserSummaryView } from '@rey-one/shared';
 import { CreateUserDto } from '../dtos/user-dto';
 import { UserService } from '../services/user-service';
 import { UserMapper } from '../mappers/user-mapper';
-import { User } from '@/persistence/entities/iam-user.entity';
+import { User } from '@/persistence/entities/user.entity';
 import { UserNotFoundError } from '@/utils/errors/user.error';
 
 @RequireAuth()

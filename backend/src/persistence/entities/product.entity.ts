@@ -1,11 +1,11 @@
 import { ChangeSetType, defineEntity, EventArgs, p } from '@mikro-orm/core';
 import { CURRENCIES, PRODUCT_STATUSES, PRODUCT_TYPES } from '@rey-one/shared';
-import { Domain } from './iam-domain.entity';
+import { Domain } from './domain.entity';
 import { AppError } from '@/utils/errors/app.error';
 import { tenantFilterConfig } from './configs/doamin-tenant.filter';
 import { uuidv7 } from 'uuidv7';
 import { BaseEntitySchema } from './base.entity';
-import { OrderItem } from './commerce-order.entity';
+import { OrderItem } from './order.entity';
 import slugify from 'slugify';
 
 const ProductInfoSchema = defineEntity({
@@ -18,7 +18,7 @@ const ProductInfoSchema = defineEntity({
 });
 
 const ProductEntitySchema = defineEntity({
-  name: 'CatalogProduct',
+  name: 'ProductEntity',
   tableName: 'product',
   filters: tenantFilterConfig,
   extends: BaseEntitySchema,

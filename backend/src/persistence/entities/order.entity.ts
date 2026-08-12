@@ -1,19 +1,20 @@
 import { ChangeSetType, defineEntity, EventArgs } from '@mikro-orm/core';
 import { uuidv7 } from 'uuidv7';
-import { Party } from './iam-party.entity';
+// import { Party } from './iam-party.entity';
 import { BaseEntitySchema } from './base.entity';
 import { AppError } from '@/utils/errors/app.error';
-import { Domain } from './iam-domain.entity';
-import { Product } from './catalog-product.entity';
-import { Payment } from './commerce-payment.entity';
+import { Domain } from './domain.entity';
+import { Product } from './product.entity';
+import { Payment } from './payment.entity';
 import { CURRENCIES, ORDER_PAYMENT_TYPES, ORDER_STATUS_TRANSITIONS, ORDER_STATUSES, OrderPaymentType, OrderStatus } from '@rey-one/shared';
 import { tenantFilterConfig } from './configs/doamin-tenant.filter';
-import { User } from './iam-user.entity';
+import { User } from './user.entity';
 import randomstring from 'randomstring'
+import { Customer } from './customer.entity';
 
 const OrderEntitySchema = defineEntity({
-  name: 'CommerceOrder',
-  tableName: 'commerce_order',
+  name: 'OrderEntity',
+  tableName: 'order',
   extends: BaseEntitySchema,
   filters: tenantFilterConfig,
   properties: (p) => ({
@@ -46,8 +47,9 @@ const OrderEntitySchema = defineEntity({
     cancelledAt: p.datetime().nullable().fieldName('cancelled_at'),
 
     createdBy: () => p.manyToOne(User).fieldName('created_by'),
-    customer: () => p.manyToOne(Party),
+    customer: () => p.manyToOne(Customer),
     domain: () => p.manyToOne(Domain),
+    
     items: () =>
       p
         .oneToMany(OrderItem)
@@ -136,14 +138,14 @@ function generateOrderCode(){
     charset: '23456789QWERTYUPASDFGHJKLMNBVCXZ'
   })
   
-  return `RDR${code}`
+  return `ORD${code}`
 }
 
 // ============ ORDER ITEM ============
 
 const OrderItemEntitySchema = defineEntity({
-  name: 'CommerceOrderItem',
-  tableName: 'commerce_order_item',
+  name: 'OrderItemEntity',
+  tableName: 'order_item',
   extends: BaseEntitySchema,
   properties: (p) => ({
     id: p.uuid().primary().onCreate(uuidv7),

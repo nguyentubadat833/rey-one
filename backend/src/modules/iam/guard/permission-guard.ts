@@ -7,7 +7,7 @@ import { AppPermission, hasPermission } from '@rey-one/shared';
 import { DomainCache } from '@/utils/cache/domain-cache';
 import guardHelper from './_helper';
 import { DomainRequiredError } from '@/utils/errors/domain.error';
-import { Domain } from '@/persistence/entities/iam-domain.entity';
+import { Domain } from '@/persistence/entities/domain.entity';
 
 @Injectable()
 export class PermissionGuard implements CanActivate {
