@@ -10,6 +10,7 @@ import { uuidv7 } from 'uuidv7';
 import { BaseEntitySchema } from './base.entity';
 import { Order } from './commerce-order.entity';
 import { Party } from './iam-party.entity';
+import randomstring from 'randomstring';
 
 const BaseDomainSchema = defineEntity({
   name: 'IAMBaseDomain',
@@ -53,6 +54,12 @@ const DomainEntitySchema = defineEntity({
         .mappedBy((order) => order.domain)
         .orphanRemoval()
         .ref(),
+    // customer: () =>
+    //   p
+    //     .oneToMany(Party)
+    //     .mappedBy((party) => party.customerDomain)
+    //     .orphanRemoval()
+    //     .ref(),
   }),
 });
 
@@ -60,6 +67,16 @@ export class BaseDomain extends BaseDomainSchema.class {}
 BaseDomainSchema.setClass(BaseDomain);
 
 export class Domain extends DomainEntitySchema.class {
+  static partyPrefix = 'DOM' as const;
+
+  static generatePartyCode() {
+    const code = randomstring.generate({
+      length: 12,
+      charset: '123456789QWERTYUPASDFGHJKLMNBVCXZ',
+    });
+    return `${Domain.partyPrefix}${code}`;
+  }
+
   static ensureStatusValue(active: boolean) {
     if (!active) {
       throw InvalidDomainStatusError();

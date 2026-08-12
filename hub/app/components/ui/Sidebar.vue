@@ -103,14 +103,36 @@ const domainItems: NavigationMenuItem[] = [
         ]
     },
     {
+        label: "CRM",
+        icon: "ic:sharp-contacts",
+        children: [
+            {
+                label: "Customer",
+                icon: "ic:baseline-groups",
+                to: '/crm/customer'
+            }
+        ]
+    },  
+    {
+        label: "Catalog",
+        icon: "ic:baseline-style",
+        children: [
+            {
+                label: "Products",
+                icon: "ic:baseline-layers",
+                to: '/catalog/products'
+            }
+        ]
+    },
+    {
         label: 'Commerce',
         icon: 'ic:round-storefront',
         children: [
-            {
-                label: 'Products',
-                icon: 'ic:outline-web-stories',
-                to: '/commerce/products'
-            },
+            // {
+            //     label: 'Products',
+            //     icon: 'ic:outline-web-stories',
+            //     to: '/commerce/products'
+            // },
             {
                 label: 'Orders',
                 icon: 'ic:outline-shopping-bag'

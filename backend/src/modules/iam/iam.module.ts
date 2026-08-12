@@ -97,6 +97,7 @@ export class IAMModule implements OnModuleInit, NestModule {
             type: item.type,
             password: item.password,
             party: {
+              code: User.generatePartyCode(),
               name: item.identity,
             },
           });

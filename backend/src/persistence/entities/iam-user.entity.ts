@@ -9,6 +9,7 @@ import { uuidv7 } from 'uuidv7';
 import { BaseEntitySchema } from './base.entity';
 import { InvalidUserStatusError, UserNotFoundError } from '@/utils/errors/user.error';
 import { Order } from './commerce-order.entity';
+import randomstring from 'randomstring'
 
 // User Base Entity
 export const BaseUserEntitySchema = defineEntity({
@@ -54,6 +55,8 @@ const UserEntitySchema = defineEntity({
   },
 });
 export class User extends UserEntitySchema.class {
+  static partyPrefix = 'USR' as const
+
   static statusAllowedTransitions: Record<UserStatus, UserStatus[]> = {
     pending: ['active', 'deleted'], // verify hoặc tự xóa
     active: ['inactive', 'banned', 'deleted'],
@@ -61,6 +64,14 @@ export class User extends UserEntitySchema.class {
     banned: ['deleted'], // banned không thể active lại
     deleted: [], // không thể đổi gì nữa
   };
+
+  static generatePartyCode() {
+    const code =  randomstring.generate({
+      length: 12,
+      charset: '123456789QWERTYUPASDFGHJKLMNBVCXZ',
+    });
+    return `${User.partyPrefix}${code}`
+  }
 
   static ensureExists(user: User | null): asserts user is User {
     if (!user) {

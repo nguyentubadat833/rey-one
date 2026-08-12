@@ -70,15 +70,21 @@ export class OrderService {
     if (dto.customer.id) {
       customer = await this.em.findOneOrFail(
         Party,
-        { id: dto.customer.id },
+        { 
+          id: dto.customer.id,
+          // customerDomain: domainId
+        },
         {
           failHandler: PartyNotFoundError,
         },
       );
+
       this.commerceService.ensurePartyCanOrder(customer);
     } else {
       customer = this.em.create(Party, {
+        code: Party.generatePartyCode(),
         name: dto.customer.name,
+        // customerDomain: domainId
       });
     }
 

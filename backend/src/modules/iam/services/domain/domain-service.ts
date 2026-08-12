@@ -31,6 +31,7 @@ export class DomainService {
   async createDomain(dto: CreateDomainDto) {
     const domain = this.em.create(Domain, {
       party: {
+        code: Domain.generatePartyCode(),
         name: dto.name,
       },
       active: dto.active,

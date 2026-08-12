@@ -37,6 +37,7 @@ export class UserService {
       phone: dto.phone,
       type: 'user',
       party: {
+        code: User.generatePartyCode(),
         name: dto.name,
       },
     });

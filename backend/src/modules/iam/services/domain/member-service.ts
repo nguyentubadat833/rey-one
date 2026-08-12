@@ -15,6 +15,7 @@ import { PaginationQueryDto } from '@/utils/dtos/utils-dto';
 import { ResponseMapper } from '@/utils/mappers/response-mapper';
 import { DomainMemberView, PaginatedResponse } from '@rey-one/shared';
 import { DomainMapper } from '../../mappers/domain-mapper';
+import { User } from '@/persistence/entities/iam-user.entity';
 
 @Injectable()
 export class DomainMemberService {
@@ -54,6 +55,7 @@ export class DomainMemberService {
         phone: dto.phone,
         password: dto.password ?? this.config.domain.member.password.default,
         party: {
+          code: User.generatePartyCode(),
           name: dto.name,
         },
         type: 'domain_user',
