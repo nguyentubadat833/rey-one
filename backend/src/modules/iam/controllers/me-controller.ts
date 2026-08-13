@@ -7,12 +7,10 @@ import { AuthService } from '../services/auth-service';
 import { CurrentUser } from '@/utils/decorators/utils.decorator';
 import { User } from '@/persistence/entities/user.entity';
 import { UserMapper } from '../mappers/user-mapper';
-import { DomainMemberService } from '../services/domain/member-service';
 import { DomainMapper } from '../mappers/domain-mapper';
-import { UserDomainAccess } from '@rey-one/shared';
-import { DomainService } from '../services/domain/domain-service';
 import { DOMAIN_ID_HEADER, DOMAIN_ID_PARAMETER } from '@/utils/types/utils';
 import type { FastifyReply } from 'fastify';
+import { DomainService } from '../services/domain-service';
 
 @RequireAuth()
 @ApiTags('Me')
@@ -21,25 +19,24 @@ export class MeController {
   constructor(
     private readonly em: EntityManager,
     private readonly userRepo: UserRepository,
-    private readonly domainService: DomainService,
-    private readonly domainMemberService: DomainMemberService,
+    private readonly domainService: DomainService
   ) {}
 
-  @ApiOperation({ summary: 'Get me' })
-  @Get()
-  async getMe(@CurrentUser('id') userId: string) {
-    const user = await this.userRepo.findByIdentity({ id: userId });
-    User.ensureExists(user);
+  // @ApiOperation({ summary: 'Get me' })
+  // @Get()
+  // async getMe(@CurrentUser('id') userId: string) {
+  //   const user = await this.userRepo.findByIdentity({ id: userId });
+  //   User.ensureExists(user);
 
-    const loadedUser = await this.em.populate(user, ['party']);
-    return UserMapper.toUserView(loadedUser);
-  }
+  //   const loadedUser = await this.em.populate(user, ['party']);
+  //   return UserMapper.toUserView(loadedUser);
+  // }
 
-  @ApiOperation({ summary: 'Get domains' })
-  @Get('/domains')
-  async getDomains(): Promise<UserDomainAccess[]> {
-    return await this.domainService.getUserAccessDomains();
-  }
+  // @ApiOperation({ summary: 'Get domains' })
+  // @Get('/domains')
+  // async getDomains(): Promise<UserDomainAccess[]> {
+  //   return await this.domainService.getUserAccessDomains();
+  // }
 
   // @HttpCode(HttpStatus.NO_CONTENT)
   // @ApiOperation({ summary: 'User working domain' })

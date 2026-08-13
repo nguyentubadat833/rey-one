@@ -3,12 +3,11 @@ import { ChangeSetType, defineEntity, EventArgs } from '@mikro-orm/core';
 import { APP_PERMISSIONS, AppPermission } from '@rey-one/shared';
 import { Role } from './role.entity';
 import { DomainRepository } from '../repositories/domain-repository';
-import { Product } from './product.entity';
 import { uuidv7 } from 'uuidv7';
 import { BaseEntitySchema } from './base.entity';
-import { Order } from './order.entity';
 import { Subscription } from './subscription.entity';
 import randomstring from 'randomstring';
+import { InvalidDomainStatusError } from '@/utils/errors/domain.error';
 
 const DomainInfoSchema = defineEntity({
   name: 'DomainInfo',
@@ -31,71 +30,52 @@ const DomainEntitySchema = defineEntity({
     permissions: p.enum(APP_PERMISSIONS).array().default([]),
     info: p.embedded(DomainInfoSchema).lazy(),
 
-    subscription: () => p.oneToOne(Subscription).owner().nullable().eager(),
+    subscription: () => p.oneToOne(Subscription).owner().eager(),
+
     roles: () =>
       p
         .oneToMany(Role)
         .mappedBy((role) => role.domain)
         .orphanRemoval()
         .ref(),
-    products: () =>
-      p
-        .oneToMany(Product)
-        .mappedBy((product) => product.domain)
-        .orphanRemoval()
-        .ref(),
-    orders: () =>
-      p
-        .oneToMany(Order)
-        .mappedBy((order) => order.domain)
-        .orphanRemoval()
-        .ref()
+    // products: () =>
+    //   p
+    //     .oneToMany(Product)
+    //     .mappedBy((product) => product.domain)
+    //     .orphanRemoval()
+    //     .ref(),
+    // orders: () =>
+    //   p
+    //     .oneToMany(Order)
+    //     .mappedBy((order) => order.domain)
+    //     .orphanRemoval()
+    //     .ref(),
   }),
 });
 
-// export class BaseDomain extends BaseDomainSchema.class {}
-// BaseDomainSchema.setClass(BaseDomain);
-
 export class Domain extends DomainEntitySchema.class {
-  // static partyPrefix = 'DOM' as const;
-
-  // static generatePartyCode() {
-  //   const code = randomstring.generate({
-  //     length: 12,
-  //     charset: '123456789QWERTYUPASDFGHJKLMNBVCXZ',
-  //   });
-  //   return `${Domain.partyPrefix}${code}`;
-  // }
-
-  // static ensureStatusValue(active: boolean) {
-  //   if (!active) {
-  //     throw InvalidDomainStatusError();
-  //   }
-  // }
-
-  // static ensureStatus(domain: Domain) {
-  //   if (!domain.active) {
-  //     throw InvalidDomainStatusError();
-  //   }
-  // }
 
   ensurePermissionsValid(permissions: AppPermission[]) {
     const invalid = permissions.filter((p) => !this.permissions.includes(p));
     if (invalid.length > 0) {
-      throw new AppError('INVALID_PERMISSION', `Permissions not available in domain: ${invalid.join(', ')}`);
+      throw new AppError('INVALID_VALUE', `Permissions not available in domain: ${invalid.join(', ')}`);
     }
   }
 
-  ensureActive() {
+  ensureSubscription(){
     if (!this.subscription) throw AppError.withMessage('PROPERTY_REQUIRED', 'Domain subscription required');
     const subscription = this.subscription;
 
     this.active = !subscription.expiresAt || subscription.expiresAt > new Date();
   }
 
-  // ensureStatus() {
-  //   Domain.ensureStatus(this);
-  // }
+  ensureActive() {
+    this.ensureSubscription()
+
+    if(!this.active){
+      throw InvalidDomainStatusError()
+    }
+  }
 }
 
 DomainEntitySchema.setClass(Domain);
@@ -115,30 +95,17 @@ async function saveHandler(args: EventArgs<Domain>) {
     const permissions = args.entity.permissions;
     entity.permissions = Array.from(new Set(permissions));
 
-    // const roles = await entity.roles.loadItems();
-    // roles.forEach((role) => {
-    //   role.permissions = role.permissions.filter((permission) => entity.permissions.includes(permission));
-    // });
+    const roles = await entity.roles.loadItems();
+    roles.forEach((role) => {
+      role.permissions = role.permissions.filter((permission) => entity.permissions.includes(permission));
+    });
   }
-
-  // if (changeSetType === ChangeSetType.CREATE) {
-  //   console.log('domain')
-  //   entity.party.getEntity().code = generatePartyCode();
-  // }
 }
-
-// function generatePartyCode() {
-//   const string = randomstring.generate({
-//     length: 12,
-//     charset: '123456789QWERTYUPASDFGHJKLMNBVCXZ',
-//   });
-//   return `DOM${string}`;
-// }
 
 function generateCode() {
   const code = randomstring.generate({
     length: 12,
-    charset: '23456789QWERTYUPASDFGHJKLMNBVCXZ',
+    charset: '23456789QWERTYUPASDFGHKLMNBVCXZ',
   });
 
   return `DAM${code}`;

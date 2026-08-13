@@ -7,32 +7,27 @@ import { APP_GUARD, ModuleRef } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './controllers/auth-controller';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { DomainController } from './controllers/domain/domain-controller';
 import { AuthService } from './services/auth-service';
 import { Domain } from '@/persistence/entities/domain.entity';
 import { UserController } from './controllers/user-controller';
-import { DomainRoleController } from './controllers/domain/role-controller';
-import { UserSummary } from '@/persistence/entities/query-entities/user-query';
-import { DomainMember } from '@/persistence/entities/domain-member.entity';
-import { DomainSummary } from '@/persistence/entities/query-entities/domain-query';
-import { DomainService } from './services/domain/domain-service';
-import { DomainMemberController } from './controllers/domain/member-controller';
+// import { UserSummary } from '@/persistence/entities/query-entities/user-query';
+// import { DomainSummary } from '@/persistence/entities/query-entities/domain-query';
 import { AuthGuard } from './guard/auth-guard';
 import { AdminGuard } from './guard/admin-guard';
 import { PermissionGuard } from './guard/permission-guard';
 import { DomainMiddleware } from '../../utils/middlewares/domain-middleware';
-import { DomainCache } from '@/utils/cache/domain-cache';
-import { DomainSubscriber } from '@/persistence/subscribers/domain-subscriber';
-import { DomainMemberService } from './services/domain/member-service';
-import { DomainRoleService } from './services/domain/role-service';
 import { SERVICE_TOKENS } from '@/utils/types/tokens';
 import { MeController } from './controllers/me-controller';
-import { UserService } from './services/user-service';
+import { Role } from '@/persistence/entities/role.entity';
+import { UserLoadedRole } from '@/persistence/types/user-type';
+import { UserAuth } from '@/utils/types/system';
+import { DomainService } from './services/domain-service';
 
 @Module({
   imports: [
     MikroOrmModule.forFeature({
-      entities: [User, UserSummary, Domain, DomainMember, DomainSummary],
+      // entities: [User, UserSummary, Domain, DomainSummary],
+      entities: [User, Domain],
     }),
     ConfigModule.forFeature(authConfig),
     JwtModule.registerAsync({
@@ -50,61 +45,78 @@ import { UserService } from './services/user-service';
       provide: APP_GUARD,
       useClass: AuthGuard,
     },
-    {
-      provide: SERVICE_TOKENS.DOAMIN_SERVICE,
-      useExisting: DomainService,
-    },
+    // {
+    //   provide: SERVICE_TOKENS.DOAMIN_SERVICE,
+    //   useExisting: DomainService,
+    // },
     //
     AuthService,
-    UserService,
     DomainService,
-    DomainMemberService,
-    DomainRoleService,
+    // UserService,
     //
     AdminGuard,
     PermissionGuard,
     //
-    DomainCache,
-    DomainSubscriber,
+    // DomainCache,
+    // DomainSubscriber,
   ],
   exports: [AdminGuard, PermissionGuard],
-  controllers: [AuthController, MeController, DomainController, DomainRoleController, DomainMemberController, UserController],
+  controllers: [AuthController, MeController, UserController],
 })
 export class IAMModule implements OnModuleInit, NestModule {
   constructor(
+    private readonly authService: AuthService,
     private readonly orm: MikroORM,
     private readonly moduleRef: ModuleRef,
     @Inject(authConfig.KEY) private readonly config: ConfigType<typeof authConfig>,
   ) {}
 
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(DomainMiddleware).forRoutes(DomainMemberController, DomainRoleController);
+    consumer.apply(DomainMiddleware).forRoutes();
   }
 
   async onModuleInit() {
     await RequestContext.create(this.orm.em, async () => {
       const em = RequestContext.getEntityManager()!;
 
-      const users = [this.config.user.admin, this.config.user.support];
+      const admin = {
+        identity: this.config.userDefault.admin.identity,
+        password: this.config.userDefault.admin.password,
+      };
 
-      for (const item of users) {
-        const identity = AuthService.IdentityDetect(item.identity);
-        const user = await em.findOne(User, identity);
+      const identity = AuthService.IdentityDetect(admin.identity);
 
-        if (!user) {
-          em.create(User, {
-            ...identity,
-            type: item.type,
-            password: item.password,
-            party: {
-              code: User.generatePartyCode(),
-              name: item.identity,
-            },
-          });
-        }
+      let user = await em.findOne(
+        User,
+        {
+          ...identity,
+        },
+        {
+          populate: ['role'],
+        },
+      );
+
+      if (!user) {
+        user = em.create(User, {
+          ...identity,
+          password: admin.password,
+          info: {
+            name: 'Administrator',
+          },
+          role: em.create(Role, {
+            name: 'Admin',
+          }),
+        }) as UserLoadedRole;
+
+        await em.flush()
       }
 
-      await em.flush();
+      this.authService.adminUser = {
+        id: user.id,
+        roleId: user.role.id,
+      } satisfies UserAuth
+
+      console.info('===== Admin user has been initialized =====');
     });
   }
 }

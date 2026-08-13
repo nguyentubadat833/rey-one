@@ -14,7 +14,7 @@ export class DomainMiddleware implements NestMiddleware {
     const domainId = req.headers[DOMAIN_ID_HEADER] as string;
 
     if (!domainId) {
-      throw new BadRequestException('Domain is required');
+      throw new BadRequestException();
     }
 
     this.cls.set('domainId', domainId);

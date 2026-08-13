@@ -1,5 +1,4 @@
 export const APP_PERMISSIONS = [
-
   "order:read",
   "order:manage",
   //

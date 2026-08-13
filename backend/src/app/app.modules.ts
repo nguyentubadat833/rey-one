@@ -8,10 +8,8 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { IAMModule } from '@/modules/iam/iam.module';
-import { CatalogModule } from '@/modules/catalog/catalog.module';
 import { ClsModule } from 'nestjs-cls';
 import { CacheModule } from '@nestjs/cache-manager';
-import { CommerceModule } from '@/modules/commerce/commerce.module';
 
 @Module({
   imports: [
@@ -49,7 +47,7 @@ import { CommerceModule } from '@/modules/commerce/commerce.module';
       isGlobal: true,
     }),
     IAMModule,
-    CatalogModule,
+    // CatalogModule,
     // CommerceModule
   ],
   controllers: [AppController],

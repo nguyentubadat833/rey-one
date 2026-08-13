@@ -4,8 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { authConfig } from '@/configs/auth.config';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RequireAuth } from '@/utils/decorators/auth.decorator';
-import { UserLoginResponse, UserType } from '@rey-one/shared';
-import { UserMapper } from '../mappers/user-mapper';
+import { UserLoginResponse } from '@rey-one/shared';
 import { UserAuth } from '@/utils/types/system';
 import { AuthService } from '../services/auth-service';
 import { EntityManager } from '@mikro-orm/core';
@@ -30,18 +29,11 @@ export class AuthController {
   async baseLogin(@Body() dto: BaseLoginDto, @Res({ passthrough: true }) reply: FastifyReply) {
     const { user, onSuccess } = await this.authService.baseAuthentication(dto);
 
-    if (user.isDomainUser()) {
-      await this.em.populate(user, ['members.domain']);
-      const members = user.members.getItems();
-      if (members.length) {
-        members[0].domain.getEntity().ensureStatus();
-      }
-    }
-
     const userAuth = {
       id: user.id,
-      type: user.type as UserType,
-      domainAccess: await user.loadDomainAccess(),
+      roleId: user.role.id,
+      domainId: user.role.getProperty('domain')?.id,
+      permissions: user.role.getProperty('permissions'),
     } satisfies UserAuth;
 
     const tokenExp = this.config.jwtAccessExpiresIn;
@@ -60,12 +52,10 @@ export class AuthController {
     });
 
     user.token = accessToken;
-    const loadedUser = await this.em.populate(user, ['party']);
     await onSuccess();
 
     return {
       accessToken: accessToken,
-      user: UserMapper.toUserView(loadedUser)
     } satisfies UserLoginResponse;
   }
 }

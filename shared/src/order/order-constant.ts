@@ -35,11 +35,3 @@ export const ORDER_PAYMENT_TYPES = [
 //   "cancelled",
 //   "expired",
 // ] as const;
-
-export const SUBSCRIPTION_PLANS = [
-  'free', // gói free
-  'monthly', // gói thanh toán hàng tháng
-  'quarterly', // gói thanh toán mỗi 3 tháng
-  'half_year', // gói thanh toán mỗi 6 tháng
-  'year' // gói thanh toán hàng năm
-] as const

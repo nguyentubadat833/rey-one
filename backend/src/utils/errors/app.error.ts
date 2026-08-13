@@ -13,3 +13,5 @@ export class AppError extends Error {
         return error
     }
 }
+
+export const SystemNotInitializedError = (message: string) => new Error(message)

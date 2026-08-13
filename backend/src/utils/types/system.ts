@@ -1,10 +1,17 @@
-import { AppPermission, UserType } from '@rey-one/shared';
+import { AppPermission } from '@rey-one/shared';
 import { ClsStore } from 'nestjs-cls';
 
+// export type UserAuth = {
+//   id: string;
+//   type: UserType;
+//   domainAccess: Record<string, AppPermission[]>;
+// };
+
 export type UserAuth = {
-  id: string;
-  type: UserType;
-  domainAccess: Record<string, AppPermission[]>; // {domainId: AppPermissions[]}
+  id: string; // user id
+  roleId: string // role id
+  domainId?: string
+  permissions?: AppPermission[]
 };
 
 export interface AppClsStore extends ClsStore {

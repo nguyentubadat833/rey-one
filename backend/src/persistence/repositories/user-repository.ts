@@ -1,7 +1,7 @@
 import { User } from '@/persistence/entities/user.entity';
 import { EntityRepository, wrap } from '@mikro-orm/core';
 import { Injectable } from '@nestjs/common';
-import { IdentifierType } from '../types/user-type';
+import { IdentifierType, UserLoadedRoleWithDomain } from '../types/user-type';
 
 @Injectable()
 export class UserRepository extends EntityRepository<User> {
@@ -9,21 +9,23 @@ export class UserRepository extends EntityRepository<User> {
     return wrap(user).toObject(['password']);
   }
 
-  async findByIdentity(identity: IdentifierType) {
-    return this.findOne(identity);
+  async findByIdentity(identity: IdentifierType): Promise<UserLoadedRoleWithDomain | null> {
+    return this.findOne(identity, {
+      populate: ['role.domain']
+    });
   }
 
   async recordFailedAuthentication(user: User) {
-    user.failedLoginAttempts = user.failedLoginAttempts ? user.failedLoginAttempts + 1 : 1;
-    user.lastFailedLoginAttemptAt = new Date();
+    user.security.failedLoginAttempts = user.security.failedLoginAttempts ? user.security.failedLoginAttempts + 1 : 1;
+    user.security.lastFailedLoginAt = new Date();
 
     await this.save(user);
   }
 
   async recordSuccessfulAuthentication(user: User) {
-    user.failedLoginAttempts = 0;
-    user.lastFailedLoginAttemptAt = null;
-    user.lastSuccessfulLoginAt = new Date();
+    user.security.failedLoginAttempts = 0;
+    user.security.lastFailedLoginAt = null;
+    user.security.lastLoginAt = new Date();
 
     await this.save(user);
   }

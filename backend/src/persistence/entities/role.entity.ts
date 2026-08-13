@@ -1,15 +1,18 @@
-import { defineEntity, p } from '@mikro-orm/core';
+import { ChangeSetType, defineEntity, EventArgs, p } from '@mikro-orm/core';
 import { APP_PERMISSIONS } from '@rey-one/shared';
 import { Domain } from './domain.entity';
 import { BaseEntitySchema } from './base.entity';
 import { User } from './user.entity';
+import { AppError } from '@/utils/errors/app.error';
+import { tenantFilterConfig } from './configs/doamin-tenant.filter';
+import { InvalidRoleStatusError } from '@/utils/errors/user.error';
 import slugify from 'slugify';
 import randomstring from 'randomstring';
 
 export const RoleEntitySchema = defineEntity({
   name: 'RoleEntity',
   tableName: 'role',
-  // filters: tenantFilterConfig,
+  filters: tenantFilterConfig,
   extends: BaseEntitySchema,
   properties: {
     id: p
@@ -17,11 +20,11 @@ export const RoleEntitySchema = defineEntity({
       .length(14)
       .primary()
       .onCreate((role) => generateId(role.name)),
-    name: p.string(),
+    name: p.string().unique(),
     active: p.boolean().default(true),
     permissions: p.enum(APP_PERMISSIONS).array().default([]),
 
-    domain: () => p.manyToOne(Domain).nullable(),
+    domain: () => p.manyToOne(Domain).nullable().ref(),
     users: () =>
       p
         .oneToMany(User)
@@ -29,12 +32,19 @@ export const RoleEntitySchema = defineEntity({
         .ref(),
   },
 });
+export class Role extends RoleEntitySchema.class {
 
-export class Role extends RoleEntitySchema.class {}
+  ensureActive() {
+    if (!this.active) {
+      throw InvalidRoleStatusError();
+    }
+  }
+  
+}
 RoleEntitySchema.setClass(Role);
 
-// DomainRoleEntitySchema.addHook('beforeCreate', handlerSave);
-// DomainRoleEntitySchema.addHook('beforeUpdate', handlerSave);
+RoleEntitySchema.addHook('beforeCreate', handlerSave);
+RoleEntitySchema.addHook('beforeUpdate', handlerSave);
 
 export function generateId(name: string) {
   const slug = slugify(name.slice(0, 7), {
@@ -51,20 +61,24 @@ export function generateId(name: string) {
   return `${slug}-${suffix}`.toUpperCase();
 }
 
-// async function handlerSave(args: EventArgs<DomainRole>) {
-//   const changeSetType: ChangeSetType | undefined = args.changeSet?.type;
+async function handlerSave(args: EventArgs<Role>) {
+  const changeSet = args.changeSet;
+  const changeSetType: ChangeSetType | undefined = changeSet?.type;
 
-//   if (!changeSetType) return;
+  if (!changeSetType) return;
 
-//   if (changeSetType === ChangeSetType.UPDATE && args.changeSet?.payload.domain) {
-//     throw AppError.withMessage('PROPERTY_IMMUTABLE', 'Domain is immutable');
-//   }
+  const payload = changeSet?.payload;
+  const entity = args.entity;
 
-//   if (args.changeSet?.payload.permissions) {
-//     const permissions = args.entity.permissions;
+  if (changeSetType === ChangeSetType.UPDATE && payload?.domain) {
+    throw AppError.withMessage('PROPERTY_IMMUTABLE', 'Domain is immutable');
+  }
 
-//     // const domain = await args.entity.domain.loadOrFail();
-//     args.entity.permissions = Array.from(new Set(permissions));
-//     args.entity.domain.ensurePermissionsValid(args.entity.permissions);
-//   }
-// }
+  if (payload?.permissions && entity.domain) {
+    const permissions = entity.permissions;
+    const domain = await entity.domain.loadOrFail();
+
+    entity.permissions = Array.from(new Set(permissions));
+    domain.ensurePermissionsValid(entity.permissions);
+  }
+}
