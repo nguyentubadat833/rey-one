@@ -44,7 +44,7 @@ export class PermissionGuard implements CanActivate {
 
       const domainId = extractDomainId(request);
       if (!domainId) {
-        throw new ForbiddenException('Request domain is required');
+        throw new ForbiddenException();
       }
 
       if (!user.domainId) {

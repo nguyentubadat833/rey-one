@@ -15,4 +15,5 @@ export type ErrorKey =
   | "INVALID_STATUS"
   | "INVALID_VALUE"
   | "INVALID_CREDENTIAL"
+  | "INVALID_REQUEST_CONTEXT"
   | "NOT_FOUND"

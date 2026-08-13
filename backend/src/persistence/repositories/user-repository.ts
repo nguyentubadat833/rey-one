@@ -1,7 +1,7 @@
 import { User } from '@/persistence/entities/user.entity';
 import { EntityRepository, wrap } from '@mikro-orm/core';
 import { Injectable } from '@nestjs/common';
-import { IdentifierType, UserLoadedRoleWithDomain } from '../types/user-type';
+import { IdentifierType, UserLoadedRoleWithDomainAndInfo } from '../types/user-type';
 
 @Injectable()
 export class UserRepository extends EntityRepository<User> {
@@ -9,9 +9,9 @@ export class UserRepository extends EntityRepository<User> {
     return wrap(user).toObject(['password']);
   }
 
-  async findByIdentity(identity: IdentifierType): Promise<UserLoadedRoleWithDomain | null> {
+  async findByIdentity(identity: IdentifierType): Promise<UserLoadedRoleWithDomainAndInfo | null> {
     return this.findOne(identity, {
-      populate: ['role.domain']
+      populate: ['role.domain.info']
     });
   }
 

@@ -30,6 +30,9 @@ const UserSecurityShema = defineEntity({
   }),
 });
 
+class UserSecurity extends UserSecurityShema.class { }
+UserSecurityShema.setClass(UserSecurity)
+
 const UserEntitySchema = defineEntity({
   name: 'UserEntity',
   tableName: 'user',
@@ -45,12 +48,13 @@ const UserEntitySchema = defineEntity({
     password: p.string().hidden().lazy().ref(),
     token: p.string().persist(false).nullable(),
 
-    security: p.embedded(UserSecurityShema).onCreate(() => new UserInfoSchema({})),
+    security: p.embedded(UserSecurityShema).onCreate(() => new UserSecurity()),
     info: p.embedded(UserInfoSchema).lazy(),
 
     role: () => p.manyToOne(Role).ref(),
   },
 });
+
 export class User extends UserEntitySchema.class {
   static statusAllowedTransitions: Record<UserStatus, UserStatus[]> = {
     pending: ['active'], // verify hoặc tự xóa

@@ -43,6 +43,7 @@ export type UserStatus = (typeof USER_STATUSES)[number];
 
 export type BaseUserView = z.infer<typeof BaseUserSchema> & {
   readonly id: string;
+  readonly code: string
 };
 
 export type UserSummaryView = BaseUserView & {
@@ -54,6 +55,22 @@ export type UserDetailView = BaseUserView & {
   role: BaseRoleView;
 };
 
-export type UserLoginResponse = {
-  accessToken: string;
-};
+export type UserAuthResponse = Readonly<
+  Omit<BaseUserView, 'status'> & {
+    role: {
+      id: string
+      name: string
+    }
+    domain?: {
+      id: string
+      name: string
+    }
+  }
+>
+
+export type UserLoginResponse = Readonly<
+  {
+    accessToken: string;
+    userAuth: UserAuthResponse
+  }
+>

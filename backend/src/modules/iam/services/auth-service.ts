@@ -2,7 +2,7 @@ import { UserRepository } from '@/persistence/repositories/user-repository';
 import { Injectable } from '@nestjs/common';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import { BaseLoginDto } from '../dtos/auth-dto';
-import { IdentifierType, UserLoadedRoleWithDomain } from '@/persistence/types/user-type';
+import { IdentifierType, UserLoadedRoleWithDomainAndInfo } from '@/persistence/types/user-type';
 import { User } from '@/persistence/entities/user.entity';
 import { verify } from 'argon2';
 import { AppError, SystemNotInitializedError } from '@/utils/errors/app.error';
@@ -42,12 +42,8 @@ export class AuthService {
     return this._adminUser;
   }
 
-  get adminRoleId() {
-    return this.adminUser.id;
-  }
-
   isUserAdmin(user: UserAuth) {
-    return user.id === this.adminRoleId;
+    return user.id === this.adminUser.id;
   }
 
   async baseAuthentication(dto: BaseLoginDto) {
@@ -72,7 +68,7 @@ export class AuthService {
     }
 
     return {
-      user: user as UserLoadedRoleWithDomain,
+      user: user as UserLoadedRoleWithDomainAndInfo,
       onSuccess: () => this.userRepo.recordSuccessfulAuthentication(user),
     };
   }

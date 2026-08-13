@@ -14,4 +14,5 @@ export class AppError extends Error {
     }
 }
 
-export const SystemNotInitializedError = (message: string) => new Error(message)
+export const SystemNotInitializedError = (message: string) => AppError.withMessage('UNKNOWN_ERROR', message)
+export const InvalidRequestContextError = (message: string) => AppError.withMessage('INVALID_REQUEST_CONTEXT', message)
