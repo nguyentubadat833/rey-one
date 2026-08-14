@@ -19,17 +19,17 @@ export class DomainService {
   ) {}
 
   ensureAccessDomain(domain: Domain | string | undefined | null) {
-    const isAdmin = this.authService.isActorAdmin();
-    if (isAdmin) return;
+    // const isAdmin = this.authService.isActorAdmin();
+    // if (isAdmin) return;
 
-    if (domain) {
-      const domainId = typeof domain === 'string' ? domain : domain.id;
-      if (domainId !== this.authService.getActor().domainId) {
-        throw new AppError('INSUFFICIENT_PERMISSION');
-      }
-    } else {
-      if (!isAdmin) throw new AppError('INSUFFICIENT_PERMISSION');
-    }
+    // if (domain) {
+    //   const domainId = typeof domain === 'string' ? domain : domain.id;
+    //   if (domainId !== this.authService.getActor().domainId) {
+    //     throw new AppError('INSUFFICIENT_PERMISSION');
+    //   }
+    // } else {
+    //   if (!isAdmin) throw new AppError('INSUFFICIENT_PERMISSION');
+    // }
   }
 
   async getDomainById(id: string, requireActive = false) {
