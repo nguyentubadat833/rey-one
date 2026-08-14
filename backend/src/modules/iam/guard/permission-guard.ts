@@ -54,6 +54,8 @@ export class PermissionGuard implements CanActivate {
 
       const domain = await this.domainService.getDomainById(domainId);
       domain.ensureActive();
+
+      this.domainService.ensureAccessDomain(domain)
     }
 
     return true;

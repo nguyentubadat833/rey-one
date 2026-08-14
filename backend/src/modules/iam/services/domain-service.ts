@@ -18,12 +18,17 @@ export class DomainService {
     private readonly authService: AuthService,
   ) {}
 
-  ensureAccessDomain(domain: Domain | undefined | null) {
+  ensureAccessDomain(domain: Domain | string | undefined | null) {
     const isAdmin = this.authService.isActorAdmin();
     if (isAdmin) return;
 
-    if (domain && domain.id !== this.authService.getActor().domainId) {
-      throw new AppError('INSUFFICIENT_PERMISSION');
+    if (domain) {
+      const domainId = typeof domain === 'string' ? domain : domain.id;
+      if (domainId !== this.authService.getActor().domainId) {
+        throw new AppError('INSUFFICIENT_PERMISSION');
+      }
+    } else {
+      if (!isAdmin) throw new AppError('INSUFFICIENT_PERMISSION');
     }
   }
 
