@@ -16,18 +16,21 @@ export class DomainService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly domainRepo: DomainRepository,
     private readonly authService: AuthService,
-    private readonly appStore: ClsService<AppClsStore>
   ) {}
 
-  ensureAccessDomain(domain: Domain | null){
-    const isAdmin = this.authService.isActorAdmin()
-    if(isAdmin) return
+  ensureAccessDomain(domain: Domain | undefined | null) {
+    const isAdmin = this.authService.isActorAdmin();
+    if (isAdmin) return;
+
+    if (domain && domain.id !== this.authService.getActor().domainId) {
+      throw new AppError('INSUFFICIENT_PERMISSION');
+    }
   }
 
   async getDomainById(id: string, requireActive = false) {
     const domainCacheObject = await this.cacheManager.get<DomainObject | undefined>(`domain::${id}`);
 
-    let domainEntity: Domain
+    let domainEntity: Domain;
 
     if (!domainCacheObject) {
       domainEntity = await this.domainRepo.findOneOrFail(
@@ -44,8 +47,8 @@ export class DomainService {
       domainEntity = this.domainRepo.merge(domainCacheObject);
     }
 
-    if(requireActive) domainEntity.ensureActive()
+    if (requireActive) domainEntity.ensureActive();
 
-    return domainEntity
+    return domainEntity;
   }
 }

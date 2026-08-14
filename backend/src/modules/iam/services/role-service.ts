@@ -13,7 +13,6 @@ export class RoleService {
   constructor(
     private readonly em: EntityManager,
     private readonly domainService: DomainService,
-    private readonly appStore: ClsService<AppClsStore>,
     private readonly authService: AuthService
   ) {}
 
@@ -32,8 +31,11 @@ export class RoleService {
     const role = await this.em.findOneOrFail(Role, 
         { id },
         {
-            failHandler: RoleNotFoundError
+            failHandler: RoleNotFoundError,
+            populate: ['domain']
         }
     )
+
+    this.domainService.ensureAccessDomain(role.domain?.getEntity())
   }
 }
