@@ -1,6 +1,6 @@
 import z from "zod";
 import { APP_PERMISSIONS } from "./app";
-import { RoleSummaryView } from "./role";
+import { RoleSummarySchema } from "./role";
 
 export const DOMAIN_STATUSES = [
   'active', // Đang hoạt động
@@ -16,8 +16,11 @@ export const SUBSCRIPTION_PLANS = [
   'year' // gói thanh toán hàng năm
 ] as const
 
+export type SubscriptionPlan = typeof SUBSCRIPTION_PLANS[number]
+export type DomainStatus = typeof DOMAIN_STATUSES[number]
+
 // schemas 
-export const BaseDomainSchema = z.object({
+const BaseDomainSchema = z.object({
   name: z.string({ error: "Domain name is required" }),
   permissions: z.array(z.enum(APP_PERMISSIONS)).default([]),
   plan: z.enum(SUBSCRIPTION_PLANS, {error: "Subscription plan is required"}),
@@ -30,18 +33,16 @@ export const UpdateDomainSchema = BaseDomainSchema.omit({
   startedAt: true,
 }).partial()
 
-// types
-export type SubscriptionPlan = typeof SUBSCRIPTION_PLANS[number]
-export type DomainStatus = typeof DOMAIN_STATUSES[number]
+export const DomainSchema = BaseDomainSchema.extend({
+  id: z.string().readonly(),
+  startedAt: z.iso.datetime(),
+  status: z.enum(DOMAIN_STATUSES)
+})
 
-export type BaseDomainView = z.infer<typeof BaseDomainSchema> & {
-  readonly id: string
-  readonly startedAt: string
-  readonly status: DomainStatus
-}
+export const DomainDetailSchema = DomainSchema.extend({
+  roles: z.array(RoleSummarySchema)
+})
 
-export type DomainDetailView = BaseDomainView & {
-  roles: RoleSummaryView[]
-}
-
-export type DomainSummaryView = Omit<BaseDomainView, 'permissions'>
+export const DomainSummarySchema = DomainSchema.omit({
+  permissions: true
+})

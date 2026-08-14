@@ -9,15 +9,6 @@ import { InvalidUserStatusError, UserNotFoundError } from '@/utils/errors/user.e
 import { Role } from './role.entity';
 import randomstring from 'randomstring';
 
-const UserInfoSchema = defineEntity({
-  name: 'UserInfoEntity',
-  embeddable: true,
-  properties: (p) => ({
-    name: p.string(),
-    image: p.string().nullable(),
-  }),
-});
-
 const UserSecurityShema = defineEntity({
   name: 'UserAuditEntity',
   embeddable: true,
@@ -30,8 +21,22 @@ const UserSecurityShema = defineEntity({
   }),
 });
 
-class UserSecurity extends UserSecurityShema.class { }
-UserSecurityShema.setClass(UserSecurity)
+class UserSecurity extends UserSecurityShema.class {}
+UserSecurityShema.setClass(UserSecurity);
+
+const UserInfoEntitySchema = defineEntity({
+  name: 'UserInfoEntity',
+  tableName: 'user_info',
+  properties: (p) => ({
+    user: () => p.oneToOne(User).primary().owner(),
+
+    name: p.string(),
+    image: p.string().nullable(),
+  }),
+});
+
+export class UserInfo extends UserInfoEntitySchema.class {}
+UserInfoEntitySchema.setClass(UserInfo);
 
 const UserEntitySchema = defineEntity({
   name: 'UserEntity',
@@ -49,8 +54,8 @@ const UserEntitySchema = defineEntity({
     token: p.string().persist(false).nullable(),
 
     security: p.embedded(UserSecurityShema).onCreate(() => new UserSecurity()),
-    info: p.embedded(UserInfoSchema).lazy(),
 
+    info: () => p.oneToOne(UserInfoEntitySchema).mappedBy((info) => info.user),
     role: () => p.manyToOne(Role).ref(),
   },
 });

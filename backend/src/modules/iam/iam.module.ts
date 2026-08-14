@@ -1,5 +1,5 @@
 import { authConfig } from '@/configs/auth.config';
-import { User } from '@/persistence/entities/user.entity';
+import { User, UserInfo } from '@/persistence/entities/user.entity';
 import { MikroORM, RequestContext } from '@mikro-orm/core';
 import { Inject, MiddlewareConsumer, Module, NestModule, OnModuleInit } from '@nestjs/common';
 import { ConfigModule, type ConfigType } from '@nestjs/config';
@@ -16,18 +16,17 @@ import { AuthGuard } from './guard/auth-guard';
 import { AdminGuard } from './guard/admin-guard';
 import { PermissionGuard } from './guard/permission-guard';
 import { DomainMiddleware } from '../../utils/middlewares/domain-middleware';
-import { SERVICE_TOKENS } from '@/utils/types/tokens';
-import { MeController } from './controllers/me-controller';
 import { Role } from '@/persistence/entities/role.entity';
 import { UserLoadedRole } from '@/persistence/types/user-type';
 import { UserAuth } from '@/utils/types/system';
 import { DomainService } from './services/domain-service';
+import { RoleService } from './services/role-service';
 
 @Module({
   imports: [
     MikroOrmModule.forFeature({
       // entities: [User, UserSummary, Domain, DomainSummary],
-      entities: [User, Domain],
+      entities: [User, Role, Domain],
     }),
     ConfigModule.forFeature(authConfig),
     JwtModule.registerAsync({
@@ -51,6 +50,7 @@ import { DomainService } from './services/domain-service';
     // },
     //
     AuthService,
+    RoleService,
     DomainService,
     // UserService,
     //
@@ -61,7 +61,7 @@ import { DomainService } from './services/domain-service';
     // DomainSubscriber,
   ],
   exports: [AdminGuard, PermissionGuard],
-  controllers: [AuthController, MeController, UserController],
+  controllers: [AuthController, UserController],
 })
 export class IAMModule implements OnModuleInit, NestModule {
   constructor(
@@ -100,13 +100,13 @@ export class IAMModule implements OnModuleInit, NestModule {
         user = em.create(User, {
           ...identity,
           password: admin.password,
-          info: {
-            name: 'Administrator',
-          },
+          info: em.create(UserInfo, {
+            name: "Administrator"
+          }),
           role: em.create(Role, {
             name: 'Admin',
           }),
-        }) as UserLoadedRole;
+        }) as UserLoadedRole
 
         await em.flush()
       }

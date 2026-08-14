@@ -2,6 +2,7 @@ import { DOMAIN_ID_HEADER, DOMAIN_ID_PARAMETER } from '@/utils/types/utils';
 import { FastifyRequest } from 'fastify';
 
 export default function guardHelper() {
+  
   function extractBearerToken(request: FastifyRequest): string | undefined {
     const fromCookie = request.cookies?.['access_token'];
     if (fromCookie) return fromCookie;

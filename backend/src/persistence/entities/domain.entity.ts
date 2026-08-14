@@ -1,6 +1,6 @@
 import { AppError } from '@/utils/errors/app.error';
 import { ChangeSetType, defineEntity, EventArgs } from '@mikro-orm/core';
-import { APP_PERMISSIONS, AppPermission } from '@rey-one/shared';
+import { APP_PERMISSIONS, AppPermission, DomainStatus } from '@rey-one/shared';
 import { Role } from './role.entity';
 import { DomainRepository } from '../repositories/domain-repository';
 import { uuidv7 } from 'uuidv7';
@@ -9,10 +9,12 @@ import { Subscription } from './subscription.entity';
 import randomstring from 'randomstring';
 import { InvalidDomainStatusError } from '@/utils/errors/domain.error';
 
-const DomainInfoSchema = defineEntity({
-  name: 'DomainInfo',
-  embeddable: true,
+const DomainInfoEntitySchema = defineEntity({
+  name: 'DomainInfoEntity',
+  tableName: 'domain_info',
   properties: (p) => ({
+    domain: () => p.oneToOne(Domain).primary().owner(),
+
     name: p.string(),
     image: p.string().nullable(),
   }),
@@ -28,16 +30,17 @@ const DomainEntitySchema = defineEntity({
     code: p.string().length(15).unique().onCreate(generateCode),
     active: p.boolean().persist(false),
     permissions: p.enum(APP_PERMISSIONS).array().default([]),
-    info: p.embedded(DomainInfoSchema).lazy(),
 
     subscription: () => p.oneToOne(Subscription).owner().eager(),
 
+    info: () => p.oneToOne(DomainInfoEntitySchema).mappedBy(info => info.domain),
     roles: () =>
       p
         .oneToMany(Role)
         .mappedBy((role) => role.domain)
         .orphanRemoval()
-        .ref(),
+        .ref()
+        
     // products: () =>
     //   p
     //     .oneToMany(Product)
@@ -75,6 +78,17 @@ export class Domain extends DomainEntitySchema.class {
     if(!this.active){
       throw InvalidDomainStatusError()
     }
+  }
+
+  getStatus(): DomainStatus{
+    if(!this.subscription) return 'pending'
+    
+    const subscription = this.subscription
+    if(subscription.expiresAt && subscription.expiresAt > new Date()){
+      return 'expiring'
+    }
+
+    return 'active'
   }
 }
 

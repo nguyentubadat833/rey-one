@@ -15,6 +15,6 @@ export type UserAuth = {
 };
 
 export interface AppClsStore extends ClsStore {
-  domainId: string;
-  actor: UserAuth
+  domainId: string | undefined;
+  actor: UserAuth | undefined
 }

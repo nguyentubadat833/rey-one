@@ -10,8 +10,10 @@ export const BaseRoleSchema = z.object({
 export const CreateRoleSchema = BaseRoleSchema;
 export const UpdateRoleSchema = BaseRoleSchema.partial();
 
-export type BaseRoleView = z.infer<typeof BaseRoleSchema> & {
-  readonly id: string;
-};
+export const RoleSchema = BaseRoleSchema.extend({
+  id: z.string().readonly()
+})
 
-export type RoleSummaryView = Omit<BaseRoleView, 'permissions'>
+export const RoleSummarySchema = RoleSchema.omit({
+  permissions: true
+})

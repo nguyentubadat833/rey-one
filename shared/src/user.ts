@@ -1,7 +1,11 @@
 import z from "zod";
-import { BaseDomainView } from "./domain";
+import {DomainSchema, DomainSummarySchema } from "./domain";
 import { zPhoneNumber } from "./utils";
-import { BaseRoleView } from "./role";
+import { RoleSchema, RoleSummarySchema } from "./role";
+
+export const USER_TYPES = [
+
+] as const
 
 export const USER_STATUSES = [
   "pending", // chưa từng kích hoạt
@@ -22,7 +26,7 @@ export const BaseLoginSchema = z.object({
   password: z.string({ error: "Password is required" }),
 });
 
-export const BaseUserSchema = z.object({
+const BaseSchema = z.object({
   status: z.enum(USER_STATUSES).default("pending"),
   name: z.string({ error: "Name is required" }),
   username: usernameSchema,
@@ -31,7 +35,7 @@ export const BaseUserSchema = z.object({
   image: imageSchema,
 });
 
-const UserFormSchema = BaseUserSchema.extend({
+const UserFormSchema = BaseSchema.extend({
   roleId: z.string(),
 });
 
@@ -41,36 +45,34 @@ export const UpdateUserSchema = UserFormSchema.partial();
 //types
 export type UserStatus = (typeof USER_STATUSES)[number];
 
-export type BaseUserView = z.infer<typeof BaseUserSchema> & {
-  readonly id: string;
-  readonly code: string
-};
+export const UserSchema = BaseSchema.extend({
+  id: z.uuid().readonly(),
+  code: z.string().readonly()
+})
 
-export type UserSummaryView = BaseUserView & {
-  role: string;
-};
+export const UserSummarySchema = UserSchema.extend({
+  role: z.string()
+})
 
-export type UserDetailView = BaseUserView & {
-  readonly domain?: BaseDomainView;
-  role: BaseRoleView;
-};
+export const UserDetailSchema = UserSchema.extend({
+  domain: DomainSummarySchema.optional(),
+  role: RoleSummarySchema
+})
 
-export type UserAuthResponse = Readonly<
-  Omit<BaseUserView, 'status'> & {
-    role: {
-      id: string
-      name: string
-    }
-    domain?: {
-      id: string
-      name: string
-    }
-  }
->
+export const UserAuthResponseSchema = UserSchema.omit({
+  status: true
+}).extend({
+  role: RoleSchema.pick({
+    id: true,
+    name: true
+  }),
+  domain: DomainSchema.pick({
+    id: true,
+    name: true
+  }).optional()
+})
 
-export type UserLoginResponse = Readonly<
-  {
-    accessToken: string;
-    userAuth: UserAuthResponse
-  }
->
+export const UserLoginResponseSchema = z.object({
+  accessToken: z.string(),
+  userAuth: UserAuthResponseSchema
+})

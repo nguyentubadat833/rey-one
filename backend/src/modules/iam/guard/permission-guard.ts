@@ -22,12 +22,9 @@ export class PermissionGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest();
 
-    const user = request[AUTH_METADATA.USER] as UserAuth;
-    if (!user) {
-      throw new UnauthorizedException();
-    }
+    if (this.authService.isActorAdmin()) return true;
 
-    if (this.authService.isUserAdmin(user)) return true;
+    const user = this.authService.getActor()
 
     if (!user.permissions) {
       throw new ForbiddenException('User permissions is required');

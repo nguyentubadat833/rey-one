@@ -2,12 +2,13 @@ import { UserRepository } from '@/persistence/repositories/user-repository';
 import { Injectable } from '@nestjs/common';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import { BaseLoginDto } from '../dtos/auth-dto';
-import { IdentifierType, UserLoadedRoleWithDomainAndInfo } from '@/persistence/types/user-type';
+import { IdentifierType, UserLoadedRoleWithDomain } from '@/persistence/types/user-type';
 import { User } from '@/persistence/entities/user.entity';
 import { verify } from 'argon2';
 import { AppError, SystemNotInitializedError } from '@/utils/errors/app.error';
+import { AppClsStore, UserAuth } from '@/utils/types/system';
 import z from 'zod';
-import { UserAuth } from '@/utils/types/system';
+import { ClsService } from 'nestjs-cls';
 
 const emailSchema = z.email();
 
@@ -15,7 +16,10 @@ const emailSchema = z.email();
 export class AuthService {
   private _adminUser?: UserAuth;
 
-  constructor(private readonly userRepo: UserRepository) {}
+  constructor(
+    private readonly userRepo: UserRepository,
+    private readonly appStore: ClsService<AppClsStore>,
+  ) {}
 
   static IdentityDetect(raw: string): IdentifierType {
     if (emailSchema.safeParse(raw).success) return { email: raw };
@@ -42,8 +46,17 @@ export class AuthService {
     return this._adminUser;
   }
 
-  isUserAdmin(user: UserAuth) {
-    return user.id === this.adminUser.id;
+  getActor() {
+    const actor = this.appStore.get('actor')
+    if(!actor){
+      throw new AppError('MISSING_ACTOR_CONTEXT')
+    }
+
+    return actor
+  }
+
+  isActorAdmin() {
+    return this.appStore.get('actor.roleId') === this.adminUser.roleId;
   }
 
   async baseAuthentication(dto: BaseLoginDto) {
@@ -68,7 +81,7 @@ export class AuthService {
     }
 
     return {
-      user: user as UserLoadedRoleWithDomainAndInfo,
+      user: user as UserLoadedRoleWithDomain,
       onSuccess: () => this.userRepo.recordSuccessfulAuthentication(user),
     };
   }

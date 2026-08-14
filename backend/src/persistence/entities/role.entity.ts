@@ -40,6 +40,17 @@ export class Role extends RoleEntitySchema.class {
     }
   }
   
+  // ensureSystemRole(){
+  //   if(this.domain){
+  //     throw InvalidRoleScopeError('System role required')
+  //   }
+  // }
+
+  // ensureDomainRole(){
+  //   if(!this.domain){
+  //     throw InvalidRoleScopeError('Domain role required')
+  //   }
+  // }
 }
 RoleEntitySchema.setClass(Role);
 
