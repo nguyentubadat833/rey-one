@@ -9,7 +9,7 @@ import { ClsStore } from 'nestjs-cls';
 
 export type UserAuth = {
   id: string; // user id
-  roleId: string // role id
+  // roleId: string // role id
   domainId?: string
   permissions?: AppPermission[]
 };

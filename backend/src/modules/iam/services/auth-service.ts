@@ -2,13 +2,13 @@ import { UserRepository } from '@/persistence/repositories/user-repository';
 import { Injectable } from '@nestjs/common';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import { BaseLoginDto } from '../dtos/auth-dto';
-import { IdentifierType, UserLoadedRoleWithDomain } from '@/persistence/types/user-type';
+import { IdentifierType } from '@/persistence/types/user-type';
 import { User } from '@/persistence/entities/user.entity';
 import { verify } from 'argon2';
 import { AppError, SystemNotInitializedError } from '@/utils/errors/app.error';
 import { AppClsStore, UserAuth } from '@/utils/types/system';
-import z from 'zod';
 import { ClsService } from 'nestjs-cls';
+import z from 'zod';
 
 const emailSchema = z.email();
 
@@ -56,7 +56,7 @@ export class AuthService {
   }
 
   isActorAdmin() {
-    return this.appStore.get('actor.roleId') === this.adminUser.roleId;
+    return this.appStore.get('actor.id') === this.adminUser.id;
   }
 
   async baseAuthentication(dto: BaseLoginDto) {
@@ -65,9 +65,6 @@ export class AuthService {
     const user = await this.userRepo.findByIdentity(identity);
     User.ensureExists(user);
     User.ensureActive(user);
-
-    user.role.getEntity().ensureActive();
-    user.role.getProperty('domain')?.getEntity().ensureActive();
 
     const password = await user.password.load();
     if (!password) {
@@ -81,7 +78,7 @@ export class AuthService {
     }
 
     return {
-      user: user as UserLoadedRoleWithDomain,
+      user,
       onSuccess: () => this.userRepo.recordSuccessfulAuthentication(user),
     };
   }

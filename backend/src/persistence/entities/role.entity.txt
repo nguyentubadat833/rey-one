@@ -25,11 +25,6 @@ export const RoleEntitySchema = defineEntity({
     permissions: p.enum(APP_PERMISSIONS).array().default([]),
 
     domain: () => p.manyToOne(Domain).nullable().ref(),
-    users: () =>
-      p
-        .oneToMany(User)
-        .mappedBy((user) => user.role)
-        .ref(),
   },
 });
 export class Role extends RoleEntitySchema.class {

@@ -1,12 +1,12 @@
 import { ChangeSetType, defineEntity, EventArgs, p } from '@mikro-orm/core';
-import { USER_STATUSES, UserStatus } from '@rey-one/shared';
+import { APP_PERMISSIONS, USER_STATUSES, UserStatus } from '@rey-one/shared';
 import { AppError } from '@/utils/errors/app.error';
 import { UserRepository } from '../repositories/user-repository';
 import { hash } from 'argon2';
 import { uuidv7 } from 'uuidv7';
 import { BaseEntitySchema } from './base.entity';
 import { InvalidUserStatusError, UserNotFoundError } from '@/utils/errors/user.error';
-import { Role } from './role.entity';
+import { Domain } from './domain.entity';
 import randomstring from 'randomstring';
 
 const UserSecurityShema = defineEntity({
@@ -21,7 +21,7 @@ const UserSecurityShema = defineEntity({
   }),
 });
 
-class UserSecurity extends UserSecurityShema.class {}
+class UserSecurity extends UserSecurityShema.class { }
 UserSecurityShema.setClass(UserSecurity);
 
 const UserInfoEntitySchema = defineEntity({
@@ -35,7 +35,7 @@ const UserInfoEntitySchema = defineEntity({
   }),
 });
 
-export class UserInfo extends UserInfoEntitySchema.class {}
+export class UserInfo extends UserInfoEntitySchema.class { }
 UserInfoEntitySchema.setClass(UserInfo);
 
 const UserEntitySchema = defineEntity({
@@ -52,11 +52,11 @@ const UserEntitySchema = defineEntity({
     status: p.enum(USER_STATUSES).default('active'),
     password: p.string().hidden().lazy().ref(),
     token: p.string().persist(false).nullable(),
-
     security: p.embedded(UserSecurityShema).onCreate(() => new UserSecurity()),
-
+    permissions: p.enum(APP_PERMISSIONS).array().default([]),
+    
     info: () => p.oneToOne(UserInfoEntitySchema).mappedBy((info) => info.user),
-    role: () => p.manyToOne(Role).ref(),
+    domain: () => p.manyToOne(Domain).nullable().ref()
   },
 });
 

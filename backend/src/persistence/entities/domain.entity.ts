@@ -1,13 +1,13 @@
 import { AppError } from '@/utils/errors/app.error';
 import { ChangeSetType, defineEntity, EventArgs } from '@mikro-orm/core';
 import { APP_PERMISSIONS, AppPermission, DomainStatus } from '@rey-one/shared';
-import { Role } from './role.entity';
 import { DomainRepository } from '../repositories/domain-repository';
 import { uuidv7 } from 'uuidv7';
 import { BaseEntitySchema } from './base.entity';
 import { Subscription } from './subscription.entity';
 import randomstring from 'randomstring';
 import { InvalidDomainStatusError } from '@/utils/errors/domain.error';
+import { User } from './user.entity';
 
 const DomainInfoEntitySchema = defineEntity({
   name: 'DomainInfoEntity',
@@ -32,14 +32,9 @@ const DomainEntitySchema = defineEntity({
     permissions: p.enum(APP_PERMISSIONS).array().default([]),
 
     subscription: () => p.oneToOne(Subscription).owner().eager(),
-
     info: () => p.oneToOne(DomainInfoEntitySchema).mappedBy(info => info.domain),
-    roles: () =>
-      p
-        .oneToMany(Role)
-        .mappedBy((role) => role.domain)
-        .orphanRemoval()
-        .ref()
+    owner: () => p.oneToOne(User).owner().eager(),
+    users: () => p.oneToMany(User).mappedBy(user => user.domain)
         
     // products: () =>
     //   p
@@ -109,10 +104,10 @@ async function saveHandler(args: EventArgs<Domain>) {
     const permissions = args.entity.permissions;
     entity.permissions = Array.from(new Set(permissions));
 
-    const roles = await entity.roles.loadItems();
-    roles.forEach((role) => {
-      role.permissions = role.permissions.filter((permission) => entity.permissions.includes(permission));
-    });
+    // const roles = await entity.roles.loadItems();
+    // roles.forEach((role) => {
+    //   role.permissions = role.permissions.filter((permission) => entity.permissions.includes(permission));
+    // });
   }
 }
 

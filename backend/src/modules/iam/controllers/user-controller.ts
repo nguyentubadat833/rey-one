@@ -9,11 +9,12 @@ import { UserMapper } from '../mappers/user-mapper';
 import { User } from '@/persistence/entities/user.entity';
 import { UserNotFoundError } from '@/utils/errors/user.error';
 import { type PaginatedResponse } from '@rey-one/shared';
+
 @RequireAuth()
 @ApiTags('IAM / Users')
 @Controller('users')
 export class UserController {
-  constructor(private readonly em: EntityManager) {}
+  constructor(private readonly em: EntityManager) { }
 
   @RequireAdmin()
   @ApiOperation({ summary: 'System-level user summaries' })
@@ -25,9 +26,7 @@ export class UserController {
     const [data, total] = await this.em.findAndCount(
       User,
       {
-        role: {
-          domain: null,
-        },
+        domain: null,
       },
       {
         limit,
@@ -37,7 +36,7 @@ export class UserController {
             createdAt: 'desc',
           },
         ],
-        populate: ['info', 'role'],
+        populate: ['info'],
       },
     );
 
@@ -47,7 +46,7 @@ export class UserController {
 
   @RequirePermission('user:read')
   @ApiOperation({ summary: 'Get user detail' })
-  @ApiOkResponse({type: UserDetailDto})
+  @ApiOkResponse({ type: UserDetailDto })
   @Get(':id/detail')
   async getUserDetail(@Param('id') userId: string) {
     const user = await this.em.findOneOrFail(
@@ -57,7 +56,7 @@ export class UserController {
       },
       {
         failHandler: UserNotFoundError,
-        populate: ['role.domain.info', 'info'],
+        populate: ['info'],
       },
     );
 

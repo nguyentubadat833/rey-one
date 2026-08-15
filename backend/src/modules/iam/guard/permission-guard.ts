@@ -1,6 +1,6 @@
 import { UserAuth } from '@/utils/types/system';
 import { AUTH_METADATA, TenantRequirement } from '@/utils/types/tokens';
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AppPermission, hasPermission } from '@rey-one/shared';
 import { AuthService } from '../services/auth-service';
@@ -14,7 +14,7 @@ export class PermissionGuard implements CanActivate {
     private readonly authService: AuthService,
     private readonly domainService: DomainService,
     // @Inject(authConfig.KEY) private readonly config: ConfigType<typeof authConfig>,
-  ) {}
+  ) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const requiredPermission = this.reflector.getAllAndOverride<AppPermission>(AUTH_METADATA.REQUIRE_PERMISSION, [context.getHandler(), context.getClass()]);
@@ -44,6 +44,11 @@ export class PermissionGuard implements CanActivate {
         throw new ForbiddenException();
       }
 
+      const domain = await this.domainService.getDomainById(domainId);
+      domain.ensureActive();
+
+      if(user.id === domain.owner.id) return true
+
       if (!user.domainId) {
         throw new ForbiddenException('User domain is required');
       }
@@ -51,11 +56,6 @@ export class PermissionGuard implements CanActivate {
       if (user.domainId !== domainId) {
         throw new ForbiddenException('User domain not assigned');
       }
-
-      const domain = await this.domainService.getDomainById(domainId);
-      domain.ensureActive();
-
-      this.domainService.ensureAccessDomain(domain)
     }
 
     return true;

@@ -62,12 +62,10 @@ export class AuthGuard implements CanActivate {
   private async authenticateBasic(credentials: { identity: string; password: string }): Promise<UserAuth> {
     const { user } = await this.authService.baseAuthentication(credentials);
 
-    const role = user.role.getEntity()
     return {
       id: user.id,
-      roleId: role.id,
-      domainId: role.domain?.getProperty('id'),
-      permissions: role.permissions
+      domainId: user.domain?.id,
+      permissions: user.permissions
     } satisfies UserAuth;
   }
 }

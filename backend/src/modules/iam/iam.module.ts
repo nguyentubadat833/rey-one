@@ -16,17 +16,14 @@ import { AuthGuard } from './guard/auth-guard';
 import { AdminGuard } from './guard/admin-guard';
 import { PermissionGuard } from './guard/permission-guard';
 import { DomainMiddleware } from '../../utils/middlewares/domain-middleware';
-import { Role } from '@/persistence/entities/role.entity';
-import { UserLoadedRole } from '@/persistence/types/user-type';
 import { UserAuth } from '@/utils/types/system';
 import { DomainService } from './services/domain-service';
-import { RoleService } from './services/role-service';
-
+import { DomainController } from './controllers/domain-controller';
 @Module({
   imports: [
     MikroOrmModule.forFeature({
       // entities: [User, UserSummary, Domain, DomainSummary],
-      entities: [User, Role, Domain],
+      entities: [User, Domain],
     }),
     ConfigModule.forFeature(authConfig),
     JwtModule.registerAsync({
@@ -50,7 +47,6 @@ import { RoleService } from './services/role-service';
     // },
     //
     AuthService,
-    RoleService,
     DomainService,
     // UserService,
     //
@@ -61,7 +57,7 @@ import { RoleService } from './services/role-service';
     // DomainSubscriber,
   ],
   exports: [AdminGuard, PermissionGuard],
-  controllers: [AuthController, UserController],
+  controllers: [AuthController, UserController, DomainController],
 })
 export class IAMModule implements OnModuleInit, NestModule {
   constructor(
@@ -69,7 +65,7 @@ export class IAMModule implements OnModuleInit, NestModule {
     private readonly orm: MikroORM,
     private readonly moduleRef: ModuleRef,
     @Inject(authConfig.KEY) private readonly config: ConfigType<typeof authConfig>,
-  ) {}
+  ) { }
 
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(DomainMiddleware).forRoutes();
@@ -90,31 +86,24 @@ export class IAMModule implements OnModuleInit, NestModule {
         User,
         {
           ...identity,
-        },
-        {
-          populate: ['role'],
-        },
+        }
       );
 
       if (!user) {
         user = em.create(User, {
           ...identity,
           password: admin.password,
-          info: em.create(UserInfo, {
-            name: "Administrator"
-          }),
-          role: em.create(Role, {
-            name: 'Admin',
-          }),
-        }) as UserLoadedRole
+          info: em.create(UserInfo,
+            {
+              name: "Administrator"
+            }
+          ),
+        })
 
         await em.flush()
       }
 
-      this.authService.adminUser = {
-        id: user.id,
-        roleId: user.role.id,
-      } satisfies UserAuth
+      this.authService.adminUser = { id: user.id } satisfies UserAuth
 
       console.info('===== Admin user has been initialized =====');
     });

@@ -11,7 +11,6 @@ import { CurrentUser, MarkPublic } from '@/utils/decorators/utils.decorator';
 import { UserMapper } from '../mappers/user-mapper';
 import { ClsService } from 'nestjs-cls';
 import { UserRepository } from '@/persistence/repositories/user-repository';
-import { UserLoadedRoleWithDomainAndInfo } from '@/persistence/types/user-type';
 import { UserNotFoundError } from '@/utils/errors/user.error';
 import type { ConfigType } from '@nestjs/config';
 import type { FastifyReply } from 'fastify';
@@ -51,7 +50,7 @@ export class AuthController {
         id: userId,
       },
       {
-        populate: ['role.domain.info', 'info'],
+        populate: ['info'],
         failHandler: UserNotFoundError,
       },
     );
@@ -70,9 +69,8 @@ export class AuthController {
 
     const userAuth = {
       id: user.id,
-      roleId: user.role.id,
-      domainId: user.role.getProperty('domain')?.id,
-      permissions: user.role.getProperty('permissions'),
+      domainId: user.domain?.id,
+      permissions: user.permissions
     } satisfies UserAuth;
 
     const tokenExp = this.config.jwtAccessExpiresIn;
@@ -91,7 +89,7 @@ export class AuthController {
     await this.em.populate(user, ['info']);
     return {
       accessToken: accessToken,
-      userAuth: UserMapper.userToUserAuth(user as UserLoadedRoleWithDomainAndInfo),
+      userAuth: UserMapper.userToUserAuth(user),
     } satisfies UserLoginResponseDto;
   }
 
