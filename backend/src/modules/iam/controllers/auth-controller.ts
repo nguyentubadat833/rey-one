@@ -55,7 +55,7 @@ export class AuthController {
       },
     );
 
-    return UserMapper.userToUserAuth(user);
+    return UserMapper.toUserAuth(user);
   }
 
   @MarkPublic()
@@ -89,7 +89,7 @@ export class AuthController {
     await this.em.populate(user, ['info']);
     return {
       accessToken: accessToken,
-      userAuth: UserMapper.userToUserAuth(user),
+      userAuth: UserMapper.toUserAuth(user),
     } satisfies UserLoginResponseDto;
   }
 

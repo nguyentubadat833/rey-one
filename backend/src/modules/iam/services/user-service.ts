@@ -9,6 +9,7 @@ import { UserNotFoundError } from '@/utils/errors/user.error';
 import { AuthService } from './auth-service';
 import { ClsService, ClsStore } from 'nestjs-cls';
 import { AppClsStore } from '@/utils/types/system';
+import { UserLoadedInfo } from '@/persistence/types/user-type';
 
 @Injectable()
 export class UserService {
@@ -18,8 +19,8 @@ export class UserService {
     private readonly authService: AuthService,
     private readonly appStore: ClsService<AppClsStore>,
     @Inject(authConfig.KEY) private readonly config: ConfigType<typeof authConfig>,
-  ) {}
-  
+  ) { }
+
   async createUser(dto: CreateUserDto) {
 
     const user = this.userRepo.create({
@@ -34,8 +35,39 @@ export class UserService {
     });
 
     await this.em.flush();
-    return user;
+    return user as UserLoadedInfo
   }
 
-  async updateUser(userId: string, dto: UpdateUserDto) {}
+  async updateUser(id: string, dto: UpdateUserDto) {
+    const user = await this.userRepo.findOneOrFail(
+      { id },
+      {
+        failHandler: UserNotFoundError,
+        populate: ['info']
+      }
+    )
+
+    this.userRepo.assign(user,
+      {
+        email: dto.email,
+        phone: dto.phone,
+        password: dto.password
+      }, 
+      {
+        ignoreUndefined: true
+      })
+
+    this.em.assign(user.info, 
+      {
+        name: dto.name,
+        image: dto.image
+      },
+      {
+        ignoreUndefined: true
+      }
+    )
+
+    await this.em.populate(user, ['info'])
+    return user as UserLoadedInfo
+  }
 }

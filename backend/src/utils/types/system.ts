@@ -1,4 +1,4 @@
-import { AppPermission } from '@rey-one/shared';
+import { SystemPermission } from '@rey-one/shared';
 import { ClsStore } from 'nestjs-cls';
 
 // export type UserAuth = {
@@ -9,9 +9,9 @@ import { ClsStore } from 'nestjs-cls';
 
 export type UserAuth = {
   id: string; // user id
-  // roleId: string // role id
-  domainId?: string
-  permissions?: AppPermission[]
+  scope: {
+    type: ''
+  }
 };
 
 export interface AppClsStore extends ClsStore {

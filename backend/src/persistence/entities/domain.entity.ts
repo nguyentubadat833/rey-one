@@ -1,6 +1,6 @@
 import { AppError } from '@/utils/errors/app.error';
 import { ChangeSetType, defineEntity, EventArgs } from '@mikro-orm/core';
-import { APP_PERMISSIONS, AppPermission, DomainStatus } from '@rey-one/shared';
+import { DomainStatus, DOMAIN_PERMISSIONS, DomainPermission } from '@rey-one/shared';
 import { DomainRepository } from '../repositories/domain-repository';
 import { uuidv7 } from 'uuidv7';
 import { BaseEntitySchema } from './base.entity';
@@ -29,13 +29,13 @@ const DomainEntitySchema = defineEntity({
     id: p.uuid().primary().onCreate(uuidv7),
     code: p.string().length(15).unique().onCreate(generateCode),
     active: p.boolean().persist(false),
-    permissions: p.enum(APP_PERMISSIONS).array().default([]),
+    permissions: p.enum(DOMAIN_PERMISSIONS).array().default([]),
 
     subscription: () => p.oneToOne(Subscription).owner().eager(),
     info: () => p.oneToOne(DomainInfoEntitySchema).mappedBy(info => info.domain),
     owner: () => p.oneToOne(User).owner().eager(),
     users: () => p.oneToMany(User).mappedBy(user => user.domain)
-        
+
     // products: () =>
     //   p
     //     .oneToMany(Product)
@@ -53,33 +53,36 @@ const DomainEntitySchema = defineEntity({
 
 export class Domain extends DomainEntitySchema.class {
 
-  ensurePermissionsValid(permissions: AppPermission[]) {
+  ensurePermissionsValid(permissions: DomainPermission[]) {
     const invalid = permissions.filter((p) => !this.permissions.includes(p));
     if (invalid.length > 0) {
       throw new AppError('INVALID_VALUE', `Permissions not available in domain: ${invalid.join(', ')}`);
     }
   }
 
-  ensureSubscription(){
-    if (!this.subscription) throw AppError.withMessage('PROPERTY_REQUIRED', 'Domain subscription required');
-    const subscription = this.subscription;
+  // ensureSubscription() {
+  //   if (!this.subscription) throw AppError.withMessage('PROPERTY_REQUIRED', 'Domain subscription required');
+  //   const subscription = this.subscription;
 
-    this.active = !subscription.expiresAt || subscription.expiresAt > new Date();
-  }
+  //   this.active = !subscription.expiresAt || subscription.expiresAt > new Date();
+  // }
 
   ensureActive() {
-    this.ensureSubscription()
+    // this.ensureSubscription()
 
-    if(!this.active){
+    // const subscription = this.subscription;
+    // this.active = !subscription.expiresAt || subscription.expiresAt > new Date();
+
+    if (!this.active) {
       throw InvalidDomainStatusError()
     }
   }
 
-  getStatus(): DomainStatus{
-    if(!this.subscription) return 'pending'
-    
+  getStatus(): DomainStatus {
+    if (!this.subscription) return 'pending'
+
     const subscription = this.subscription
-    if(subscription.expiresAt && subscription.expiresAt > new Date()){
+    if (subscription.expiresAt && subscription.expiresAt > new Date()) {
       return 'expiring'
     }
 
@@ -90,6 +93,14 @@ export class Domain extends DomainEntitySchema.class {
 DomainEntitySchema.setClass(Domain);
 DomainEntitySchema.addHook('beforeCreate', saveHandler);
 DomainEntitySchema.addHook('beforeUpdate', saveHandler);
+DomainEntitySchema.addHook('onInit', initHandler)
+
+async function initHandler(args: EventArgs<Domain>) {
+  const entity = args.entity
+  const sub = entity.subscription
+  
+  this.active = !sub.expiresAt || sub.expiresAt > new Date();
+}
 
 async function saveHandler(args: EventArgs<Domain>) {
   const changeSet = args.changeSet;
@@ -103,11 +114,6 @@ async function saveHandler(args: EventArgs<Domain>) {
   if (changeSetPayload?.permissions) {
     const permissions = args.entity.permissions;
     entity.permissions = Array.from(new Set(permissions));
-
-    // const roles = await entity.roles.loadItems();
-    // roles.forEach((role) => {
-    //   role.permissions = role.permissions.filter((permission) => entity.permissions.includes(permission));
-    // });
   }
 }
 

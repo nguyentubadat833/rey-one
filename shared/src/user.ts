@@ -1,6 +1,6 @@
 import z from "zod";
-import {DomainSchema, DomainSummarySchema } from "./domain";
 import { zPhoneNumber } from "./utils";
+import { DOMAIN_PERMISSIONS, DomainPermission, SYSTEM_PERMISSIONS, SystemPermission } from "./app";
 
 export const USER_STATUSES = [
   "pending", // chưa từng kích hoạt
@@ -10,20 +10,34 @@ export const USER_STATUSES = [
   // "deleted",
 ] as const;
 
+export const USER_DOMAIN_SCOPE_TYPE = 'domain' as const
+export const USER_SYSTEM_SCOPE_TYPE = 'system' as const
+
 export type UserStatus = (typeof USER_STATUSES)[number];
 
-// schemas
+export const SystemUserScopeSchema = z.object({
+  type: z.literal('system'),
+  permissions: z.array(z.enum(SYSTEM_PERMISSIONS))
+})
+
+export const DomainUserScopeSchema = z.object({
+  type: z.literal('domain'),
+  permissions: z.array(z.enum(DOMAIN_PERMISSIONS))
+})
+
+export const UserScopeSchema = z.discriminatedUnion('type', [
+  SystemUserScopeSchema,
+  DomainUserScopeSchema
+])
+export type UserScope = z.infer<typeof UserScopeSchema>
+export type UserPermissions = SystemPermission[] | DomainPermission[]
+
 const usernameSchema = z.string().optional();
 const emailSchema = z.email().optional();
 const phoneSchema = zPhoneNumber("VN").optional();
 const imageSchema = z.url().optional();
 
-export const BaseLoginSchema = z.object({
-  identity: z.string({ error: "Identity is required" }),
-  password: z.string({ error: "Password is required" }),
-});
-
-const BaseSchema = z.object({
+export const BaseUserSchema = z.object({
   status: z.enum(USER_STATUSES).default("pending"),
   name: z.string({ error: "Name is required" }),
   username: usernameSchema,
@@ -32,25 +46,28 @@ const BaseSchema = z.object({
   image: imageSchema,
 });
 
-export const CreateUserSchema = BaseSchema;
-export const UpdateUserSchema = BaseSchema.partial();
+const BaseSystemUserSchema = BaseUserSchema.extend({
+  permissions: z.array(z.enum(SYSTEM_PERMISSIONS)).default([])
+})
+const BaseDomainUserSchema = BaseUserSchema.extend({
+  permissions: z.array(z.enum(DOMAIN_PERMISSIONS)).default([])
+})
 
-//types
-export const UserSchema = BaseSchema.extend({
+export const CreateSystemUserSchema = BaseSystemUserSchema;
+export const UpdateSystemUserSchema = BaseSystemUserSchema.extend({
+  password: z.string()
+}).partial();
+
+export const CreateDomainUserSchema = BaseDomainUserSchema;
+export const UpdateDomainUserSchema = BaseDomainUserSchema.extend({
+  password: z.string()
+}).partial();
+
+export const SystemUserSchema = BaseSystemUserSchema.extend({
   id: z.uuid().readonly(),
   code: z.string().readonly()
 })
-
-export const UserAuthResponseSchema = UserSchema.omit({
-  status: true
-}).extend({
-  domain: z.object({
-    id: z.ulid(),
-    name: z.string()
-  }).optional()
-})
-
-export const UserLoginResponseSchema = z.object({
-  accessToken: z.string(),
-  userAuth: UserAuthResponseSchema
+export const DomainUserSchema = BaseDomainUserSchema.extend({
+  id: z.uuid().readonly(),
+  code: z.string().readonly()
 })

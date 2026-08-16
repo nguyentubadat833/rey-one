@@ -1,6 +1,6 @@
 import z from "zod";
-import { APP_PERMISSIONS } from "./app";
-import { USER_STATUSES, UserSchema } from "./user";
+import { BaseUserSchema, USER_STATUSES } from "./user";
+import { DOMAIN_PERMISSIONS } from "./app";
 
 export const DOMAIN_STATUSES = [
   'active', // Đang hoạt động
@@ -21,9 +21,10 @@ export type DomainStatus = typeof DOMAIN_STATUSES[number]
 
 // schemas 
 const BaseDomainSchema = z.object({
+  image: z.url().optional(),
   name: z.string({ error: "Domain name is required" }),
   status: z.enum(DOMAIN_STATUSES),
-  permissions: z.array(z.enum(APP_PERMISSIONS)).default([]),
+  permissions: z.array(z.enum(DOMAIN_PERMISSIONS)).default([]),
   plan: z.enum(SUBSCRIPTION_PLANS, { error: "Subscription plan is required" }),
   startedAt: z.iso.datetime({ error: "Started at is required" }),
   expiresAt: z.iso.datetime().optional(),
@@ -34,7 +35,8 @@ const BaseDomainSchema = z.object({
 });
 
 export const CreateDomainSchema = BaseDomainSchema.omit({
-  owner: true
+  owner: true,
+  status: true
 }).extend({
   email: z.string()
 })
@@ -42,14 +44,11 @@ export const CreateDomainSchema = BaseDomainSchema.omit({
 export const UpdateDomainSchema = BaseDomainSchema.omit({
   owner: true,
   startedAt: true,
+  status: true
 }).partial()
 
 export const DomainSchema = BaseDomainSchema.extend({
   id: z.string().readonly(),
-})
-
-export const DomainDetailSchema = DomainSchema.extend({
-  users: z.array(UserSchema)
 })
 
 export const DomainSummarySchema = DomainSchema.omit({

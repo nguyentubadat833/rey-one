@@ -19,6 +19,7 @@ import { DomainMiddleware } from '../../utils/middlewares/domain-middleware';
 import { UserAuth } from '@/utils/types/system';
 import { DomainService } from './services/domain-service';
 import { DomainController } from './controllers/domain-controller';
+import { UserService } from './services/user-service';
 @Module({
   imports: [
     MikroOrmModule.forFeature({
@@ -48,7 +49,7 @@ import { DomainController } from './controllers/domain-controller';
     //
     AuthService,
     DomainService,
-    // UserService,
+    UserService,
     //
     AdminGuard,
     PermissionGuard,

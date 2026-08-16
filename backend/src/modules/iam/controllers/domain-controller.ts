@@ -3,12 +3,13 @@ import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common
 import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RequireAdmin, RequireAuth, RequirePermission } from '@/utils/decorators/auth.decorator';
 import { DomainService } from '../services/domain-service';
-import { CreateDomainDto, DomainDto } from '../dtos/domain-dto';
+import { CreateDomainDto, DomainDto, UpdateDomainDto } from '../dtos/domain-dto';
 import { DomainMapper } from '../mappers/domain-mapper';
 import { PaginationQueryDto } from '@/utils/dtos/utils-dto';
 import { ResponseMapper } from '@/utils/mappers/response-mapper';
 import { Domain } from '@/persistence/entities/domain.entity';
 import { UserSummariesDto } from '../dtos/user-dto';
+import { DOMAIN_ID_PARAMETER } from '@/utils/types/utils';
 
 @RequireAuth()
 @ApiTags('IAM / Domains')
@@ -17,9 +18,9 @@ export class DomainController {
   constructor(
     private readonly em: EntityManager,
     private readonly domainService: DomainService,
-  ) {}
+  ) { }
 
-  @RequireAdmin()
+  @RequirePermission('module:domain:red')
   @ApiOperation({ summary: 'Domain summaries' })
   @ApiOkResponse({
     type: UserSummariesDto
@@ -51,7 +52,7 @@ export class DomainController {
   //   return await this.domainService.getAvailableDomains().then((rs) => rs.map((item) => DomainMapper.toDomainWithRolesView(item)));
   // }
 
-  @RequireAdmin()
+  @RequirePermission('module:domain:manage')
   @ApiOperation({ summary: 'Create domain' })
   @ApiOkResponse({
     type: DomainDto
@@ -62,40 +63,25 @@ export class DomainController {
     return DomainMapper.toDomain(domain);
   }
 
-//   @RequireAdmin()
-//   @ApiOperation({ summary: 'Update domain' })
-//   @Patch(`:${DOMAIN_ID_PARAMETER}`)
-//   async updateDomain(@Param(DOMAIN_ID_PARAMETER) id: string, @Body() dto: UpdateDomainDto) {
-//     const domain = await this.domainService.updateDomain(id, dto);
-//     return DomainMapper.toDomainView(domain);
-//   }
+  @RequirePermission('module:domain:manage')
+  @ApiOperation({ summary: 'Update domain' })
+  @ApiOkResponse({
+    type: DomainDto
+  })
+  @Patch(`:${DOMAIN_ID_PARAMETER}`)
+  async updateDomain(@Param(DOMAIN_ID_PARAMETER) id: string, @Body() dto: UpdateDomainDto) {
+    const domain = await this.domainService.updateDomain(id, dto);
+    return DomainMapper.toDomain(domain);
+  }
 
-//   @RequirePermission('domain:manage:read')
-//   @ApiOperation({ summary: 'Domain info with roles' })
-//   @Get(`:${DOMAIN_ID_PARAMETER}`)
-//   async getInfo(@Param(DOMAIN_ID_PARAMETER) id: string): Promise<DomainWithRolesView> {
-//     return this.domainService.getDomainWithRoles(id).then(DomainMapper.toDomainWithRolesView);
-//   }
-
-//   @RequirePermission('domain:manage:read', false)
-//   @ApiOperation({ summary: 'Domain summary' })
-//   @Get(`:${DOMAIN_ID_PARAMETER}/summary`)
-//   async getSummary(@Param(DOMAIN_ID_PARAMETER) id: string): Promise<DomainSummaryView> {
-//     return this.em
-//       .findOneOrFail(
-//         DomainSummary,
-//         {
-//           id,
-//         },
-//         { failHandler: DomainNotFoundError },
-//       )
-//       .then((data) => DomainMapper.toDomainSummary(data));
-//   }
-
-//   @RequirePermission('domain:manage:read', false)
-//   @ApiOperation({ summary: 'Domain detail' })
-//   @Get(`:${DOMAIN_ID_PARAMETER}/detail`)
-//   async getDetail(@Param(DOMAIN_ID_PARAMETER) id: string): Promise<DomainWithIAMView> {
-//     return this.domainService.getDomainDetailWithIAM(id).then(DomainMapper.toDomainWithIAMView);
-//   }
+  // @RequirePermission('module:domain:manage')
+  // @ApiOperation({ summary: 'Create domain' })
+  // @ApiOkResponse({
+  //   type: DomainDto
+  // })
+  // @Post()
+  // async createDomain(@Body() dto: CreateDomainDto) {
+  //   const domain = await this.domainService.createDomain(dto);
+  //   return DomainMapper.toDomain(domain);
+  // }
 }

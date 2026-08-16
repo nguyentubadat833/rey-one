@@ -2,7 +2,6 @@ import { UserAuth } from '@/utils/types/system';
 import { AUTH_METADATA, TenantRequirement } from '@/utils/types/tokens';
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { AppPermission, hasPermission } from '@rey-one/shared';
 import { AuthService } from '../services/auth-service';
 import { DomainService } from '../services/domain-service';
 import guardHelper from './_helper';
@@ -18,6 +17,8 @@ export class PermissionGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const requiredPermission = this.reflector.getAllAndOverride<AppPermission>(AUTH_METADATA.REQUIRE_PERMISSION, [context.getHandler(), context.getClass()]);
+    const requireTenant = this.reflector.getAllAndOverride<TenantRequirement>(AUTH_METADATA.REQUIRE_TENANT, [context.getHandler(), context.getClass()]);
+
     if (!requiredPermission) return true;
 
     const request = context.switchToHttp().getRequest();
@@ -26,15 +27,13 @@ export class PermissionGuard implements CanActivate {
 
     const user = this.authService.getActor()
 
-    if (!user.permissions) {
-      throw new ForbiddenException('User permissions is required');
-    }
+    // if (!user.permissions) {
+    //   throw new ForbiddenException('User permissions is required');
+    // }
 
-    if (!hasPermission(user.permissions, requiredPermission)) {
-      throw new ForbiddenException('User missing permission');
-    }
-
-    const requireTenant = this.reflector.getAllAndOverride<TenantRequirement>(AUTH_METADATA.REQUIRE_TENANT, [context.getHandler(), context.getClass()]);
+    // if (!hasPermission(user.permissions, requiredPermission)) {
+    //   throw new ForbiddenException('User missing permission');
+    // }
 
     if (requireTenant === TenantRequirement.REQUIRED) {
       const { extractDomainId } = guardHelper();
@@ -47,15 +46,15 @@ export class PermissionGuard implements CanActivate {
       const domain = await this.domainService.getDomainById(domainId);
       domain.ensureActive();
 
-      if(user.id === domain.owner.id) return true
+      if (user.id === domain.owner.id) return true
 
-      if (!user.domainId) {
-        throw new ForbiddenException('User domain is required');
-      }
+      // if (!user.domainId) {
+      //   throw new ForbiddenException('User domain is required');
+      // }
 
-      if (user.domainId !== domainId) {
-        throw new ForbiddenException('User domain not assigned');
-      }
+      // if (user.domainId !== domainId) {
+      //   throw new ForbiddenException('User domain not assigned');
+      // }
     }
 
     return true;

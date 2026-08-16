@@ -1,6 +1,7 @@
-import { APP_PERMISSIONS } from "./app-constant";
+import { SYSTEM_PERMISSIONS, DOMAIN_PERMISSIONS } from "./app-constant";
 
-export type AppPermission = (typeof APP_PERMISSIONS)[number];
+export type SystemPermission = (typeof SYSTEM_PERMISSIONS)[number];
+export type DomainPermission = typeof DOMAIN_PERMISSIONS[number]
 
 export type ErrorKey =
   | "UNKNOWN_ERROR"

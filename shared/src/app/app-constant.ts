@@ -1,19 +1,20 @@
-export const APP_PERMISSIONS = [
-  "order:read",
-  "order:manage",
+export const SYSTEM_PERMISSIONS = [
+  // Quyền module, thêm, sửa domains
+  "domain@create",
+  "domain@update",
+  "domain@read",
   //
-  "product:read",
-  "product:manage",
-  //
-  "domain:role:read",
-  "domain:role:manage",
-  //
-  "domain:member:read",
-  "domain:member:manage",
-  //
-  "domain:manage:read",
-  "domain:manage",
-  //
-  "user:read",
-  "user:manage"
+  "user@create",
+  "user@update",
+  "user@read"
 ] as const;
+
+export const DOMAIN_PERMISSIONS = [
+  "order@create",
+  "order@update",
+  "order@read",
+  //
+  "product@create",
+  "product@update",
+  "product@read"
+] as const

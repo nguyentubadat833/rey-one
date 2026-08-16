@@ -1,10 +1,10 @@
 import { createZodDto } from 'nestjs-zod';
-import { createPaginatedResponseSchema, CreateUserSchema, UpdateUserSchema, UserSchema} from '@rey-one/shared';
+import { createPaginatedResponseSchema, CreateSystemUserSchema, SystemUserSchema, UpdateSystemUserSchema} from '@rey-one/shared';
 
-export class CreateUserDto extends createZodDto(CreateUserSchema) { }
-export class UpdateUserDto extends createZodDto(UpdateUserSchema) { }
+export class CreateUserDto extends createZodDto(CreateSystemUserSchema) { }
+export class UpdateUserDto extends createZodDto(UpdateSystemUserSchema) { }
 
-export class UserDetailDto extends createZodDto(UserSchema){}
+export class UserDto extends createZodDto(SystemUserSchema){}
 
-export class UserSummaryDto extends createZodDto(UserSchema) {}
-export class UserSummariesDto extends createZodDto(createPaginatedResponseSchema(UserSchema)){}
+export class UserSummaryDto extends createZodDto(SystemUserSchema) {}
+export class UserSummariesDto extends createZodDto(createPaginatedResponseSchema(SystemUserSchema)){}

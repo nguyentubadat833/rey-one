@@ -9,7 +9,7 @@ import { AuthService } from './auth-service';
 import { ClsService } from 'nestjs-cls';
 import { AppClsStore } from '@/utils/types/system';
 import { AppError } from '@/utils/errors/app.error';
-import { CreateDomainDto } from '../dtos/domain-dto';
+import { CreateDomainDto, UpdateDomainDto } from '../dtos/domain-dto';
 import { Subscription } from '@/persistence/entities/subscription.entity';
 import { User } from '@/persistence/entities/user.entity';
 import { authConfig } from '@/configs/auth.config';
@@ -73,7 +73,8 @@ export class DomainService {
         plan: dto.plan
       },
       info: {
-        name: dto.name
+        name: dto.name,
+        image: dto.image
       },
       owner: {
         email: dto.email,
@@ -83,7 +84,52 @@ export class DomainService {
         }
       }
     })
-    
+
+    this.em.assign(domain.owner, {
+      domain
+    })
+
+    await this.em.flush()
+    return domain as DoaminLoadedInfoAndOwner
+  }
+
+  async updateDomain(id: string, dto: UpdateDomainDto) {
+    const domain = await this.domainRepo.findOneOrFail(
+      { id },
+      {
+        populate: ['info', 'owner.info']
+      }
+    )
+
+    this.domainRepo.assign(domain,
+      {
+        permissions: dto.permissions
+      },
+      {
+        ignoreUndefined: true
+      }
+    )
+
+    this.em.assign(domain.info,
+      {
+        name: dto.name,
+        image: dto.image
+      },
+      {
+        ignoreUndefined: true
+      }
+    )
+
+    this.em.assign(domain.subscription,
+      {
+        expiresAt: dto.expiresAt,
+        plan: dto.plan
+      },
+      {
+        ignoreUndefined: true
+      }
+    )
+
     await this.em.flush()
     return domain as DoaminLoadedInfoAndOwner
   }

@@ -1,5 +1,5 @@
 import { ChangeSetType, defineEntity, EventArgs, p } from '@mikro-orm/core';
-import { APP_PERMISSIONS, USER_STATUSES, UserStatus } from '@rey-one/shared';
+import { SystemPermission, DomainPermission, USER_STATUSES, UserStatus, UserScopeSchema, UserPermissions } from '@rey-one/shared';
 import { AppError } from '@/utils/errors/app.error';
 import { UserRepository } from '../repositories/user-repository';
 import { hash } from 'argon2';
@@ -7,6 +7,7 @@ import { uuidv7 } from 'uuidv7';
 import { BaseEntitySchema } from './base.entity';
 import { InvalidUserStatusError, UserNotFoundError } from '@/utils/errors/user.error';
 import { Domain } from './domain.entity';
+import { z } from 'zod';
 import randomstring from 'randomstring';
 
 const UserSecurityShema = defineEntity({
@@ -53,14 +54,15 @@ const UserEntitySchema = defineEntity({
     password: p.string().hidden().lazy().ref(),
     token: p.string().persist(false).nullable(),
     security: p.embedded(UserSecurityShema).onCreate(() => new UserSecurity()),
-    permissions: p.enum(APP_PERMISSIONS).array().default([]),
-    
+    permissions: p.json<UserPermissions>().default([]),
+
     info: () => p.oneToOne(UserInfoEntitySchema).mappedBy((info) => info.user),
     domain: () => p.manyToOne(Domain).nullable().ref()
   },
 });
 
 export class User extends UserEntitySchema.class {
+
   static statusAllowedTransitions: Record<UserStatus, UserStatus[]> = {
     pending: ['active'], // verify hoặc tự xóa
     active: ['inactive', 'banned'],
@@ -132,6 +134,15 @@ async function saveHandler(args: EventArgs<User>) {
   if (typeof changePassword === 'string') {
     const hashed = await hash(changePassword);
     entity.password.set(hashed);
+  }
+
+  if(entity.permissions.length){
+    const parse = UserScopeSchema.safeParse({
+      type: entity.domain ? 'domain' : 'system',
+      permissions: entity.permissions
+    })
+
+    if(!parse.success) throw AppError.withMessage('INVALID_VALUE', parse.error.issues[0].message)
   }
 }
 
