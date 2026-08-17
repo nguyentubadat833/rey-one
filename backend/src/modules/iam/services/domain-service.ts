@@ -10,13 +10,11 @@ import { ClsService } from 'nestjs-cls';
 import { AppClsStore } from '@/utils/types/system';
 import { AppError } from '@/utils/errors/app.error';
 import { CreateDomainDto, CreateDomainMemberDto, UpdateDomainDto, UpdateDomainMemberDto } from '../dtos/domain-dto';
-import { Subscription } from '@/persistence/entities/subscription.entity';
 import { User } from '@/persistence/entities/user.entity';
 import { authConfig } from '@/configs/auth.config';
-import type { ConfigType } from '@nestjs/config';
-import { CreateUserDto } from '../dtos/user-dto';
 import { UserLoadedInfoAndDomain } from '@/persistence/types/user-type';
 import { UserNotFoundError } from '@/utils/errors/user.error';
+import type { ConfigType } from '@nestjs/config';
 
 @Injectable()
 export class DomainService {
@@ -25,7 +23,6 @@ export class DomainService {
     private readonly em: EntityManager,
     private readonly appStore: ClsService<AppClsStore>,
     private readonly domainRepo: DomainRepository,
-    private readonly authService: AuthService,
     @Inject(authConfig.KEY) private readonly config: ConfigType<typeof authConfig>,
   ) {}
 

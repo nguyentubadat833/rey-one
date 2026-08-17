@@ -2,7 +2,7 @@ import { AppClsStore } from '@/utils/types/system';
 import { FilterDef, Dictionary, EntityManager } from '@mikro-orm/core';
 import { ClsServiceManager } from 'nestjs-cls';
 
-export const tenantFilterConfig: Dictionary<FilterDef> = {
+export const domainFilter: Dictionary<FilterDef> = {
   tenant: {
     name: 'tenant',
     args: false,

@@ -1,5 +1,5 @@
 import z from "zod";
-import { BaseUserSchema, USER_STATUSES } from "./user";
+import { USER_STATUSES } from "./user";
 import { DOMAIN_PERMISSIONS } from "./app";
 
 export const DOMAIN_STATUSES = [

@@ -1,6 +1,11 @@
 import z from "zod";
-import { CURRENCIES } from "../utils";
-import { PRODUCT_STATUSES, PRODUCT_TYPES } from "./product-constant";
+import { CURRENCIES } from "./utils";
+
+export const PRODUCT_STATUSES = ['draft', 'active', 'inactive', 'archived'] as const;
+export const PRODUCT_TYPES = ['digital', 'physical', 'service', 'food_beverage'] as const
+
+export type ProductStatus = typeof PRODUCT_STATUSES[number]
+export type ProductType = typeof PRODUCT_TYPES[number]
 
 export const ProductSchema = z.object({
   id: z.uuid(),
@@ -23,3 +28,12 @@ export const UpdateProductSchema = ProductSchema.omit({
   sku: true,
   type: true,
 }).partial()
+
+export type ProductView = Omit<
+  z.infer<typeof ProductSchema>,
+  "sku"
+> & {
+  sku: string;
+};
+
+export type ProductSummaryView = Omit<ProductView, 'description'>

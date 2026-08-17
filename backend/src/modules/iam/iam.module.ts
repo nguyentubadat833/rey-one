@@ -59,7 +59,7 @@ import { UserLoadedDomain } from '@/persistence/types/user-type';
     // DomainSubscriber,
   ],
   exports: [
-    AdminGuard, 
+    AdminGuard,
     // PermissionGuard
   ],
   controllers: [AuthController, UserController, DomainController],

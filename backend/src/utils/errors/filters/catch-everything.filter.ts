@@ -36,7 +36,7 @@ export class AppCatchEverythingFilter implements ExceptionFilter {
   }
 
   private handleError(error: unknown): ApiError {
-    console.error(error)
+    console.error(error);
     if (error instanceof AppError) {
       const statusCode = AppErrorHttpStatus[error.type] ?? HttpStatus.INTERNAL_SERVER_ERROR;
 
@@ -82,6 +82,7 @@ const AppErrorHttpStatus: Record<ErrorKey, HttpStatus> = {
   INSUFFICIENT_PERMISSION: HttpStatus.FORBIDDEN,
   UNSUPPORTED_CURRENCY: HttpStatus.BAD_REQUEST,
   PAYMENT_METHOD_NOT_SUPPORTED: HttpStatus.BAD_REQUEST,
+  INVALID_STATUS_TRANSITION: HttpStatus.CONFLICT,
   INVALID_STATUS: HttpStatus.CONFLICT,
   INVALID_VALUE: HttpStatus.BAD_REQUEST,
   INVALID_CREDENTIAL: HttpStatus.UNAUTHORIZED,
@@ -92,7 +93,7 @@ const AppErrorHttpStatus: Record<ErrorKey, HttpStatus> = {
   PROPERTY_REQUIRED: HttpStatus.BAD_REQUEST,
   MISSING_ACTOR_CONTEXT: HttpStatus.UNAUTHORIZED,
   MISSING_DOMAIN_CONTEXT: HttpStatus.FORBIDDEN,
-  NOT_FOUND: HttpStatus.NOT_FOUND
+  NOT_FOUND: HttpStatus.NOT_FOUND,
 };
 
 // const AppErrorHttpStatus: Record<ErrorType, HttpStatus> = {
