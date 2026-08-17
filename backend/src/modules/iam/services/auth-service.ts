@@ -47,15 +47,14 @@ export class AuthService {
   }
 
   getActor() {
-    const actor = this.appStore.get('actor')
-    if(!actor){
-      throw new AppError('MISSING_ACTOR_CONTEXT')
-    }
-
-    return actor
+    const actor = this.appStore.get('actor');
+    if (!actor) throw new AppError('MISSING_ACTOR_CONTEXT');
+    
+    return actor;
   }
 
   isActorAdmin() {
+    console.log('admin user: ', this.adminUser)
     return this.appStore.get('actor.id') === this.adminUser.id;
   }
 

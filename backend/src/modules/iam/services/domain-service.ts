@@ -9,12 +9,14 @@ import { AuthService } from './auth-service';
 import { ClsService } from 'nestjs-cls';
 import { AppClsStore } from '@/utils/types/system';
 import { AppError } from '@/utils/errors/app.error';
-import { CreateDomainDto, UpdateDomainDto } from '../dtos/domain-dto';
+import { CreateDomainDto, CreateDomainMemberDto, UpdateDomainDto, UpdateDomainMemberDto } from '../dtos/domain-dto';
 import { Subscription } from '@/persistence/entities/subscription.entity';
 import { User } from '@/persistence/entities/user.entity';
 import { authConfig } from '@/configs/auth.config';
 import type { ConfigType } from '@nestjs/config';
 import { CreateUserDto } from '../dtos/user-dto';
+import { UserLoadedInfoAndDomain } from '@/persistence/types/user-type';
+import { UserNotFoundError } from '@/utils/errors/user.error';
 
 @Injectable()
 export class DomainService {
@@ -25,20 +27,20 @@ export class DomainService {
     private readonly domainRepo: DomainRepository,
     private readonly authService: AuthService,
     @Inject(authConfig.KEY) private readonly config: ConfigType<typeof authConfig>,
-  ) { }
+  ) {}
 
   getDomainIdFromContext() {
-    const domainId = this.appStore.get('domainId')
+    const domainId = this.appStore.get('domainId');
     if (!domainId) {
-      throw new AppError('MISSING_DOMAIN_CONTEXT')
+      throw new AppError('MISSING_DOMAIN_CONTEXT');
     }
-    return domainId
+    return domainId;
   }
 
   async getDomainFromContext() {
-    const domainId = this.getDomainIdFromContext()
+    const domainId = this.getDomainIdFromContext();
 
-    return this.getDomainById(domainId)
+    return this.getDomainById(domainId);
   }
 
   async getDomainById(id: string, requireActive = false) {
@@ -70,67 +72,115 @@ export class DomainService {
     const domain = this.domainRepo.create({
       subscription: {
         startedAt: dto.startedAt,
-        plan: dto.plan
+        plan: dto.plan,
       },
       info: {
         name: dto.name,
-        image: dto.image
+        image: dto.image,
       },
       owner: {
         email: dto.email,
         password: this.config.userDefault.password,
         info: {
-          name: dto.name
-        }
-      }
-    })
+          name: dto.name,
+        },
+      },
+    });
 
     this.em.assign(domain.owner, {
-      domain
-    })
+      domain,
+    });
 
-    await this.em.flush()
-    return domain as DoaminLoadedInfoAndOwner
+    await this.em.flush();
+    return domain as DoaminLoadedInfoAndOwner;
   }
 
   async updateDomain(id: string, dto: UpdateDomainDto) {
     const domain = await this.domainRepo.findOneOrFail(
       { id },
       {
-        populate: ['info', 'owner.info']
-      }
-    )
+        populate: ['info', 'owner.info'],
+      },
+    );
 
-    this.domainRepo.assign(domain,
+    this.domainRepo.assign(
+      domain,
       {
-        permissions: dto.permissions
+        permissions: dto.permissions,
       },
       {
-        ignoreUndefined: true
-      }
-    )
+        ignoreUndefined: true,
+      },
+    );
 
-    this.em.assign(domain.info,
+    this.em.assign(
+      domain.info,
       {
         name: dto.name,
-        image: dto.image
+        image: dto.image,
       },
       {
-        ignoreUndefined: true
-      }
-    )
+        ignoreUndefined: true,
+      },
+    );
 
-    this.em.assign(domain.subscription,
+    this.em.assign(
+      domain.subscription,
       {
         expiresAt: dto.expiresAt,
-        plan: dto.plan
+        plan: dto.plan,
       },
       {
-        ignoreUndefined: true
+        ignoreUndefined: true,
+      },
+    );
+
+    await this.em.flush();
+    return domain as DoaminLoadedInfoAndOwner;
+  }
+
+  async addMember(dto: CreateDomainMemberDto, domainId = this.getDomainIdFromContext()) {
+    const domain = await this.getDomainById(domainId);
+
+    const member = this.em.create(User, {
+      username: dto.username,
+      phone: dto.phone,
+      email: dto.email,
+      password: this.config.userDefault.password,
+      permissions: dto.permissions,
+      info: {
+        name: dto.name,
+        image: dto.image,
+      },
+    });
+    domain.users.add(member);
+
+    await this.em.flush();
+    await this.em.populate(member, ['domain.info'])
+    return member as UserLoadedInfoAndDomain
+  }
+
+  async updateMember(id: string, dto: UpdateDomainMemberDto){
+    const member = await this.em.findOneOrFail(User,
+      { id },
+      {
+        failHandler: UserNotFoundError,
+        populate: ['domain.info', 'info']
       }
     )
 
+    this.em.assign(member, {
+      username: dto.username,
+      phone: dto.phone,
+      email: dto.email,
+      permissions: dto.permissions,
+      info: {
+        name: dto.name,
+        image: dto.image
+      }
+    })
+
     await this.em.flush()
-    return domain as DoaminLoadedInfoAndOwner
+    return member
   }
 }

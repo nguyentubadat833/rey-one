@@ -1,13 +1,13 @@
-export enum TenantRequirement {
-  REQUIRED = 'required',
-  SKIP = 'skip',
-}
+// export enum TenantRequirement {
+//   REQUIRED = 'required',
+//   SKIP = 'skip',
+// }
 
 export const AUTH_METADATA = {
   USER: 'user',
   IS_PUBLIC: 'is_public',
-  REQUIRE_PERMISSION: 'require_permission',
-  REQUIRE_TENANT: TenantRequirement,
+  REQUIRE_DOMAIN_PERMISSION: 'require_domain_permission',
+  REQUIRE_SYSTEM_PERMISSION: 'require_system_permission'
 } as const;
 
 export const SERVICE_TOKENS = {

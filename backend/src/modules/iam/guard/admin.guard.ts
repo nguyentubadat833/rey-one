@@ -12,6 +12,8 @@ export class AdminGuard implements CanActivate {
     // if (!user)  throw new UnauthorizedException();
     // if (this.authService.adminUser.roleId === user.roleId) return true
 
+    console.log(this.authService.getActor(), this.authService.isActorAdmin())
+
     if (!this.authService.isActorAdmin()) {
       throw new ForbiddenException();
     }

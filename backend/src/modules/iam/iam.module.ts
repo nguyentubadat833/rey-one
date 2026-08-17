@@ -12,14 +12,15 @@ import { Domain } from '@/persistence/entities/domain.entity';
 import { UserController } from './controllers/user-controller';
 // import { UserSummary } from '@/persistence/entities/query-entities/user-query';
 // import { DomainSummary } from '@/persistence/entities/query-entities/domain-query';
-import { AuthGuard } from './guard/auth-guard';
-import { AdminGuard } from './guard/admin-guard';
-import { PermissionGuard } from './guard/permission-guard';
+import { AuthGuard } from './guard/auth.guard';
+import { AdminGuard } from './guard/admin.guard';
+// import { PermissionGuard } from './guard/permission-guard';
 import { DomainMiddleware } from '../../utils/middlewares/domain-middleware';
 import { UserAuth } from '@/utils/types/system';
 import { DomainService } from './services/domain-service';
 import { DomainController } from './controllers/domain-controller';
 import { UserService } from './services/user-service';
+import { UserLoadedDomain } from '@/persistence/types/user-type';
 @Module({
   imports: [
     MikroOrmModule.forFeature({
@@ -52,12 +53,15 @@ import { UserService } from './services/user-service';
     UserService,
     //
     AdminGuard,
-    PermissionGuard,
+    // PermissionGuard,
     //
     // DomainCache,
     // DomainSubscriber,
   ],
-  exports: [AdminGuard, PermissionGuard],
+  exports: [
+    AdminGuard, 
+    // PermissionGuard
+  ],
   controllers: [AuthController, UserController, DomainController],
 })
 export class IAMModule implements OnModuleInit, NestModule {
@@ -66,10 +70,10 @@ export class IAMModule implements OnModuleInit, NestModule {
     private readonly orm: MikroORM,
     private readonly moduleRef: ModuleRef,
     @Inject(authConfig.KEY) private readonly config: ConfigType<typeof authConfig>,
-  ) { }
+  ) {}
 
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(DomainMiddleware).forRoutes();
+    consumer.apply(DomainMiddleware).forRoutes(DomainController);
   }
 
   async onModuleInit() {
@@ -83,28 +87,28 @@ export class IAMModule implements OnModuleInit, NestModule {
 
       const identity = AuthService.IdentityDetect(admin.identity);
 
-      let user = await em.findOne(
-        User,
-        {
-          ...identity,
-        }
-      );
+      let user = await em.findOne(User, {
+        ...identity,
+      });
 
       if (!user) {
         user = em.create(User, {
           ...identity,
           password: admin.password,
-          info: em.create(UserInfo,
-            {
-              name: "Administrator"
-            }
-          ),
-        })
+          info: em.create(UserInfo, {
+            name: 'Administrator',
+          }),
+        });
 
-        await em.flush()
+        await em.flush();
       }
 
-      this.authService.adminUser = { id: user.id } satisfies UserAuth
+      await em.populate(user, ['info', 'domain']);
+
+      this.authService.adminUser = {
+        id: user.id,
+        scope: User.parseUserScope(user as UserLoadedDomain),
+      } satisfies UserAuth;
 
       console.info('===== Admin user has been initialized =====');
     });

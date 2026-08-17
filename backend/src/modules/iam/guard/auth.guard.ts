@@ -6,6 +6,7 @@ import { FastifyRequest } from 'fastify';
 import { AuthService } from '../services/auth-service';
 import { ClsService } from 'nestjs-cls';
 import { Reflector } from '@nestjs/core';
+import { User } from '@/persistence/entities/user.entity';
 import guardHelper from './_helper';
 
 @Injectable()
@@ -15,7 +16,7 @@ export class AuthGuard implements CanActivate {
     private readonly jwtService: JwtService,
     private readonly appStore: ClsService<AppClsStore>,
     private reflector: Reflector,
-  ) { }
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(AUTH_METADATA.IS_PUBLIC, [context.getHandler(), context.getClass()]);
@@ -26,16 +27,16 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<FastifyRequest>();
 
     const setData = (userAuth: UserAuth) => {
-      request[AUTH_METADATA.USER] = userAuth
-      this.appStore.set('actor', userAuth)
-    }
+      request[AUTH_METADATA.USER] = userAuth;
+      this.appStore.set('actor', userAuth);
+    };
 
     const { extractBasicCredentials, extractBearerToken } = guardHelper();
     const bearerToken = extractBearerToken(request);
 
     if (bearerToken) {
       const userAuth = await this.verifyBearerToken(bearerToken);
-      setData(userAuth)
+      setData(userAuth);
 
       return true;
     }
@@ -43,7 +44,7 @@ export class AuthGuard implements CanActivate {
     const basicCredentials = extractBasicCredentials(request);
     if (basicCredentials) {
       const userAuth = await this.authenticateBasic(basicCredentials);
-      setData(userAuth)
+      setData(userAuth);
 
       return true;
     }
@@ -64,8 +65,7 @@ export class AuthGuard implements CanActivate {
 
     return {
       id: user.id,
-      domainId: user.domain?.id,
-      permissions: user.permissions
+      scope: User.parseUserScope(user)
     } satisfies UserAuth;
   }
 }

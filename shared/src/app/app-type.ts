@@ -1,7 +1,7 @@
 import { SYSTEM_PERMISSIONS, DOMAIN_PERMISSIONS } from "./app-constant";
 
 export type SystemPermission = (typeof SYSTEM_PERMISSIONS)[number];
-export type DomainPermission = typeof DOMAIN_PERMISSIONS[number]
+export type DomainPermission = (typeof DOMAIN_PERMISSIONS)[number];
 
 export type ErrorKey =
   | "UNKNOWN_ERROR"
@@ -19,4 +19,5 @@ export type ErrorKey =
   | "INVALID_REQUEST_CONTEXT"
   | "MISSING_ACTOR_CONTEXT"
   | "MISSING_DOMAIN_CONTEXT"
+  | "INVALID_USER_SCOPE"
   | "NOT_FOUND";

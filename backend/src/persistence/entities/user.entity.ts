@@ -1,13 +1,13 @@
 import { ChangeSetType, defineEntity, EventArgs, p } from '@mikro-orm/core';
-import { SystemPermission, DomainPermission, USER_STATUSES, UserStatus, UserScopeSchema, UserPermissions } from '@rey-one/shared';
+import { USER_STATUSES, UserStatus, UserScopeSchema, UserPermissions, SystemUserPermissionsSchema, DomainUserPermissionsSchema } from '@rey-one/shared';
 import { AppError } from '@/utils/errors/app.error';
 import { UserRepository } from '../repositories/user-repository';
 import { hash } from 'argon2';
 import { uuidv7 } from 'uuidv7';
 import { BaseEntitySchema } from './base.entity';
-import { InvalidUserStatusError, UserNotFoundError } from '@/utils/errors/user.error';
+import { InvalidUserScopeError, InvalidUserStatusError, UserNotFoundError } from '@/utils/errors/user.error';
 import { Domain } from './domain.entity';
-import { z } from 'zod';
+import { UserLoadedDomain } from '../types/user-type';
 import randomstring from 'randomstring';
 
 const UserSecurityShema = defineEntity({
@@ -22,7 +22,7 @@ const UserSecurityShema = defineEntity({
   }),
 });
 
-class UserSecurity extends UserSecurityShema.class { }
+class UserSecurity extends UserSecurityShema.class {}
 UserSecurityShema.setClass(UserSecurity);
 
 const UserInfoEntitySchema = defineEntity({
@@ -36,7 +36,7 @@ const UserInfoEntitySchema = defineEntity({
   }),
 });
 
-export class UserInfo extends UserInfoEntitySchema.class { }
+export class UserInfo extends UserInfoEntitySchema.class {}
 UserInfoEntitySchema.setClass(UserInfo);
 
 const UserEntitySchema = defineEntity({
@@ -57,12 +57,11 @@ const UserEntitySchema = defineEntity({
     permissions: p.json<UserPermissions>().default([]),
 
     info: () => p.oneToOne(UserInfoEntitySchema).mappedBy((info) => info.user),
-    domain: () => p.manyToOne(Domain).nullable().ref()
+    domain: () => p.manyToOne(Domain).nullable().ref(),
   },
 });
 
 export class User extends UserEntitySchema.class {
-
   static statusAllowedTransitions: Record<UserStatus, UserStatus[]> = {
     pending: ['active'], // verify hoặc tự xóa
     active: ['inactive', 'banned'],
@@ -82,6 +81,18 @@ export class User extends UserEntitySchema.class {
     }
   }
 
+  static parseUserScope(user: UserLoadedDomain) {
+    const parse = UserScopeSchema.safeParse({
+      type: user.domain ? 'domain' : 'system',
+      domainId: user.domain ? user.domain.id : undefined,
+      permissions: user.permissions,
+    });
+
+    if (!parse.success) throw AppError.withMessage('INVALID_VALUE', parse.error.issues[0].message);
+
+    return parse.data;
+  }
+  
   isActive() {
     return this.status === 'active';
   }
@@ -93,6 +104,7 @@ UserEntitySchema.addHook('beforeCreate', saveHandler);
 UserEntitySchema.addHook('beforeUpdate', saveHandler);
 
 async function saveHandler(args: EventArgs<User>) {
+
   const changeSetType: ChangeSetType | undefined = args.changeSet?.type;
 
   if (!changeSetType) return;
@@ -104,9 +116,8 @@ async function saveHandler(args: EventArgs<User>) {
   const changeUsername = changeSet?.username;
   const changePhone = changeSet?.phone;
   const changePassword = args.changeSet?.payload.password;
-
-  const changeRole = args.changeSet?.payload.role;
   const changeDomain = args.changeSet?.payload.domain;
+  const changePermissions = args.changeSet?.payload.permissions;
 
   if (changeSetType === ChangeSetType.CREATE) {
     if (!changeEmail && !changeUsername && !changePhone) {
@@ -115,20 +126,23 @@ async function saveHandler(args: EventArgs<User>) {
   }
 
   if (changeSetType === ChangeSetType.UPDATE) {
-    if (changeEmail && entity.security.emailVerified) {
+
+    if (changeEmail && changeEmail !== entity.email && entity.security.emailVerified) {
       throw AppError.withMessage('PROPERTY_IMMUTABLE', 'Verified email cannot be changed');
     }
 
-    if (changePhone && entity.phone) {
+    if (changePhone && changePhone !== entity.phone && entity.security.phoneVerified) {
       throw AppError.withMessage('PROPERTY_IMMUTABLE', 'Verified phone cannot be changed');
     }
 
-    if (changeUsername) {
+    if (changeUsername && changeUsername !== entity.username) {
       throw AppError.withMessage('PROPERTY_IMMUTABLE', 'Username cannot be changed');
     }
-  }
 
-  if (changeRole || changeDomain) {
+    
+    if (changeDomain && changeDomain !== entity.domain?.id) {
+      throw AppError.withMessage('PROPERTY_IMMUTABLE', 'Domain cannot be changed');
+    }
   }
 
   if (typeof changePassword === 'string') {
@@ -136,13 +150,17 @@ async function saveHandler(args: EventArgs<User>) {
     entity.password.set(hashed);
   }
 
-  if(entity.permissions.length){
-    const parse = UserScopeSchema.safeParse({
-      type: entity.domain ? 'domain' : 'system',
-      permissions: entity.permissions
-    })
+  if (changePermissions) {
+    if (entity.domain) {
+      const domain = await entity.domain.loadOrFail()
+      const parsePermissions = DomainUserPermissionsSchema.safeParse(entity.permissions);
+      if (!parsePermissions.success) throw AppError.withMessage('INVALID_VALUE', 'Invalid domain permissions');
 
-    if(!parse.success) throw AppError.withMessage('INVALID_VALUE', parse.error.issues[0].message)
+      domain.ensurePermissionsValid(parsePermissions.data)
+    } else {
+      const parsePermissions = SystemUserPermissionsSchema.safeParse(entity.permissions);
+      if (!parsePermissions.success) throw AppError.withMessage('INVALID_VALUE', 'Invalid system permissions');
+    }
   }
 }
 

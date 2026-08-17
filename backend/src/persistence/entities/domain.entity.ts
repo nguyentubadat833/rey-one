@@ -60,19 +60,7 @@ export class Domain extends DomainEntitySchema.class {
     }
   }
 
-  // ensureSubscription() {
-  //   if (!this.subscription) throw AppError.withMessage('PROPERTY_REQUIRED', 'Domain subscription required');
-  //   const subscription = this.subscription;
-
-  //   this.active = !subscription.expiresAt || subscription.expiresAt > new Date();
-  // }
-
   ensureActive() {
-    // this.ensureSubscription()
-
-    // const subscription = this.subscription;
-    // this.active = !subscription.expiresAt || subscription.expiresAt > new Date();
-
     if (!this.active) {
       throw InvalidDomainStatusError()
     }
@@ -99,7 +87,7 @@ async function initHandler(args: EventArgs<Domain>) {
   const entity = args.entity
   const sub = entity.subscription
   
-  this.active = !sub.expiresAt || sub.expiresAt > new Date();
+  entity.active = !sub.expiresAt || sub.expiresAt > new Date();
 }
 
 async function saveHandler(args: EventArgs<Domain>) {

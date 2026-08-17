@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, ForbiddenException, Get, Inject, NotFoundException, Post, Res, UnauthorizedException } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Inject, Post, Res } from '@nestjs/common';
 import { BaseLoginDto, UserAuthResponseDto, UserLoginResponseDto } from '../dtos/auth-dto';
 import { JwtService } from '@nestjs/jwt';
 import { authConfig } from '@/configs/auth.config';
@@ -12,6 +12,7 @@ import { UserMapper } from '../mappers/user-mapper';
 import { ClsService } from 'nestjs-cls';
 import { UserRepository } from '@/persistence/repositories/user-repository';
 import { UserNotFoundError } from '@/utils/errors/user.error';
+import { User } from '@/persistence/entities/user.entity';
 import type { ConfigType } from '@nestjs/config';
 import type { FastifyReply } from 'fastify';
 
@@ -23,8 +24,6 @@ const COOKIE_OPTIONS = {
   sameSite: 'lax',
   path: '/',
 } as const;
-
-
 
 @RequireAuth()
 @ApiTags('IAM / Auth')
@@ -50,7 +49,7 @@ export class AuthController {
         id: userId,
       },
       {
-        populate: ['info'],
+        populate: ['info', 'domain'],
         failHandler: UserNotFoundError,
       },
     );
@@ -59,9 +58,9 @@ export class AuthController {
   }
 
   @MarkPublic()
-  @ApiOperation({ summary: 'Sign in', })
+  @ApiOperation({ summary: 'Sign in' })
   @ApiOkResponse({
-    type: UserLoginResponseDto
+    type: UserLoginResponseDto,
   })
   @Post('login')
   async baseLogin(@Body() dto: BaseLoginDto, @Res({ passthrough: true }) reply: FastifyReply) {
@@ -69,8 +68,7 @@ export class AuthController {
 
     const userAuth = {
       id: user.id,
-      domainId: user.domain?.id,
-      permissions: user.permissions
+      scope: User.parseUserScope(user),
     } satisfies UserAuth;
 
     const tokenExp = this.config.jwtAccessExpiresIn;
@@ -94,7 +92,7 @@ export class AuthController {
   }
 
   @MarkPublic()
-  @ApiOperation({ summary: 'Sign out'})
+  @ApiOperation({ summary: 'Sign out' })
   @Delete('logout')
   async logout(@Res({ passthrough: true }) reply: FastifyReply) {
     reply.clearCookie('access_token', { ...COOKIE_OPTIONS });
