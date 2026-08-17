@@ -1,24 +1,20 @@
-// import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
-// import { ProductService } from '../services/product-service';
-// import { ApiDomainHeader } from '@/utils/decorators/utils.decorator';
-// import { ApiOperation, ApiTags } from '@nestjs/swagger';
-// import { RequireAuth, RequirePermission } from '@/utils/decorators/auth.decorator';
-// import { CreateProductDto, UpdateProductDto } from '../dtos/product-dto';
-// import { ProductMapper } from '../mappers/product-mapper';
-// import { EntityManager } from '@mikro-orm/core';
-// import { Product } from '@/persistence/entities/product.entity';
-// import { PaginationQueryDto } from '@/utils/dtos/utils-dto';
-// import { ResponseMapper } from '@/utils/mappers/response-mapper';
-
-// @RequireAuth()
-// @ApiDomainHeader()
-// @ApiTags('Catalog / Products')
-// @Controller('products')
-// export class ProductController {
-//   constructor(
-//     private readonly em: EntityManager,
-//     private readonly productService: ProductService,
-//   ) {}
+import { Body, Controller, Get, Inject, Param, Patch, Post, Query } from '@nestjs/common';
+import { ApiDomainHeader } from '@/utils/decorators/utils.decorator';
+import { RequireAuth } from '@/utils/decorators/auth.decorator';
+import { EntityManager } from '@mikro-orm/core';
+import { ApiTags } from '@nestjs/swagger';
+import { TOKENS } from '@/utils/types/tokens';
+import type { DomainUtils } from '@/modules/contracts';
+@RequireAuth()
+@ApiDomainHeader()
+@ApiTags('Catalog / Products')
+@Controller('products')
+export class ProductController {
+  constructor(
+    private readonly em: EntityManager,
+    @Inject(TOKENS.DOMAIN_UTILS ) private readonly domainUtils: DomainUtils
+    // private readonly productService: ProductService,
+  ) {}
 
 //   @RequirePermission('product:read', false)
 //   @ApiOperation({ summary: 'Product summaries' })
@@ -63,4 +59,4 @@
 //   async getProduct(@Param('id') id: string) {
 //     return await this.productService.getProductById(id).then(ProductMapper.toProductView);
 //   }
-// }
+}

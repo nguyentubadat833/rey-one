@@ -15,9 +15,10 @@ import { authConfig } from '@/configs/auth.config';
 import { UserLoadedInfoAndDomain } from '@/persistence/types/user-type';
 import { UserNotFoundError } from '@/utils/errors/user.error';
 import type { ConfigType } from '@nestjs/config';
+import { DomainUtils } from '@/modules/contracts';
 
 @Injectable()
-export class DomainService {
+export class DomainService implements DomainUtils {
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly em: EntityManager,

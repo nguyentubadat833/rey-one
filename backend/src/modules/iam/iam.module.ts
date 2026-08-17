@@ -21,6 +21,7 @@ import { DomainService } from './services/domain-service';
 import { DomainController } from './controllers/domain-controller';
 import { UserService } from './services/user-service';
 import { UserLoadedDomain } from '@/persistence/types/user-type';
+import { TOKENS } from '@/utils/types/tokens';
 @Module({
   imports: [
     MikroOrmModule.forFeature({
@@ -43,11 +44,14 @@ import { UserLoadedDomain } from '@/persistence/types/user-type';
       provide: APP_GUARD,
       useClass: AuthGuard,
     },
-    // {
-    //   provide: SERVICE_TOKENS.DOAMIN_SERVICE,
-    //   useExisting: DomainService,
-    // },
-    //
+    {
+      provide: TOKENS.AUTH_UTILS,
+      useExisting: AuthService,
+    },
+    {
+      provide: TOKENS.DOMAIN_UTILS,
+      useExisting: DomainService
+    },
     AuthService,
     DomainService,
     UserService,
@@ -60,6 +64,8 @@ import { UserLoadedDomain } from '@/persistence/types/user-type';
   ],
   exports: [
     AdminGuard,
+    TOKENS.DOMAIN_UTILS,
+    TOKENS.AUTH_UTILS
     // PermissionGuard
   ],
   controllers: [AuthController, UserController, DomainController],

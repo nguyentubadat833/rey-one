@@ -10,6 +10,7 @@ import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { IAMModule } from '@/modules/iam/iam.module';
 import { ClsModule } from 'nestjs-cls';
 import { CacheModule } from '@nestjs/cache-manager';
+import { CatalogModule } from '@/modules/catalog/catalog.module';
 
 @Module({
   imports: [
@@ -47,7 +48,7 @@ import { CacheModule } from '@nestjs/cache-manager';
       isGlobal: true,
     }),
     IAMModule,
-    // CatalogModule,
+    CatalogModule,
     // CommerceModule
   ],
   controllers: [AppController],

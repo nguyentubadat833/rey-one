@@ -9,11 +9,12 @@ import { AppError, SystemNotInitializedError } from '@/utils/errors/app.error';
 import { AppClsStore, UserAuth } from '@/utils/types/system';
 import { ClsService } from 'nestjs-cls';
 import z from 'zod';
+import { AuthUtils } from '@/modules/contracts';
 
 const emailSchema = z.email();
 
 @Injectable()
-export class AuthService {
+export class AuthService implements AuthUtils{
   private _adminUser?: UserAuth;
 
   constructor(
@@ -54,7 +55,6 @@ export class AuthService {
   }
 
   isActorAdmin() {
-    console.log('admin user: ', this.adminUser)
     return this.appStore.get('actor.id') === this.adminUser.id;
   }
 

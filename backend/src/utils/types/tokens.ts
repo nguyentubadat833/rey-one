@@ -10,7 +10,8 @@ export const AUTH_METADATA = {
   REQUIRE_SYSTEM_PERMISSION: 'require_system_permission'
 } as const;
 
-export const SERVICE_TOKENS = {
+export const TOKENS = {
   SEPAY_CLIENT: Symbol("SEPAY_CLIENT"),
-  DOAMIN_SERVICE: Symbol('DOMAIN_SERVICE'),
+  AUTH_UTILS: Symbol('AUTH_UTILS'),
+  DOMAIN_UTILS: Symbol('DOMAIN_UTILS'),
 } as const;
