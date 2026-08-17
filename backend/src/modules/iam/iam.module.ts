@@ -1,7 +1,7 @@
 import { authConfig } from '@/configs/auth.config';
 import { User, UserInfo } from '@/persistence/entities/user.entity';
 import { MikroORM, RequestContext } from '@mikro-orm/core';
-import { Inject, MiddlewareConsumer, Module, NestModule, OnModuleInit } from '@nestjs/common';
+import { Global, Inject, MiddlewareConsumer, Module, NestModule, OnModuleInit } from '@nestjs/common';
 import { ConfigModule, type ConfigType } from '@nestjs/config';
 import { APP_GUARD, ModuleRef } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
@@ -22,6 +22,8 @@ import { DomainController } from './controllers/domain-controller';
 import { UserService } from './services/user-service';
 import { UserLoadedDomain } from '@/persistence/types/user-type';
 import { TOKENS } from '@/utils/types/tokens';
+
+@Global()
 @Module({
   imports: [
     MikroOrmModule.forFeature({
@@ -63,7 +65,7 @@ import { TOKENS } from '@/utils/types/tokens';
     // DomainSubscriber,
   ],
   exports: [
-    AdminGuard,
+    // AdminGuard,
     TOKENS.DOMAIN_UTILS,
     TOKENS.AUTH_UTILS
     // PermissionGuard
@@ -76,7 +78,7 @@ export class IAMModule implements OnModuleInit, NestModule {
     private readonly orm: MikroORM,
     private readonly moduleRef: ModuleRef,
     @Inject(authConfig.KEY) private readonly config: ConfigType<typeof authConfig>,
-  ) {}
+  ) { }
 
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(DomainMiddleware).forRoutes(DomainController);
@@ -111,10 +113,10 @@ export class IAMModule implements OnModuleInit, NestModule {
 
       await em.populate(user, ['info', 'domain']);
 
-      this.authService.adminUser = {
+      this.authService.setAdminUser({
         id: user.id,
         scope: User.parseUserScope(user as UserLoadedDomain),
-      } satisfies UserAuth;
+      } satisfies UserAuth)
 
       console.info('===== Admin user has been initialized =====');
     });

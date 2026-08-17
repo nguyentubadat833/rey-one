@@ -14,7 +14,7 @@ export class DomainPermissionGuard implements CanActivate {
     private reflector: Reflector,
     private readonly authService: AuthService,
     private readonly domainService: DomainService,
-  ) {}
+  ) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(AUTH_METADATA.IS_PUBLIC, [context.getHandler(), context.getClass()]);
@@ -28,6 +28,11 @@ export class DomainPermissionGuard implements CanActivate {
     ]);
     if (!requireDomainPermission) return true;
 
+    const isForceDomainActive = this.reflector.getAllAndOverride<boolean>(AUTH_METADATA.IS_FORCE_DOMAIN_ACTIVE, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
     const request = context.switchToHttp().getRequest();
     if (this.authService.isActorAdmin()) return true;
 
@@ -40,7 +45,7 @@ export class DomainPermissionGuard implements CanActivate {
     }
 
     const domain = await this.domainService.getDomainById(domainId);
-    domain.ensureActive();
+    if (isForceDomainActive) domain.ensureActive();
 
     if (user.id === domain.owner.id) return true;
     if (user.scope.type !== 'domain') {

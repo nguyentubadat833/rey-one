@@ -1,20 +1,22 @@
-import { ChangeSetType, defineEntity, EventArgs, p } from '@mikro-orm/core';
+import { ChangeSetType, defineEntity, EventArgs } from '@mikro-orm/core';
 import { CURRENCIES, PRODUCT_STATUSES, PRODUCT_TYPES } from '@rey-one/shared';
 import { Domain } from './domain.entity';
 import { AppError } from '@/utils/errors/app.error';
 import { uuidv7 } from 'uuidv7';
 import { BaseEntitySchema } from './base.entity';
 import { OrderItem } from './order.entity';
-import slugify from 'slugify';
 import { domainFilter } from './configs/doamin-tenant.filter';
+import randomstring from 'randomstring';
+import slugify from 'slugify';
 
 const ProductInfoSchema = defineEntity({
   name: 'ProductInfo',
-  embeddable: true,
-  properties: {
+  properties: (p) => ({
+    product: () => p.oneToOne(Product).primary().owner(),
+
     name: p.string(),
     description: p.text().nullable(),
-  },
+  }),
 });
 
 const ProductEntitySchema = defineEntity({
@@ -22,8 +24,9 @@ const ProductEntitySchema = defineEntity({
   tableName: 'product',
   filters: domainFilter,
   extends: BaseEntitySchema,
-  properties: {
+  properties: (p) => ({
     id: p.uuid().primary().onCreate(uuidv7),
+    slug: p.string().unique().onCreate((product) => generateSlug(product.info.name)),
     sku: p
       .string()
       .length(100)
@@ -31,18 +34,18 @@ const ProductEntitySchema = defineEntity({
       .onCreate((product) => generateSku(product.info.name)),
     currency: p.enum(CURRENCIES).default('VND'),
     defaultCost: p.bigint().fieldName('default_cost').nullable(),
-    info: p.embedded(ProductInfoSchema).lazy(),
     trackInventory: p.boolean().default(false).fieldName('track_inventory'),
     status: p.enum(PRODUCT_STATUSES).default('draft'),
     type: p.enum(PRODUCT_TYPES),
     //
+    info: () => p.oneToOne(ProductInfoSchema).mappedBy(info => info.product),
     domain: () => p.manyToOne(Domain),
     orderItems: () => p.oneToMany(OrderItem).mappedBy((orderItem) => orderItem.product),
-  },
+  }),
 });
 
 export class Product extends ProductEntitySchema.class {
-  
+
   isDraft() {
     return this.status === 'draft';
   }
@@ -105,7 +108,26 @@ export function generateSku(name: string) {
     .replace(/-+$/, '')
     .toUpperCase();
 
-  const suffix = crypto.randomUUID().slice(0, 8).toUpperCase();
+  const suffix = randomstring.generate({
+    length: 7,
+    charset: '23456789QWERTYUPASDFGHKLMNBVCXZ',
+  });
 
+  return `${slug}-${suffix}`;
+}
+
+export function generateSlug(name: string) {
+  const slug = slugify(name, {
+    strict: true,
+  })
+    .slice(0, 249)
+    .trim()
+    .replace(/-+$/, '')
+    .toUpperCase();
+
+  const suffix = randomstring.generate({
+    length: 5,
+    charset: '23456789QWERTYUPASDFGHKLMNBVCXZ',
+  });
   return `${slug}-${suffix}`;
 }

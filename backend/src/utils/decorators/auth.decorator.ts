@@ -16,10 +16,11 @@ export const RequireSystemPermission = (permission: SystemPermission) =>
     SetMetadata(AUTH_METADATA.REQUIRE_SYSTEM_PERMISSION, permission)
   );
 
-export const RequireDomainPermission = (permission: DomainPermission) =>
+export const RequireDomainPermission = (permission: DomainPermission, forceDomainActive = false) =>
   applyDecorators(
     UseGuards(DomainPermissionGuard),
-    SetMetadata(AUTH_METADATA.REQUIRE_DOMAIN_PERMISSION, permission)
+    SetMetadata(AUTH_METADATA.REQUIRE_DOMAIN_PERMISSION, permission),
+    SetMetadata(AUTH_METADATA.IS_FORCE_DOMAIN_ACTIVE, forceDomainActive)
   );
 
 // export const RequireAuthAndPermission = (permission: AppPermission) =>

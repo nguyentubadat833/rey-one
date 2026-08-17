@@ -15,7 +15,7 @@ const emailSchema = z.email();
 
 @Injectable()
 export class AuthService implements AuthUtils{
-  private _adminUser?: UserAuth;
+  private adminUser?: UserAuth;
 
   constructor(
     private readonly userRepo: UserRepository,
@@ -35,16 +35,16 @@ export class AuthService implements AuthUtils{
     return { username: raw };
   }
 
-  set adminUser(user: UserAuth) {
-    this._adminUser = user;
+  setAdminUser(user: UserAuth) {
+    this.adminUser = user;
   }
 
-  get adminUser(): UserAuth {
-    if (!this._adminUser) {
+  getAdminUser(): UserAuth {
+    if (!this.adminUser) {
       throw SystemNotInitializedError('System admin user has not been initialized');
     }
 
-    return this._adminUser;
+    return this.adminUser;
   }
 
   getActor() {
@@ -55,7 +55,7 @@ export class AuthService implements AuthUtils{
   }
 
   isActorAdmin() {
-    return this.appStore.get('actor.id') === this.adminUser.id;
+    return this.appStore.get('actor.id') === this.getAdminUser().id;
   }
 
   async baseAuthentication(dto: BaseLoginDto) {

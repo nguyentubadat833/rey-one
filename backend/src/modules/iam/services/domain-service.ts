@@ -5,7 +5,6 @@ import { DomainNotFoundError } from '@/utils/errors/domain.error';
 import { EntityManager, wrap } from '@mikro-orm/core';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
-import { AuthService } from './auth-service';
 import { ClsService } from 'nestjs-cls';
 import { AppClsStore } from '@/utils/types/system';
 import { AppError } from '@/utils/errors/app.error';
@@ -33,12 +32,6 @@ export class DomainService implements DomainUtils {
       throw new AppError('MISSING_DOMAIN_CONTEXT');
     }
     return domainId;
-  }
-
-  async getDomainFromContext() {
-    const domainId = this.getDomainIdFromContext();
-
-    return this.getDomainById(domainId);
   }
 
   async getDomainById(id: string, requireActive = false) {

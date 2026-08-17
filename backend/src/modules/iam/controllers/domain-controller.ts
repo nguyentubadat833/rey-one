@@ -108,7 +108,7 @@ export class DomainController {
     return ResponseMapper.toPaginatedResponse(users, total, page, limit);
   }
 
-  @RequireDomainPermission('member@create')
+  @RequireDomainPermission('member@create', true)
   @ApiDomainHeader()
   @ApiOperation({ summary: 'Add domain member' })
   @ApiOkResponse({
@@ -120,7 +120,7 @@ export class DomainController {
     return UserMapper.toDomainUser(member);
   }
 
-  @RequireDomainPermission('member@update')
+  @RequireDomainPermission('member@update', true)
   @ApiDomainHeader()
   @ApiOperation({ summary: 'Update domain member' })
   @ApiOkResponse({

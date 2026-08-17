@@ -10,7 +10,6 @@ import { IAMModule } from '../iam/iam.module';
     MikroOrmModule.forFeature({
       entities: [Domain],
     }),
-    IAMModule
   ],
   controllers: [ProductController],
   providers: [

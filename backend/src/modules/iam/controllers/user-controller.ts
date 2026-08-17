@@ -1,4 +1,4 @@
-import { RequireAdmin, RequireAuth, RequireDomainPermission, RequireSystemPermission } from '@/utils/decorators/auth.decorator';
+import { RequireAdmin, RequireAuth, RequireSystemPermission } from '@/utils/decorators/auth.decorator';
 import { PaginationQueryDto } from '@/utils/dtos/utils-dto';
 import { ResponseMapper } from '@/utils/mappers/response-mapper';
 import { EntityManager } from '@mikro-orm/core';
