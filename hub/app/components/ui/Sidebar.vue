@@ -71,12 +71,62 @@ const adminItems: NavigationMenuItem[] = [
         ]
     },
     {
-        label: 'Contacts',
-        icon: 'ic:baseline-all-inbox'
+        label: 'Plan',
+        icon: 'ic:sharp-calendar-month',
+        children: [
+            {
+                label: 'Subscription',
+                icon: 'ic:sharp-file-download-done',
+                to: '/plan/subscription'
+            }
+        ]
     },
+    {
+        label: 'Audit',
+        icon: 'ic:outline-safety-check',
+        children: [
+            {
+                label: 'System logs',
+                icon: 'ic:outline-history',
+                to: '/audit/system-logs'
+            },
+           {
+                label: 'Email logs',
+                icon: 'ic:round-alternate-email',
+                to: '/audit/email-logs'
+            }
+        ]
+    },
+    {
+        label: 'Billing & Invoice',
+        icon: 'ic:baseline-list-alt',
+        children: [
+            {
+                label: 'Billing',
+                icon: 'ic:sharp-request-page',
+                to: '/billing'
+            }
+        ]
+    },
+    {
+        label: 'Usage & Quotas',
+        icon: 'ic:twotone-storage',
+        children: [
+            {
+                label: 'Usage',
+                icon: 'ic:baseline-data-usage',
+                to: '/usage'
+            }
+        ]
+    },
+    // {
+    //     label: 'Contacts',
+    //     icon: 'ic:baseline-all-inbox'
+    // },
     {
         label: 'Setting',
         icon: 'ic:baseline-settings-suggest',
+        to: '/setting'
     },
 ]
 
@@ -110,9 +160,19 @@ const domainItems: NavigationMenuItem[] = [
                 label: "Customer",
                 icon: "ic:baseline-groups",
                 to: '/crm/customer'
+            },
+            {
+                label: "Leads",
+                icon: "ic:baseline-personal-injury",
+                to: '/crm/leads'
+            },
+            {
+                label: "Deals",
+                icon: "ic:sharp-person-add-alt-1",
+                to: '/crm/deals'
             }
         ]
-    },  
+    },
     {
         label: "Catalog",
         icon: "ic:baseline-style",
@@ -121,6 +181,11 @@ const domainItems: NavigationMenuItem[] = [
                 label: "Products",
                 icon: "ic:baseline-layers",
                 to: '/catalog/products'
+            },
+            {
+                label: "Suppliers",
+                icon: "ic:twotone-switch-account",
+                to: '/catalog/suppliers'
             }
         ]
     },
@@ -135,25 +200,28 @@ const domainItems: NavigationMenuItem[] = [
             // },
             {
                 label: 'Orders',
-                icon: 'ic:outline-shopping-bag'
+                icon: 'ic:outline-shopping-bag',
+                to: '/commerce/orders'
             },
-            {
-                label: 'Promotions',
-                icon: 'ic:outline-discount'
-            },
+            // {
+            //     label: 'Promotions',
+            //     icon: 'ic:outline-discount'
+            // },
             {
                 label: 'Payments',
-                icon: 'ic:outline-payments'
+                icon: 'ic:outline-payments',
+                to: '/commerce/payments'
             }
         ]
     },
-    {
-        label: 'Contacts',
-        icon: 'ic:baseline-all-inbox'
-    },
+    // {
+    //     label: 'Contacts',
+    //     icon: 'ic:baseline-all-inbox'
+    // },
     {
         label: 'Setting',
         icon: 'ic:baseline-settings-suggest',
+        to: '/setting'
     },
 ]
 

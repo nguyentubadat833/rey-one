@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div class="flex flex-col">
     <div class="flex justify-between px-4 py-3.5 border-b border-accented">
       <TableGlobalSearch />
@@ -43,7 +43,7 @@ import { createPaginationQuery } from "~/composables/api/pagination-query";
 
 definePageMeta({
     title: "Product management",
-    middleware: ['domain']
+    middleware: ['domain-user']
 })
 
 const Modal = resolveComponent("UModal");
@@ -87,7 +87,7 @@ function ProductButton(product?: ProductSummaryView) {
             if (!isAdd) {
               await loadProduct(product.id);
             }
-          },
+          },Q
         }),
       body: () => h(ProductForm),
       footer: () =>
@@ -100,4 +100,73 @@ function ProductButton(product?: ProductSummaryView) {
     },
   );
 }
+</script> -->
+
+<script setup lang="ts">
+const search = ref('')
+
+const columns = [
+  { accessorKey: 'sku', header: 'Mã SKU' },
+  { accessorKey: 'name', header: 'Tên sản phẩm' },
+  { accessorKey: 'category', header: 'Danh mục' },
+  { accessorKey: 'price', header: 'Giá bán' },
+  { accessorKey: 'stock', header: 'Tồn kho' },
+  { accessorKey: 'status', header: 'Trạng thái' },
+  { accessorKey: 'actions', header: '' }
+]
+
+const categories = ['Khóa học Online', 'Phần mềm', 'Thiết bị', 'Dịch vụ']
+const products = ref(
+  Array.from({ length: 20 }, (_, i) => ({
+    sku: `SKU-${200 + i}`,
+    name: `Sản phẩm dịch vụ mẫu #${i + 1}`,
+    category: categories[i % categories.length],
+    price: `${((i + 1) * 350).toLocaleString('vi-VN')}.000 đ`,
+    stock: i % 3 === 0 ? 0 : (i + 1) * 15,
+    status: i % 3 === 0 ? 'Hết hàng' : 'Đang bán'
+  }))
+)
+
+const filtered = computed(() => {
+  if (!search.value) return products.value
+  return products.value.filter(p =>
+    Object.values(p).some(v => String(v).toLowerCase().includes(search.value.toLowerCase()))
+  )
+})
 </script>
+
+<template>
+  <div class="p-6 space-y-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Quản lý Sản phẩm</h1>
+        <p class="text-sm text-gray-500">Danh mục sản phẩm và gói dịch vụ kinh doanh.</p>
+      </div>
+      <UButton icon="i-heroicons-plus" color="primary">Thêm sản phẩm</UButton>
+    </div>
+
+    <UCard>
+      <div class="mb-4">
+        <UInput v-model="search" icon="i-heroicons-magnifying-glass" placeholder="Tìm tên sản phẩm, SKU..." class="max-w-xs" />
+      </div>
+
+      <UTable :data="filtered" :columns="columns">
+        <template #status-cell="{ row }">
+          <UBadge
+            :color="row.original.status === 'Đang bán' ? 'success' : 'error'"
+            variant="subtle"
+            size="xs"
+          >
+            {{ row.original.status }}
+          </UBadge>
+        </template>
+        <template #actions-cell>
+          <div class="flex gap-1">
+            <UButton icon="i-heroicons-pencil-square" color="neutral" variant="ghost" size="xs" />
+            <UButton icon="i-heroicons-trash" color="error" variant="ghost" size="xs" />
+          </div>
+        </template>
+      </UTable>
+    </UCard>
+  </div>
+</template>
