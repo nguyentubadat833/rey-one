@@ -49,7 +49,7 @@ export class DomainPermissionGuard implements CanActivate {
     }
 
     if (!user.scope.permissions.includes(requireDomainPermission)) {
-      throw new ForbiddenException('Required domain permission: ', requireDomainPermission);
+      throw new ForbiddenException(`Required domain permission: ${requireDomainPermission}`);
     }
     return true;
   }

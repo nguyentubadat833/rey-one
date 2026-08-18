@@ -1,7 +1,7 @@
 import {
-  CreateDomainSchema,
-  DomainSchema,
-  type ApiResponse,
+    CreateDomainSchema,
+    DomainSchema,
+    type ApiResponse,
 } from "@rey-one/shared";
 import { UpdateDomainSchema } from "@rey-one/shared";
 import type z from "zod";
@@ -9,26 +9,34 @@ import { useAPI } from "~/composables/api";
 
 type Domain = z.infer<typeof DomainSchema>;
 
-const domainFormState = reactive({
-  permissionChecks: [] as PermissionCheck[],
-  data: {
+const defaultData: Partial<Domain> = {
+    id: undefined,
+    name: undefined,
+    status: undefined,
     plan: 'monthly',
-  } as Partial<Domain>,
-  version: Date.now(),
-  loading: false,
+    owner: {
+        email: '',
+        status: "pending"
+    },
+    startedAt: undefined,
+    permissions: [],
+}
+
+const domainFormState = reactive({
+    permissionChecks: [] as PermissionCheck[],
+    data: defaultData,
+    version: Date.now(),
+    loading: false,
 });
 
 
 export default function () {
 
-    function resetForm() {
-        domainFormState.data.id = undefined;
-        domainFormState.data.name = undefined;
-        domainFormState.data.status = undefined;
-        domainFormState.data.permissions = [];
+    function resetFormData() {
+        domainFormState.data = structuredClone(defaultData)
     }
 
-    async function loadDomain(domainId = domainFormState.data.id){
+    async function loadDomain(domainId = domainFormState.data.id) {
         const result = await useAPI<ApiResponse<Domain>>(`/domains/${domainId}`)
         domainFormState.data = nullToUndefined(result.data)
     }
@@ -36,9 +44,7 @@ export default function () {
     async function save() {
         // onSuccess: () => Promise<void> = () => Promise.resolve(),
         const process = async () => {
-            const { pushToast } = useNotification();
-
-            console.log(domainFormState.data)
+            const { pushToast } = useNotification()
 
             domainFormState.data.permissions = domainFormState.permissionChecks
                 .filter((item) => item.active)
@@ -61,7 +67,11 @@ export default function () {
                     description: "Updated",
                 });
             } else {
-                const payload = zodValidate(CreateDomainSchema, domainFormState.data);
+                const data = {
+                    ...domainFormState.data,
+                    email: domainFormState.data.owner?.email
+                }
+                const payload = zodValidate(CreateDomainSchema, data);
                 const result = await useAPI<ApiResponse<Domain>>("/domains", {
                     method: "POST",
                     body: payload,
@@ -90,7 +100,7 @@ export default function () {
         domainFormState,
 
         loadDomain,
-        resetForm,
+        resetFormData,
         save,
     };
 }

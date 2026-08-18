@@ -33,7 +33,7 @@ export class DomainController {
   constructor(
     private readonly em: EntityManager,
     private readonly domainService: DomainService,
-  ) {}
+  ) { }
 
   @RequireSystemPermission('domain@read')
   @ApiOperation({ summary: 'Domain summaries' })
@@ -130,7 +130,8 @@ export class DomainController {
     return DomainMapper.toDomain(domain);
   }
 
-  @RequireDomainPermission('base@read', true)
+  // @RequireDomainPermission('base@read', true)
+  @ApiDomainHeader()
   @ApiOperation({ summary: 'My available domain' })
   @ApiOkResponse({
     type: DomainAvailableDto,
@@ -138,7 +139,7 @@ export class DomainController {
   })
   @Get('/my-available')
   async myAvailableDomains(@CurrentUser('id') myId: string) {
-    const user = await this.em.findOneOrFail(User, 
+    const user = await this.em.findOneOrFail(User,
       {
         id: myId
       },
@@ -148,7 +149,7 @@ export class DomainController {
       }
     )
 
-    if(!user.domain) return null
+    if (!user.domain) return null
     return DomainMapper.domainToDomainAvailableDto(user.domain.getEntity())
   }
 

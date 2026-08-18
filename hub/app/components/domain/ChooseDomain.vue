@@ -19,8 +19,7 @@
                 </UFormField>
                 <UFormField label="Domain Name">
                     <div class="flex gap-2">
-                        <UInput disabled :model-value="selectedDomain?.name" icon="ic:round-domain"
-                            class="w-full" />
+                        <UInput disabled :model-value="selectedDomain?.name" icon="ic:round-domain" class="w-full" />
                         <UButton v-if="selectedDomain" label="Leave" icon="ic:baseline-power-off" color="neutral"
                             variant="subtle" @click="leaveDomain" />
                     </div>
@@ -56,15 +55,14 @@ const { accessDomainState, loadDomains, chooseDomain, leaveDomain: leave } = use
 const open = ref(false)
 const selectedDomain = toRef(accessDomainState, 'domain')
 
-function openMenu() {
+async function openMenu() {
     if (!accessDomainState.list) {
-        loadDomains()
+        await loadDomains()
     }
 }
 
 async function leaveDomain() {
     await leave()
-
     open.value = false
 }
 

@@ -31,7 +31,7 @@ const columns = [
     { id: 'actions' }
 ] satisfies TableColumn<DomainSummary>[]
 
-const { domainFormState: domainState, resetForm: resetDomainFormState, loadDomain, save } = useDomainForm()
+const { domainFormState: domainState, resetFormData, loadDomain, save } = useDomainForm()
 const { createPermissionsChecks } = permission()
 const domainFormData = toRef(domainState, 'data')
 
@@ -63,7 +63,7 @@ function DomainButton(type: 'edit' | 'add', rowData?: DomainSummary) {
                 {
                     onClick: async () => {
                         if (isAdd) {
-                            resetDomainFormState()
+                            resetFormData()
                             domainState.permissionChecks = createPermissionsChecks({
                                 referencePermissions: [...DOMAIN_PERMISSIONS]
                             })

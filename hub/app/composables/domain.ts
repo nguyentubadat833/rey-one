@@ -17,31 +17,31 @@ export function useAccessDomains() {
   const { loadAuthState } = useAuth();
 
   const loadDomains = async () => {
-    accessDomainState.loading = true;
 
-    let domains: DomainAvailable[] = [];
+    const process = async () => {
+      const authState = await loadAuthState();
+      if (authState.userAuth?.scope.type === "domain") {
+        const result = await useAPI<ApiResponse<DomainAvailable | null>>("/domains/my-available");
+        if (result.data) {
+          accessDomainState.list = [{
+            id: result.data.id,
+            name: result.data.name,
+            image: result.data.image
+          }]
+        }
 
-    const authState = await loadAuthState();
-    if (authState.userAuth?.scope.type === "domain") {
-      const result = await useAPI<ApiResponse<DomainAvailable | null>>(
-        "/domains/my-available",
-      );
-      if (result.data) {
-        domains.push({
-          id: result.data.id,
-          name: result.data.name,
-          image: result.data.image
-        });
-      }
-
-    } else {
-      try {
+      } else {
         const result =
           await useAPI<ApiResponse<DomainAvailable[]>>("/domains/available");
         accessDomainState.list = result.data;
-      } finally {
-        accessDomainState.loading = false;
       }
+    }
+
+    try {
+      accessDomainState.loading = true;
+      await process()
+    } finally {
+      accessDomainState.loading = false;
     }
   };
 
@@ -64,6 +64,8 @@ export function useAccessDomains() {
   };
 
   const loadWorkingDomain = async () => {
+    // if(accessDomainId.value) return    
+
     const userAuthId = (await loadAuthState()).userAuth?.id;
     if (!userAuthId) return;
 

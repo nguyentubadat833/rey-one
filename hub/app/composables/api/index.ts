@@ -36,6 +36,8 @@ export const useGuestAPI = $fetch.create({
 
 function requestOptionsConfig(options: ResolvedFetchOptions<any>) {
   const nuxtApp = useNuxtApp();
+  // const { accessDomainState } = useAccessDomains();
+  // console.log(accessDomainState)
   nuxtApp.runWithContext(() => {
     const { accessDomainState } = useAccessDomains();
     if (accessDomainState.domain) {
