@@ -15,4 +15,5 @@ export const TOKENS = {
   SEPAY_CLIENT: Symbol("SEPAY_CLIENT"),
   AUTH_UTILS: Symbol('AUTH_UTILS'),
   DOMAIN_UTILS: Symbol('DOMAIN_UTILS'),
+  USER_UTILS: Symbol('USER_UTILS')
 } as const;

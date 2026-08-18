@@ -20,6 +20,9 @@ export const ORDER_PAYMENT_TYPES = [
   "recurring",
 ] as const;
 
+export type OrderStatus = (typeof ORDER_STATUSES)[number];
+export type OrderPaymentType = (typeof ORDER_PAYMENT_TYPES)[number];
+
 // export const INSTALLMENT_STATUSES = [
 //   "pending",
 //   "paid",
@@ -74,17 +77,17 @@ export const AddOrderItemSchema = OrderItemSchema.omit({
   subtotal: z.number().transform(BigInt),
 });
 
-export const OrderSchema = z.object({
-  id: z.uuid(),
+export const BaseOrderSchema = z.object({
+  // id: z.uuid(),
   paymentType: z.enum(ORDER_PAYMENT_TYPES).default("one_time"),
   status: z.enum(ORDER_STATUSES),
   currency: z.enum(CURRENCIES).default("VND"),
   totalAmount: z.number(),
   paidAmount: z.number(),
   metadata: z.any().nullable().optional(),
-  expiresAt: z.date().nullable(),
-  completedAt: z.date().nullable(),
-  cancelledAt: z.date().nullable(),
+  expiresAt: z.iso.datetime().nullable(),
+  completedAt: z.iso.datetime().nullable(),
+  cancelledAt: z.iso.datetime().nullable(),
   items: z.array(OrderItemSchema),
   customer: z.object({
     id: z.uuid(),
@@ -100,7 +103,7 @@ export const CreateOrderQuerySchema = z.object({
   paymentType: z.enum(ORDER_PAYMENT_TYPES),
 });
 
-export const CreateOrderSchema = OrderSchema.pick({
+export const CreateOrderSchema = BaseOrderSchema.pick({
   currency: true,
   metadata: true,
 }).extend({
@@ -116,7 +119,7 @@ export const CustomerCreateOrderSchema = CreateOrderSchema.omit({
   customer: true,
 });
 
-export const UpdateOrderSchema = OrderSchema.pick({
+export const UpdateOrderSchema = BaseOrderSchema.pick({
   metadata: true,
 })
   .extend({
@@ -125,8 +128,10 @@ export const UpdateOrderSchema = OrderSchema.pick({
   })
   .partial();
 
-export type OrderStatus = (typeof ORDER_STATUSES)[number];
-export type OrderPaymentType = (typeof ORDER_PAYMENT_TYPES)[number];
+export const OrderSchema = BaseOrderSchema.extend({
+  id: z.uuid()
+})
 
-export type OrderView = z.infer<typeof OrderSchema>;
-export type OrderSummaryView = Omit<OrderView, "items">;
+export const OrderSummarySchema = OrderSchema.omit({
+  items: true
+})

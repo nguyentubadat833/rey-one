@@ -11,6 +11,7 @@ import { IAMModule } from '@/modules/iam/iam.module';
 import { ClsModule } from 'nestjs-cls';
 import { CacheModule } from '@nestjs/cache-manager';
 import { CatalogModule } from '@/modules/catalog/catalog.module';
+import { CommerceModule } from '@/modules/commerce/commerce.module';
 
 @Module({
   imports: [
@@ -49,7 +50,7 @@ import { CatalogModule } from '@/modules/catalog/catalog.module';
     }),
     IAMModule,
     CatalogModule,
-    // CommerceModule
+    CommerceModule
   ],
   controllers: [AppController],
   providers: [],

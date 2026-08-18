@@ -9,6 +9,7 @@ import { InvalidUserScopeError, InvalidUserStatusError, UserNotFoundError } from
 import { Domain } from './domain.entity';
 import { UserLoadedDomain } from '../types/user-type';
 import randomstring from 'randomstring';
+import { Order } from './order.entity';
 
 const UserSecurityShema = defineEntity({
   name: 'UserAuditEntity',
@@ -58,6 +59,7 @@ const UserEntitySchema = defineEntity({
 
     info: () => p.oneToOne(UserInfoEntitySchema).mappedBy((info) => info.user),
     domain: () => p.manyToOne(Domain).nullable().ref(),
+    orders: () => p.oneToMany(Order).mappedBy(order => order.customer).ref()
   },
 });
 
@@ -96,6 +98,10 @@ export class User extends UserEntitySchema.class {
   isActive() {
     return this.status === 'active';
   }
+
+  isCustomer(){
+    return !!this.domain && !this.permissions.length
+  }
 }
 
 UserEntitySchema.setClass(User);
@@ -120,7 +126,7 @@ async function saveHandler(args: EventArgs<User>) {
   const changePermissions = args.changeSet?.payload.permissions;
 
   if (changeSetType === ChangeSetType.CREATE) {
-    if (!changeEmail && !changeUsername && !changePhone) {
+    if (!entity.isCustomer() && !changeEmail && !changeUsername && !changePhone) {
       throw AppError.withMessage('PROPERTY_REQUIRED', 'At least one of email, username, or phone is required');
     }
   }

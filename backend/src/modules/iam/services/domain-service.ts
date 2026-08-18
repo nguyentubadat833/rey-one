@@ -13,8 +13,8 @@ import { User } from '@/persistence/entities/user.entity';
 import { authConfig } from '@/configs/auth.config';
 import { UserLoadedInfoAndDomain } from '@/persistence/types/user-type';
 import { UserNotFoundError } from '@/utils/errors/user.error';
-import type { ConfigType } from '@nestjs/config';
 import { DomainUtils } from '@/modules/contracts';
+import type { ConfigType } from '@nestjs/config';
 
 @Injectable()
 export class DomainService implements DomainUtils {
@@ -147,18 +147,19 @@ export class DomainService implements DomainUtils {
     domain.users.add(member);
 
     await this.em.flush();
-    await this.em.populate(member, ['domain.info'])
-    return member as UserLoadedInfoAndDomain
+    await this.em.populate(member, ['domain.info']);
+    return member as UserLoadedInfoAndDomain;
   }
 
-  async updateMember(id: string, dto: UpdateDomainMemberDto){
-    const member = await this.em.findOneOrFail(User,
+  async updateMember(id: string, dto: UpdateDomainMemberDto) {
+    const member = await this.em.findOneOrFail(
+      User,
       { id },
       {
         failHandler: UserNotFoundError,
-        populate: ['domain.info', 'info']
-      }
-    )
+        populate: ['domain.info', 'info'],
+      },
+    );
 
     this.em.assign(member, {
       username: dto.username,
@@ -167,11 +168,25 @@ export class DomainService implements DomainUtils {
       permissions: dto.permissions,
       info: {
         name: dto.name,
-        image: dto.image
-      }
-    })
+        image: dto.image,
+      },
+    });
 
-    await this.em.flush()
-    return member
+    await this.em.flush();
+    return member;
+  }
+
+  async getDomainUserById(id: string): Promise<User> {
+    return this.em.findOneOrFail(User, {
+      id,
+      domain: this.getDomainIdFromContext()
+    })
+  }
+
+  async createCustomer(input: CreateDomainMemberDto): Promise<User> {
+    if(input.permissions.length > 0){
+      throw new AppError('BUSINESS_RULE_VIOLATION', 'Customer permissions must be empty')
+    }
+    return this.addMember(input)
   }
 }

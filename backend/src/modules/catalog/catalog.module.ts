@@ -1,10 +1,11 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-
 import { DomainMiddleware } from '@/utils/middlewares/domain-middleware';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Domain } from '@/persistence/entities/domain.entity';
 import { ProductController } from './controllers/product-controller';
-import { IAMModule } from '../iam/iam.module';
+import { ProductService } from './services/product-service';
+import { TOKENS } from '@/utils/types/tokens';
+
 @Module({
   imports: [
     MikroOrmModule.forFeature({
@@ -13,7 +14,7 @@ import { IAMModule } from '../iam/iam.module';
   ],
   controllers: [ProductController],
   providers: [
-    // ProductService
+    ProductService
   ],
 })
 export class CatalogModule implements NestModule {

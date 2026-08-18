@@ -7,8 +7,8 @@ import { Product } from './product.entity';
 import { Payment } from './payment.entity';
 import { CURRENCIES, ORDER_PAYMENT_TYPES, ORDER_STATUS_TRANSITIONS, ORDER_STATUSES, OrderPaymentType, OrderStatus } from '@rey-one/shared';
 import { User } from './user.entity';
-import randomstring from 'randomstring'
 import { domainFilter } from './configs/doamin-tenant.filter';
+import randomstring from 'randomstring';
 
 const OrderEntitySchema = defineEntity({
   name: 'OrderEntity',
@@ -44,10 +44,10 @@ const OrderEntitySchema = defineEntity({
     completedAt: p.datetime().nullable().fieldName('completed_at'),
     cancelledAt: p.datetime().nullable().fieldName('cancelled_at'),
 
-    createdBy: () => p.manyToOne(User).mapToPk().fieldName('created_by'),
-    // customer: () => p.manyToOne(Customer),
     domain: () => p.manyToOne(Domain),
-    
+    customer: () => p.manyToOne(User).eager(),
+    createdBy: () => p.manyToOne(User).fieldName('created_by'),
+
     items: () =>
       p
         .oneToMany(OrderItem)
@@ -130,13 +130,13 @@ function saveHandler(args: EventArgs<Order>) {
   }
 }
 
-function generateOrderCode(){
+function generateOrderCode() {
   const code = randomstring.generate({
     length: 12,
-    charset: '23456789QWERTYUPASDFGHJKLMNBVCXZ'
-  })
-  
-  return `ORD${code}`
+    charset: '23456789QWERTYUPASDFGHJKLMNBVCXZ',
+  });
+
+  return `ORD${code}`;
 }
 
 // ============ ORDER ITEM ============

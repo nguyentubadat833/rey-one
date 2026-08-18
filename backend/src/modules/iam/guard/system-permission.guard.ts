@@ -1,15 +1,15 @@
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, ForbiddenException, Inject } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { AuthService } from '../services/auth-service';
 import { SystemPermission } from '@rey-one/shared';
-import { AUTH_METADATA } from '@/utils/types/tokens';
+import { AUTH_METADATA, TOKENS } from '@/utils/types/tokens';
 import { InvalidUserScopeError } from '@/utils/errors/user.error';
+import type { AuthUtils } from '@/modules/contracts';
 
 @Injectable()
 export class SystemPermissionGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
-    private readonly authService: AuthService
+    @Inject(TOKENS.AUTH_UTILS) private readonly authService: AuthUtils,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {

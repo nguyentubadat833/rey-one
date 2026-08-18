@@ -8,6 +8,7 @@ import { Subscription } from './subscription.entity';
 import randomstring from 'randomstring';
 import { InvalidDomainStatusError } from '@/utils/errors/domain.error';
 import { User } from './user.entity';
+import { Order } from './order.entity';
 
 const DomainInfoEntitySchema = defineEntity({
   name: 'DomainInfoEntity',
@@ -34,7 +35,7 @@ const DomainEntitySchema = defineEntity({
     subscription: () => p.oneToOne(Subscription).owner().eager(),
     info: () => p.oneToOne(DomainInfoEntitySchema).mappedBy(info => info.domain),
     owner: () => p.oneToOne(User).owner().eager(),
-    users: () => p.oneToMany(User).mappedBy(user => user.domain)
+    users: () => p.oneToMany(User).mappedBy(user => user.domain),
 
     // products: () =>
     //   p
@@ -42,12 +43,12 @@ const DomainEntitySchema = defineEntity({
     //     .mappedBy((product) => product.domain)
     //     .orphanRemoval()
     //     .ref(),
-    // orders: () =>
-    //   p
-    //     .oneToMany(Order)
-    //     .mappedBy((order) => order.domain)
-    //     .orphanRemoval()
-    //     .ref(),
+    orders: () =>
+      p
+        .oneToMany(Order)
+        .mappedBy((order) => order.domain)
+        .orphanRemoval()
+        .ref(),
   }),
 });
 

@@ -54,6 +54,10 @@ import { TOKENS } from '@/utils/types/tokens';
       provide: TOKENS.DOMAIN_UTILS,
       useExisting: DomainService
     },
+    {
+      provide: TOKENS.USER_UTILS,
+      useExisting: UserService,
+    },
     AuthService,
     DomainService,
     UserService,
@@ -65,10 +69,9 @@ import { TOKENS } from '@/utils/types/tokens';
     // DomainSubscriber,
   ],
   exports: [
-    // AdminGuard,
+    TOKENS.USER_UTILS,
     TOKENS.DOMAIN_UTILS,
     TOKENS.AUTH_UTILS
-    // PermissionGuard
   ],
   controllers: [AuthController, UserController, DomainController],
 })
