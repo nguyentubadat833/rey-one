@@ -46,7 +46,7 @@ const { authState } = useAuth()
 const { accessDomainState } = useAccessDomains()
 
 const domainAccess = computed(() => accessDomainState.domain)
-const userType = computed(() => authState.userAuth?.type)
+const userType = computed(() => authState.userAuth?.scope.type)
 
 const adminItems: NavigationMenuItem[] = [
     {
@@ -160,7 +160,7 @@ const domainItems: NavigationMenuItem[] = [
 const items = ref<NavigationMenuItem[]>([])
 
 function setItems(domain: typeof domainAccess.value) {
-    if (userType.value === 'admin_user') {
+    if (userType.value === 'system') {
         items.value = domain ? domainItems : adminItems
     } else {
         if (domain) {

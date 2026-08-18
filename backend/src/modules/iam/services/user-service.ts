@@ -26,6 +26,7 @@ export class UserService {
         name: dto.name,
         image: dto.image,
       }),
+      permissions: dto.permissions
     });
 
     await this.em.flush();
@@ -47,6 +48,7 @@ export class UserService {
         email: dto.email,
         phone: dto.phone,
         password: dto.password,
+        permissions: dto.permissions
       },
       {
         ignoreUndefined: true,
@@ -63,8 +65,8 @@ export class UserService {
         ignoreUndefined: true,
       },
     );
-
-    await this.em.populate(user, ['info']);
+    
+    await this.em.flush()
     return user as UserLoadedInfo;
   }
 }

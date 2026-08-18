@@ -49,7 +49,7 @@ export default function useAuth() {
 
   async function loadAuthState() {
     if (!authState.authenticated) {
-      const { data: res } = await useAsyncAPI<ApiResponse<UserView>>("/me", {
+      const { data: res } = await useAsyncAPI<ApiResponse<UserAuth>>("auth", {
         retry: 3,
         retryDelay: 4000,
       });

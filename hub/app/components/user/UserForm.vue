@@ -5,31 +5,37 @@
         <UFormField label="Identity" description="Provide at least one: Username, Email, or Phone. " required>
             <div class="space-y-3 pl-4">
                 <UsernameField v-model:username="formData.username" />
-                <EmailField v-model:email="formData.email"/>
+                <EmailField v-model:email="formData.email" />
                 <PhoneField v-model:phone="formData.phone" />
-                <PasswordField v-model:password="formData.password"/>
+                <PasswordField v-model:password="formData.password" />
             </div>
         </UFormField>
-        <UserStatusField v-model:status="formData.status" required/>
-        <UFormField label="Domain Members">
+        <UserStatusField v-model:status="formData.status" required />
+        <UFormField label="Permissions">
+            <UTable :data="userFormState.permissionChecks" sticky class="max-h-[50vh]">
+                <template #active-cell="{ row }">
+                    <UCheckbox v-model="row.original.active" />
+                </template>
+            </UTable>
+        </UFormField>
+        <!-- <UFormField label="Domain Members">
             <template #hint>
                 <ChooseDomainWithRoles v-model:members="members" />
             </template>
-            <div class="space-y-5">
-                <UTable :data="members">
-                    <template #domain-cell="{ row }">
+<div class="space-y-5">
+    <UTable :data="members">
+        <template #domain-cell="{ row }">
                         {{ row.original.domain.name }}
                     </template>
-                    <template #role-cell="{ row }">
+        <template #role-cell="{ row }">
                         {{ row.original.role?.name }}
                     </template>
-                </UTable>
-            </div>
-        </UFormField>
+    </UTable>
+</div>
+</UFormField> -->
     </form>
 </template>
 <script setup lang="ts">
-import ChooseDomainWithRoles from "../domain/ChooseDomainWithRoles.vue";
 import CopyableField from '../ui/input/fields/CopyableField.vue';
 import useUserForm from './composables/useUserForm.ts';
 import NameField from "../ui/input/fields/NameField.vue";
@@ -42,8 +48,4 @@ import UserStatusField from "../ui/input/fields/UserStatusField.vue";
 const { userFormState } = useUserForm()
 const formData = toRef(userFormState, 'data')
 
-const members = computed({
-    get: () => userFormState.data.members,
-    set: (val) => { userFormState.data.members = val }
-})
 </script>

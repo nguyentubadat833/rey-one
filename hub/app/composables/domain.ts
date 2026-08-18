@@ -85,6 +85,7 @@ export function useAccessDomains() {
 }
 
 export function useDomainUtils() {
+  
   function createPermissionsChecks(input: {
     currentPermissions?: AppPermission[];
     referencePermissions?: AppPermission[];

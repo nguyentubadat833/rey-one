@@ -14,6 +14,7 @@ import { ApiDomainHeader } from '@/utils/decorators/utils.decorator';
 import { UserMapper } from '../mappers/user-mapper';
 import { PaginatedResponse } from '@rey-one/shared';
 import { User } from '@/persistence/entities/user.entity';
+import { UserLoadedInfoAndDomain } from '@/persistence/types/user-type';
 
 @RequireAuth()
 @ApiTags('IAM / Domains')
@@ -130,5 +131,18 @@ export class DomainController {
   async updateMember(@Param('memberId') memberId: string, @Body() dto: UpdateDomainMemberDto) {
     const member = await this.domainService.updateMember(memberId, dto);
     return UserMapper.toDomainUser(member);
+  }
+
+  @RequireDomainPermission('member@read')
+  @ApiDomainHeader()
+  @ApiOperation({ summary: 'Get domain member' })
+  @ApiOkResponse({
+    type: DomainUserDto,
+  })
+  @Get('/members/:memberId')
+  async getMember(@Param('memberId') memberId: string) {
+    const member = await this.domainService.getDomainUserById(memberId);
+    this.em.populate(member, ['domain', 'info'])
+    return UserMapper.toDomainUser(member as UserLoadedInfoAndDomain);
   }
 }

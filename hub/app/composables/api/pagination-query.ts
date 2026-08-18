@@ -1,6 +1,8 @@
-import type { ApiResponse, PaginatedResponse, PaginationQuery } from "@rey-one/shared";
+import type { ApiResponse, PaginatedResponse, PaginationQuerySchema } from "@rey-one/shared";
 import { useAsyncAPI } from ".";
+import type z from "zod";
 
+type PaginationQuery = z.infer<typeof PaginationQuerySchema>
 type Response<T> = ApiResponse<PaginatedResponse<T>>
 
 export function createPaginationQuery<T>(path: string, limit = 30) {

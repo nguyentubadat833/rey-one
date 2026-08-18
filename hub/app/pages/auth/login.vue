@@ -27,7 +27,7 @@ const submit = async () => {
 <template>
   <div class="min-h-screen grid lg:grid-cols-2 bg-gray-50 dark:bg-gray-950">
     <!-- Left branding panel -->
-    <div class="hidden lg:flex flex-col justify-between p-12 bg-gradient-to-br from-primary-600 to-primary-800 text-white relative overflow-hidden">
+    <div class="hidden lg:flex flex-col justify-between p-12 bg-linear-to-br from-primary-600 to-primary-800 text-white relative overflow-hidden">
       <div class="absolute inset-0 opacity-10 pointer-events-none"
            style="background-image: radial-gradient(circle at 20% 20%, white 1px, transparent 1px); background-size: 28px 28px;" />
 

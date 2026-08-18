@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { useAccessDomains } from '~/composables/domain';
-import type { SidebarProps } from '@nuxt/ui'
 import Brand from '~/components/ui/Brand.vue';
 import useUI from '~/composables/ui/ui';
 import Sidebar from '~/components/ui/Sidebar.vue';
 import UserProfileCard from '~/components/user/UserProfileCard.vue';
+import type { SidebarProps } from '@nuxt/ui'
 
 defineProps<Pick<SidebarProps, 'variant' | 'collapsible' | 'side'>>()
 
