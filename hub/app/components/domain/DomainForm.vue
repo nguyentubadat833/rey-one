@@ -2,7 +2,7 @@
     <form class="space-y-5">
         <CopyableField :model-value="domainFormState.data.id"/>
         <NameField v-model:name="domainFormState.data.name"/>
-        <ActiveField v-model:active="domainFormState.data.active"/>
+        <DomainStatusField v-model:status="domainFormState.data.status"/>
         <UFormField label="Permissions">
             <UTable :data="domainFormState.permissionChecks" sticky class="max-h-[50vh]">
                 <template #active-cell="{ row }">
@@ -13,8 +13,8 @@
     </form>
 </template>
 <script setup lang="ts">
-import ActiveField from '../ui/input/fields/ActiveField.vue';
 import CopyableField from '../ui/input/fields/CopyableField.vue';
+import DomainStatusField from '../ui/input/fields/DomainStatusField.vue';
 import NameField from '../ui/input/fields/NameField.vue';
 import useDomainForm from './composables/useDomainForm'
 

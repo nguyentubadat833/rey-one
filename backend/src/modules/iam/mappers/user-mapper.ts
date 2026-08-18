@@ -25,6 +25,7 @@ export class UserMapper {
       return {
         type: 'domain',
         domainId: user.domain.id,
+        domainName: user.domain.$.info.name,
         permissions: user.permissions as DomainPermission[],
       };
     } else {

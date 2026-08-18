@@ -127,6 +127,7 @@ export class DomainService implements DomainUtils {
     );
 
     await this.em.flush();
+    await this.cacheManager.set(`domain::${id}`, wrap(domain).toObject())
     return domain as DoaminLoadedInfoAndOwner;
   }
 

@@ -18,21 +18,6 @@
                 </template>
             </UTable>
         </UFormField>
-        <!-- <UFormField label="Domain Members">
-            <template #hint>
-                <ChooseDomainWithRoles v-model:members="members" />
-            </template>
-<div class="space-y-5">
-    <UTable :data="members">
-        <template #domain-cell="{ row }">
-                        {{ row.original.domain.name }}
-                    </template>
-        <template #role-cell="{ row }">
-                        {{ row.original.role?.name }}
-                    </template>
-    </UTable>
-</div>
-</UFormField> -->
     </form>
 </template>
 <script setup lang="ts">

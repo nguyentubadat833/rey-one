@@ -1,5 +1,5 @@
-import { DomainDto, DomainSummaryDto } from '../dtos/domain-dto';
-import { DoaminLoadedInfoAndOwner, DomainLoadedOwner } from '@/persistence/types/domain-type';
+import { DomainAvailableDto, DomainDto, DomainSummaryDto } from '../dtos/domain-dto';
+import { DoaminLoadedInfoAndOwner, DomainLoadedInfo, DomainLoadedOwner } from '@/persistence/types/domain-type';
 import { AppError } from '@/utils/errors/app.error';
 
 export class DomainMapper {
@@ -9,6 +9,14 @@ export class DomainMapper {
     if (!domain.owner.email) throw new AppError('PROPERTY_REQUIRED', "Domain owner missing email")
 
     return domain.owner
+  }
+
+  static domainToDomainAvailableDto(domain: DomainLoadedInfo){
+    return {
+      id: domain.id,
+      name: domain.info.name,
+      image: domain.info.image ?? undefined
+    } satisfies DomainAvailableDto
   }
 
   static domainToDomainSummary(domain: DoaminLoadedInfoAndOwner) {

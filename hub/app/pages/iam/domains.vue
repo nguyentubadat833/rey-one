@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { APP_PERMISSIONS, type DomainSummaryView } from '@rey-one/shared';
 import { createPaginationQuery } from '~/composables/api/pagination-query';
 import DomainForm from '~/components/domain/DomainForm.vue';
 import CreateButton from '~/components/ui/button/CreateButton.vue';
@@ -8,11 +7,15 @@ import SaveButton from '~/components/ui/button/SaveButton.vue';
 import RefreshButton from '~/components/ui/button/RefreshButton.vue';
 import useDomainForm from '~/components/domain/composables/useDomainForm';
 import Pagination from '~/components/ui/Pagination.vue';
+import { DOMAIN_PERMISSIONS, type DomainSummarySchema } from '@rey-one/shared';
 import type { TableColumn, TableRow } from '@nuxt/ui';
+import type z from 'zod';
+
+type DomainSummary = z.infer<typeof DomainSummarySchema>
 
 definePageMeta({
     title: "Domains Management",
-    middleware: ['admin']
+    middleware: ['system-user']
 });
 
 const Modal = resolveComponent('UModal')
@@ -20,19 +23,19 @@ const Modal = resolveComponent('UModal')
 const columns = [
     { id: "no" },
     { accessorKey: "name", header: "Name" },
-    { accessorKey: 'active', header: "Status" },
-    { accessorKey: 'memberCount', header: "Members" },
-    { accessorKey: 'roleCount', header: "Roles" },
-    { accessorKey: 'productCount', header: "Products" },
-    { accessorKey: "registeredAt", header: "Registered At" },
+    { accessorKey: 'status', header: "Status" },
+    { accessorKey: 'plan', header: "Plan" },
+    { accessorKey: 'startedAt', header: "Started at" },
+    { accessorKey: 'expiresAt', header: "Expires at" },
+    { accessorKey: "owner", header: "Owner" },
     { id: 'actions' }
-] satisfies TableColumn<DomainSummaryView>[]
+] satisfies TableColumn<DomainSummary>[]
 
-const { domainFormState: domainState, resetForm: resetDomainFormState, save } = useDomainForm()
-const { createPermissionsChecks } = useDomainUtils()
+const { domainFormState: domainState, resetForm: resetDomainFormState, loadDomain, save } = useDomainForm()
+const { createPermissionsChecks } = permission()
 const domainFormData = toRef(domainState, 'data')
 
-const paginationQuery = createPaginationQuery<DomainSummaryView>('/domains', 5)
+const paginationQuery = createPaginationQuery<DomainSummary>('/domains', 5)
 const { searchInput, TableGlobalSearch } = createTableGlobalFilter()
 
 const { fetch, data } = paginationQuery
@@ -40,7 +43,7 @@ const { pending, refresh } = await fetch()
 
 const rowSelection = ref<Record<string, boolean>>({})
 
-function onSelect(e: Event, row: TableRow<DomainSummaryView>) {
+function onSelect(e: Event, row: TableRow<DomainSummary>) {
     rowSelection.value = {
         [`${row.index}`]: true
     }
@@ -48,7 +51,7 @@ function onSelect(e: Event, row: TableRow<DomainSummaryView>) {
     Object.assign(domainFormData.value, row.original)
 }
 
-function DomainButton(type: 'edit' | 'add', rowData?: DomainSummaryView) {
+function DomainButton(type: 'edit' | 'add', rowData?: DomainSummary) {
     const isAdd = type === 'add'
 
     return h(Modal,
@@ -58,16 +61,16 @@ function DomainButton(type: 'edit' | 'add', rowData?: DomainSummaryView) {
         {
             default: () => h(isAdd ? CreateButton : EditButton,
                 {
-                    onClick: () => {
+                    onClick: async () => {
                         if (isAdd) {
                             resetDomainFormState()
                             domainState.permissionChecks = createPermissionsChecks({
-                                referencePermissions: [...APP_PERMISSIONS]
+                                referencePermissions: [...DOMAIN_PERMISSIONS]
                             })
                         } else {
-                            Object.assign(domainFormData.value, rowData)
+                            await loadDomain(rowData!.id)
                             domainState.permissionChecks = createPermissionsChecks({
-                                referencePermissions: [...APP_PERMISSIONS],
+                                referencePermissions: [...DOMAIN_PERMISSIONS],
                                 currentPermissions: domainFormData.value.permissions
                             })
                         }
@@ -89,7 +92,7 @@ function DomainButton(type: 'edit' | 'add', rowData?: DomainSummaryView) {
 }
 
 const AddDomainButton = () => DomainButton('add')
-const UpdateDomainButton = (row: DomainSummaryView) => DomainButton('edit', row)
+const UpdateDomainButton = (row: DomainSummary) => DomainButton('edit', row)
 
 </script>
 
@@ -102,15 +105,18 @@ const UpdateDomainButton = (row: DomainSummaryView) => DomainButton('edit', row)
                 <AddDomainButton />
             </div>
         </div>
-        <UTable v-model:row-selection="rowSelection" :data="data" :columns="columns"
-            v-model:global-filter="searchInput" :loading="pending" loading-color="primary" loading-animation="carousel"
-            sticky class="h-[70vh]" @select="onSelect">
+        <UTable v-model:row-selection="rowSelection" :data="data" :columns="columns" v-model:global-filter="searchInput"
+            :loading="pending" loading-color="primary" loading-animation="carousel" sticky class="h-[70vh]"
+            @select="onSelect">
             <template #no-cell="{ row }">{{ row.index + 1 }}</template>
-            <template #active-cell="{ row }">
-                <UBadge :color="row.original.active ? 'success' : 'neutral'" label="Active" />
+            <template #startedAt-cell="{ row }">
+                <NuxtTime :datetime="row.original.startedAt" dateStyle="medium" locale="vi-VN" />
             </template>
-            <template #registeredAt-cell="{ row }">
-                <NuxtTime :datetime="row.original.registeredAt" dateStyle="medium" locale="vi-VN" />
+            <template #expiresAt-cell="{ row }">
+                <NuxtTime v-if="row.original.expiresAt" :datetime="row.original.expiresAt" dateStyle="medium" locale="vi-VN" />
+            </template>
+            <template #owner-cell="{row}">
+                {{ row.original.owner.email }}
             </template>
             <template #actions-cell="{ row }">
                 <component :is="UpdateDomainButton(row.original)" />

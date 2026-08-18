@@ -49,7 +49,7 @@ export class AuthController {
         id: userId,
       },
       {
-        populate: ['info', 'domain'],
+        populate: ['info', 'domain.info'],
         failHandler: UserNotFoundError,
       },
     );

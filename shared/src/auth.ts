@@ -4,6 +4,7 @@ import { BaseUserSchema, UserScopeSchema } from "./user";
 export const UserAuthResponseSchema = BaseUserSchema.omit({
     status: true
 }).extend({
+    id: z.uuid(),
     scope: UserScopeSchema
 })
 

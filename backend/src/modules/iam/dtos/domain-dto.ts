@@ -1,6 +1,7 @@
 import {
   CreateDomainSchema,
   CreateDomainUserSchema,
+  DomainAvailableSchema,
   DomainSchema,
   DomainSummarySchema,
   DomainUserSchema,
@@ -19,3 +20,4 @@ export class CreateDomainMemberDto extends createZodDto(CreateDomainUserSchema) 
 export class UpdateDomainMemberDto extends createZodDto(UpdateDomainUserSchema) {}
 
 export class DomainUserDto extends createZodDto(DomainUserSchema) {}
+export class DomainAvailableDto extends createZodDto(DomainAvailableSchema) {}

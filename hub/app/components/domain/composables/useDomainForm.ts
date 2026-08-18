@@ -1,17 +1,17 @@
 import {
   CreateDomainSchema,
+  DomainSchema,
   type ApiResponse,
-  type DomainView
 } from "@rey-one/shared";
 import { UpdateDomainSchema } from "@rey-one/shared";
+import type z from "zod";
 import { useAPI } from "~/composables/api";
-import type { PermissionCheck } from "~/types/domain-types";
 
-type DomainForm = DomainView;
+type Domain = z.infer<typeof DomainSchema>;
 
 const domainFormState = reactive({
   permissionChecks: [] as PermissionCheck[],
-  data: {} as Partial<DomainForm>,
+  data: {} as Partial<Domain>,
   version: Date.now(),
   loading: false,
 });
@@ -22,8 +22,13 @@ export default function () {
     function resetForm() {
         domainFormState.data.id = undefined;
         domainFormState.data.name = undefined;
-        domainFormState.data.active = true;
+        domainFormState.data.status = undefined;
         domainFormState.data.permissions = [];
+    }
+
+    async function loadDomain(domainId = domainFormState.data.id){
+        const result = await useAPI<ApiResponse<Domain>>(`/domains/${domainId}`)
+        domainFormState.data = nullToUndefined(result.data)
     }
 
     async function save() {
@@ -33,11 +38,11 @@ export default function () {
 
             domainFormState.data.permissions = domainFormState.permissionChecks
                 .filter((item) => item.active)
-                .map((item) => item.name);
+                .map((item) => item.name) as any
 
             if (domainFormState.data.id) {
                 const payload = zodValidate(UpdateDomainSchema, domainFormState.data);
-                const result = await useAPI<ApiResponse<DomainView>>(
+                const result = await useAPI<ApiResponse<Domain>>(
                     `/domains/${domainFormState.data.id}`,
                     {
                         method: "PATCH",
@@ -53,7 +58,7 @@ export default function () {
                 });
             } else {
                 const payload = zodValidate(CreateDomainSchema, domainFormState.data);
-                const result = await useAPI<ApiResponse<DomainView>>("/domains", {
+                const result = await useAPI<ApiResponse<Domain>>("/domains", {
                     method: "POST",
                     body: payload,
                 });
@@ -80,6 +85,7 @@ export default function () {
     return {
         domainFormState,
 
+        loadDomain,
         resetForm,
         save,
     };

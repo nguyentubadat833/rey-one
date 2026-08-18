@@ -1,47 +1,57 @@
 import {
+  DomainAvailableSchema,
   type ApiResponse,
-  type DomainWithRolesView,
-  type UserDomainAccess,
-  type AppPermission,
 } from "@rey-one/shared";
 import { useAPI } from "./api";
 import useAuth from "./auth";
-import type { PermissionCheck } from "~/types/domain-types";
+import type z from "zod";
 
-const domainAvailableState = reactive({
-  data: [] as DomainWithRolesView[],
-  loading: false,
-});
+type DomainAvailable = z.infer<typeof DomainAvailableSchema>;
 
 const accessDomainState = reactive({
-  domain: undefined as UserDomainAccess | undefined,
-  list: undefined as UserDomainAccess[] | undefined,
+  domain: undefined as DomainAvailable | undefined,
+  list: undefined as DomainAvailable[] | undefined,
   loading: false,
 });
 
-const accessDomainId = computed(() => accessDomainState.domain?.domainId);
+const accessDomainId = computed(() => accessDomainState.domain?.id);
 
 export function useAccessDomains() {
   const { loadAuthState } = useAuth();
 
   const loadDomains = async () => {
     accessDomainState.loading = true;
-    try {
-      const result =
-        await useAPI<ApiResponse<UserDomainAccess[]>>("/me/domains");
 
-      accessDomainState.list = result.data;
-    } finally {
-      accessDomainState.loading = false;
+    let domains: DomainAvailable[] = [];
+
+    const authState = await loadAuthState();
+    if (authState.userAuth?.scope.type === "domain") {
+
+      const scope = authState.userAuth.scope;
+      domains.push({
+        id: scope.domainId,
+        name: scope.domainName,
+        image: undefined,
+      });
+
+    } else {
+
+      try {
+        const result = await useAPI<ApiResponse<DomainAvailable[]>>("/domains/available");
+        accessDomainState.list = result.data;
+      } finally {
+        accessDomainState.loading = false;
+      }
+
     }
   };
 
-  const chooseDomain = async (domain: UserDomainAccess) => {
+  const chooseDomain = async (domain: DomainAvailable) => {
     const userAuthId = (await loadAuthState()).userAuth?.id;
     if (!userAuthId) return;
 
     accessDomainState.domain = domain;
-    localStorage.setItem(`${userAuthId}:working_domain`, domain.domainId);
+    localStorage.setItem(`${userAuthId}:working_domain`, domain.id);
   };
 
   const leaveDomain = async () => {
@@ -66,7 +76,7 @@ export function useAccessDomains() {
     if (!accessDomainState.list) await loadDomains();
 
     const domain = accessDomainState.list?.find(
-      (item) => item.domainId === storageDomainId,
+      (item) => item.id === storageDomainId,
     );
     if (!domain) return;
 
@@ -84,35 +94,13 @@ export function useAccessDomains() {
   };
 }
 
-export function useDomainUtils() {
-  
-  function createPermissionsChecks(input: {
-    currentPermissions?: AppPermission[];
-    referencePermissions?: AppPermission[];
-  }): PermissionCheck[] {
-    if (input.referencePermissions) {
-      return input.referencePermissions.map((pms) => ({
-        name: pms,
-        active: input.currentPermissions?.includes(pms) ?? false,
-      }));
-    } else {
-      return (
-        input.currentPermissions?.map((pms) => ({
-          name: pms,
-          active: true,
-        })) ?? []
-      );
-    }
-  }
+// export function useDomainUtils() {
+//   async function loadAvailable() {
+//     return useAPI<ApiResponse<Domain[]>>("/domains/available");
+//   }
 
-  async function loadAvailable() {
-    return useAPI<ApiResponse<DomainWithRolesView[]>>("/domains/available");
-  }
-
-  return {
-    domainAvailableState,
-    
-    loadAvailable,
-    createPermissionsChecks,
-  };
-}
+//   return {
+//     domainAvailableState,
+//     loadAvailable,
+//   };
+// }

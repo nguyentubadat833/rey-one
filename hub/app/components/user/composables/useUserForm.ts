@@ -50,8 +50,6 @@ export default function () {
       );
     }
 
-    // console.log(result)
-
     userFormState.data = nullToUndefined(result.data);
   }
 

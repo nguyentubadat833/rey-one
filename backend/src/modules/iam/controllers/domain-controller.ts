@@ -3,7 +3,7 @@ import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RequireAuth, RequireDomainPermission, RequireSystemPermission } from '@/utils/decorators/auth.decorator';
 import { DomainService } from '../services/domain-service';
-import { CreateDomainDto, CreateDomainMemberDto, DomainDto, DomainUserDto, UpdateDomainDto, UpdateDomainMemberDto } from '../dtos/domain-dto';
+import { CreateDomainDto, CreateDomainMemberDto, DomainAvailableDto, DomainDto, DomainUserDto, UpdateDomainDto, UpdateDomainMemberDto } from '../dtos/domain-dto';
 import { DomainMapper } from '../mappers/domain-mapper';
 import { PaginationQueryDto } from '@/utils/dtos/utils-dto';
 import { ResponseMapper } from '@/utils/mappers/response-mapper';
@@ -51,12 +51,24 @@ export class DomainController {
     return ResponseMapper.toPaginatedResponse(domains, total, page, limit);
   }
 
-  // @RequirePermission('domain:manage:read')
-  // @ApiOperation({ summary: 'Available Domains' })
-  // @Get('/available')
-  // async availableDomains() {
-  //   return await this.domainService.getAvailableDomains().then((rs) => rs.map((item) => DomainMapper.toDomainWithRolesView(item)));
-  // }
+  @RequireSystemPermission('domain@read')
+  @ApiOperation({ summary: 'Available Domains' })
+  @ApiOkResponse({
+    type: DomainAvailableDto
+  })
+  @Get('/available')
+  async availableDomains() {
+    const domains = await this.em.find(
+      Domain,
+      {
+        $or: [{ subscription: { expiresAt: null } }, { subscription: { expiresAt: { $gt: new Date() } } }],
+      },
+      {
+        populate: ['info'],
+      },
+    );
+    return domains.map(item => DomainMapper.domainToDomainAvailableDto(item))
+  }
 
   @RequireSystemPermission('domain@create')
   @ApiOperation({ summary: 'Create domain' })
@@ -77,6 +89,18 @@ export class DomainController {
   @Patch(`:${DOMAIN_ID_PARAMETER}`)
   async updateDomain(@Param(DOMAIN_ID_PARAMETER) id: string, @Body() dto: UpdateDomainDto) {
     const domain = await this.domainService.updateDomain(id, dto);
+    return DomainMapper.toDomain(domain);
+  }
+
+  @RequireSystemPermission('domain@read')
+  @ApiOperation({ summary: 'Get domain' })
+  @ApiOkResponse({
+    type: DomainDto,
+  })
+  @Get(`:${DOMAIN_ID_PARAMETER}`)
+  async getDomain(@Param(DOMAIN_ID_PARAMETER) id: string) {
+    const domain = await this.domainService.getDomainById(id);
+    await this.em.populate(domain, ['info', 'owner.info']);
     return DomainMapper.toDomain(domain);
   }
 
@@ -142,7 +166,7 @@ export class DomainController {
   @Get('/members/:memberId')
   async getMember(@Param('memberId') memberId: string) {
     const member = await this.domainService.getDomainUserById(memberId);
-    this.em.populate(member, ['domain', 'info'])
+    this.em.populate(member, ['domain', 'info']);
     return UserMapper.toDomainUser(member as UserLoadedInfoAndDomain);
   }
 }

@@ -51,6 +51,12 @@ export const DomainSchema = BaseDomainSchema.extend({
   id: z.string().readonly(),
 })
 
+export const DomainAvailableSchema = DomainSchema.pick({
+  id: true,
+  name: true,
+  image: true
+})
+
 export const DomainSummarySchema = DomainSchema.omit({
   permissions: true
 })

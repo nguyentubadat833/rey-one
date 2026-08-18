@@ -8,7 +8,7 @@
                     <Brand :show-name="openSidebar" />
                     <UIcon v-if="isMobile" name="ic:twotone-close" size="25" @click="openSidebar = false" />
                 </div>
-                <ChooseDomainAccess />
+                <ChooseDomain />
             </div>
         </template>
 
@@ -29,7 +29,7 @@ import useAuth from '~/composables/auth.ts';
 import { useAccessDomains } from '~/composables/domain.ts';
 import Brand from './Brand.vue';
 import UserProfileCard from '../user/UserProfileCard.vue';
-import ChooseDomainAccess from '../domain/ChooseDomainAccess.vue';
+import ChooseDomain from '../domain/ChooseDomain.vue';
 
 withDefaults(
     defineProps<{

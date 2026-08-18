@@ -31,6 +31,7 @@ export const SystemUserScopeSchema = z.object({
 export const DomainUserScopeSchema = z.object({
   type: z.literal("domain"),
   domainId: z.string(),
+  domainName: z.string(),
   permissions: DomainUserPermissionsSchema
 });
 
