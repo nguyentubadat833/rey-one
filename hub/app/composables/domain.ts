@@ -1,7 +1,4 @@
-import {
-  DomainAvailableSchema,
-  type ApiResponse,
-} from "@rey-one/shared";
+import { DomainAvailableSchema, type ApiResponse } from "@rey-one/shared";
 import { useAPI } from "./api";
 import useAuth from "./auth";
 import type z from "zod";
@@ -26,23 +23,25 @@ export function useAccessDomains() {
 
     const authState = await loadAuthState();
     if (authState.userAuth?.scope.type === "domain") {
-
-      const scope = authState.userAuth.scope;
-      domains.push({
-        id: scope.domainId,
-        name: scope.domainName,
-        image: undefined,
-      });
+      const result = await useAPI<ApiResponse<DomainAvailable | null>>(
+        "/domains/my-available",
+      );
+      if (result.data) {
+        domains.push({
+          id: result.data.id,
+          name: result.data.name,
+          image: result.data.image
+        });
+      }
 
     } else {
-
       try {
-        const result = await useAPI<ApiResponse<DomainAvailable[]>>("/domains/available");
+        const result =
+          await useAPI<ApiResponse<DomainAvailable[]>>("/domains/available");
         accessDomainState.list = result.data;
       } finally {
         accessDomainState.loading = false;
       }
-
     }
   };
 
@@ -93,14 +92,3 @@ export function useAccessDomains() {
     loadWorkingDomain,
   };
 }
-
-// export function useDomainUtils() {
-//   async function loadAvailable() {
-//     return useAPI<ApiResponse<Domain[]>>("/domains/available");
-//   }
-
-//   return {
-//     domainAvailableState,
-//     loadAvailable,
-//   };
-// }

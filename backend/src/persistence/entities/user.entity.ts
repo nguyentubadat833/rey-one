@@ -1,5 +1,5 @@
 import { ChangeSetType, defineEntity, EventArgs, p } from '@mikro-orm/core';
-import { USER_STATUSES, UserStatus, UserScopeSchema, UserPermissions, SystemUserPermissionsSchema, DomainUserPermissionsSchema } from '@rey-one/shared';
+import { USER_STATUSES, UserStatus, UserScopeSchema, UserPermissions, SystemUserPermissionsSchema, DomainUserPermissionsSchema, DomainPermission } from '@rey-one/shared';
 import { AppError } from '@/utils/errors/app.error';
 import { UserRepository } from '../repositories/user-repository';
 import { hash } from 'argon2';

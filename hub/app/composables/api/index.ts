@@ -39,7 +39,7 @@ function requestOptionsConfig(options: ResolvedFetchOptions<any>) {
   nuxtApp.runWithContext(() => {
     const { accessDomainState } = useAccessDomains();
     if (accessDomainState.domain) {
-      options.headers.set("x-domain-id", accessDomainState.domain.domainId);
+      options.headers.set("x-domain-id", accessDomainState.domain.id);
     }
   });
 }

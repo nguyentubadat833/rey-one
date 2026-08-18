@@ -9,6 +9,11 @@ export const SYSTEM_PERMISSIONS = [
 ] as const;
 
 export const DOMAIN_PERMISSIONS = [
+  "manage@setting",
+  "manage@read",
+  //
+  "base@read",
+  //
   "member@create",
   "member@update",
   "member@read",

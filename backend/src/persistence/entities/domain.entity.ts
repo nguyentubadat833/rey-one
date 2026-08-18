@@ -88,7 +88,7 @@ async function initHandler(args: EventArgs<Domain>) {
   const entity = args.entity
   const sub = entity.subscription
   
-  entity.active = !sub.expiresAt || sub.expiresAt > new Date();
+  entity.active = !!sub && (!sub.expiresAt || sub.expiresAt > new Date());
 }
 
 async function saveHandler(args: EventArgs<Domain>) {
@@ -102,6 +102,7 @@ async function saveHandler(args: EventArgs<Domain>) {
 
   if (changeSetPayload?.permissions) {
     const permissions = args.entity.permissions;
+    permissions.push('base@read')
     entity.permissions = Array.from(new Set(permissions));
   }
 }

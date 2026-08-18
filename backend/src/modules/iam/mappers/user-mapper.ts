@@ -3,7 +3,7 @@ import { nullToUndefined } from '@/utils/mappers/falsy-value-mapper';
 import { UserAuthResponseDto } from '../dtos/auth-dto';
 import { SystemUserDto, UserSummaryDto } from '../dtos/user-dto';
 import { User } from '@/persistence/entities/user.entity';
-import { DomainPermission, DomainUserPermissionsSchema, SystemPermission, SystemUserPermissionsSchema, SystemUserScopeSchema, UserScope } from '@rey-one/shared';
+import { DomainPermission, DomainUserPermissionsSchema, SystemPermission, SystemUserPermissionsSchema, UserScope } from '@rey-one/shared';
 import { AppError } from '@/utils/errors/app.error';
 import { DomainUserDto } from '../dtos/domain-dto';
 
@@ -25,7 +25,6 @@ export class UserMapper {
       return {
         type: 'domain',
         domainId: user.domain.id,
-        domainName: user.domain.$.info.name,
         permissions: user.permissions as DomainPermission[],
       };
     } else {
@@ -63,6 +62,7 @@ export class UserMapper {
     const parsePermissions = DomainUserPermissionsSchema.safeParse(user.permissions);
     if (!parsePermissions.success) throw new AppError('INVALID_VALUE', `Invalid domain user`);
 
+    
     const domain = user.domain!.getEntity()
     return {
       ...UserMapper.toUserInfo(user),

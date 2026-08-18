@@ -61,6 +61,7 @@ export class DomainService implements DomainUtils {
 
   async createDomain(dto: CreateDomainDto) {
     const domain = this.domainRepo.create({
+      permissions: dto.permissions,
       subscription: {
         startedAt: dto.startedAt,
         plan: dto.plan,
@@ -127,7 +128,7 @@ export class DomainService implements DomainUtils {
     );
 
     await this.em.flush();
-    await this.cacheManager.set(`domain::${id}`, wrap(domain).toObject())
+    await this.cacheManager.set(`domain::${id}`, wrap(domain).toObject());
     return domain as DoaminLoadedInfoAndOwner;
   }
 
@@ -145,6 +146,10 @@ export class DomainService implements DomainUtils {
         image: dto.image,
       },
     });
+
+    if (!member.permissions.length) {
+      member.permissions = ['base@read'];
+    }
     domain.users.add(member);
 
     await this.em.flush();
@@ -162,17 +167,33 @@ export class DomainService implements DomainUtils {
       },
     );
 
-    this.em.assign(member, {
-      username: dto.username,
-      phone: dto.phone,
-      email: dto.email,
-      permissions: dto.permissions,
-      info: {
+    this.em.assign(
+      member,
+      {
+        username: dto.username,
+        phone: dto.phone,
+        email: dto.email,
+        permissions: dto.permissions,
+      },
+      {
+        ignoreUndefined: true,
+      },
+    );
+
+    this.em.assign(
+      member.info,
+      {
         name: dto.name,
         image: dto.image,
       },
-    });
+      {
+        ignoreUndefined: true,
+      },
+    );
 
+    if (!member.permissions.length) {
+      member.permissions = ['base@read'];
+    }
     await this.em.flush();
     return member;
   }
@@ -180,14 +201,14 @@ export class DomainService implements DomainUtils {
   async getDomainUserById(id: string): Promise<User> {
     return this.em.findOneOrFail(User, {
       id,
-      domain: this.getDomainIdFromContext()
-    })
+      domain: this.getDomainIdFromContext(),
+    });
   }
 
   async createCustomer(input: CreateDomainMemberDto): Promise<User> {
-    if(input.permissions.length > 0){
-      throw new AppError('BUSINESS_RULE_VIOLATION', 'Customer permissions must be empty')
+    if (input.permissions.length > 0) {
+      throw new AppError('BUSINESS_RULE_VIOLATION', 'Customer permissions must be empty');
     }
-    return this.addMember(input)
+    return this.addMember(input);
   }
 }

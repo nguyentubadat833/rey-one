@@ -3,18 +3,28 @@ import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RequireAuth, RequireDomainPermission, RequireSystemPermission } from '@/utils/decorators/auth.decorator';
 import { DomainService } from '../services/domain-service';
-import { CreateDomainDto, CreateDomainMemberDto, DomainAvailableDto, DomainDto, DomainUserDto, UpdateDomainDto, UpdateDomainMemberDto } from '../dtos/domain-dto';
+import {
+  CreateDomainDto,
+  CreateDomainMemberDto,
+  DomainAvailableDto,
+  DomainDto,
+  DomainUserDto,
+  UpdateDomainDto,
+  UpdateDomainMemberDto,
+} from '../dtos/domain-dto';
 import { DomainMapper } from '../mappers/domain-mapper';
 import { PaginationQueryDto } from '@/utils/dtos/utils-dto';
 import { ResponseMapper } from '@/utils/mappers/response-mapper';
 import { Domain } from '@/persistence/entities/domain.entity';
 import { UserSummariesDto, UserSummaryDto } from '../dtos/user-dto';
 import { DOMAIN_ID_PARAMETER } from '@/utils/types/utils';
-import { ApiDomainHeader } from '@/utils/decorators/utils.decorator';
+import { ApiDomainHeader, CurrentUser } from '@/utils/decorators/utils.decorator';
 import { UserMapper } from '../mappers/user-mapper';
 import { PaginatedResponse } from '@rey-one/shared';
 import { User } from '@/persistence/entities/user.entity';
 import { UserLoadedInfoAndDomain } from '@/persistence/types/user-type';
+import { UserNotFoundError } from '@/utils/errors/user.error';
+import { DomainLoadedInfo } from '@/persistence/types/domain-type';
 
 @RequireAuth()
 @ApiTags('IAM / Domains')
@@ -54,7 +64,8 @@ export class DomainController {
   @RequireSystemPermission('domain@read')
   @ApiOperation({ summary: 'Available Domains' })
   @ApiOkResponse({
-    type: DomainAvailableDto
+    type: DomainAvailableDto,
+    isArray: true
   })
   @Get('/available')
   async availableDomains() {
@@ -67,7 +78,7 @@ export class DomainController {
         populate: ['info'],
       },
     );
-    return domains.map(item => DomainMapper.domainToDomainAvailableDto(item))
+    return domains.map((item) => DomainMapper.domainToDomainAvailableDto(item));
   }
 
   @RequireSystemPermission('domain@create')
@@ -102,6 +113,43 @@ export class DomainController {
     const domain = await this.domainService.getDomainById(id);
     await this.em.populate(domain, ['info', 'owner.info']);
     return DomainMapper.toDomain(domain);
+  }
+
+  @RequireDomainPermission('manage@read')
+  @ApiDomainHeader()
+  @ApiOperation({ summary: 'Get domain information' })
+  @ApiOkResponse({
+    type: DomainDto,
+  })
+  @Get('/info')
+  async getMyDomain() {
+    const domainId = this.domainService.getDomainIdFromContext();
+    const domain = await this.domainService.getDomainById(domainId);
+
+    await this.em.populate(domain, ['info', 'owner.info']);
+    return DomainMapper.toDomain(domain);
+  }
+
+  @RequireDomainPermission('base@read', true)
+  @ApiOperation({ summary: 'My available domain' })
+  @ApiOkResponse({
+    type: DomainAvailableDto,
+    nullable: true
+  })
+  @Get('/my-available')
+  async myAvailableDomains(@CurrentUser('id') myId: string) {
+    const user = await this.em.findOneOrFail(User, 
+      {
+        id: myId
+      },
+      {
+        failHandler: UserNotFoundError,
+        populate: ['domain.info']
+      }
+    )
+
+    if(!user.domain) return null
+    return DomainMapper.domainToDomainAvailableDto(user.domain.getEntity())
   }
 
   @RequireDomainPermission('member@read')
@@ -166,7 +214,7 @@ export class DomainController {
   @Get('/members/:memberId')
   async getMember(@Param('memberId') memberId: string) {
     const member = await this.domainService.getDomainUserById(memberId);
-    this.em.populate(member, ['domain', 'info']);
+    await this.em.populate(member, ['domain.info', 'info']);
     return UserMapper.toDomainUser(member as UserLoadedInfoAndDomain);
   }
 }

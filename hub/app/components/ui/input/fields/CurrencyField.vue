@@ -6,7 +6,6 @@
 <script setup lang="ts">
 import { CURRENCIES, type Currency } from '@rey-one/shared';
 
-
 const currency = defineModel<Currency | undefined>('currency', {
     required: true
 })

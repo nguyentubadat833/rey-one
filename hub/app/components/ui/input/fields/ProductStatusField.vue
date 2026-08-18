@@ -6,7 +6,6 @@
 <script setup lang="ts">
 import { PRODUCT_STATUSES, type ProductStatus } from '@rey-one/shared';
 
-
 const status = defineModel<ProductStatus | undefined>('status', {
     required: true
 })

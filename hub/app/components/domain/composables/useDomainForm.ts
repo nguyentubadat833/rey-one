@@ -11,7 +11,9 @@ type Domain = z.infer<typeof DomainSchema>;
 
 const domainFormState = reactive({
   permissionChecks: [] as PermissionCheck[],
-  data: {} as Partial<Domain>,
+  data: {
+    plan: 'monthly',
+  } as Partial<Domain>,
   version: Date.now(),
   loading: false,
 });
@@ -35,6 +37,8 @@ export default function () {
         // onSuccess: () => Promise<void> = () => Promise.resolve(),
         const process = async () => {
             const { pushToast } = useNotification();
+
+            console.log(domainFormState.data)
 
             domainFormState.data.permissions = domainFormState.permissionChecks
                 .filter((item) => item.active)
