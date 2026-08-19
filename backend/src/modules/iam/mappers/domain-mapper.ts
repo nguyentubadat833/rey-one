@@ -27,6 +27,7 @@ export class DomainMapper {
       name: domain.info.name,
       plan: domain.subscription.plan,
       startedAt: domain.subscription.startedAt.toISOString(),
+      expiresAt: domain.subscription.expiresAt?.toISOString(),
       status: domain.getStatus(),
       owner: {
         email: owner.email!,
@@ -45,6 +46,7 @@ export class DomainMapper {
       permissions: domain.permissions,
       plan: domain.subscription.plan,
       startedAt: domain.subscription.startedAt.toISOString(),
+      expiresAt: domain.subscription.expiresAt?.toISOString(),
       owner: {
         email: owner.email!,
         status: owner.status

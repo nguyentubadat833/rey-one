@@ -8,6 +8,8 @@ import { UserNotFoundError } from '@/utils/errors/user.error';
 import { UserLoadedInfo } from '@/persistence/types/user-type';
 import type { ConfigType } from '@nestjs/config';
 
+
+
 @Injectable()
 export class UserService {
   constructor(
@@ -18,15 +20,13 @@ export class UserService {
 
   async createUser(dto: CreateUserDto) {
     const user = this.userRepo.create({
+      name: dto.name,
+      image: dto.image,
       username: dto.username,
       email: dto.email,
       phone: dto.phone,
       password: this.config.userDefault.password,
-      info: this.em.create(UserInfo, {
-        name: dto.name,
-        image: dto.image,
-      }),
-      permissions: dto.permissions
+      permissions: dto.permissions,
     });
 
     await this.em.flush();
@@ -48,7 +48,7 @@ export class UserService {
         email: dto.email,
         phone: dto.phone,
         password: dto.password,
-        permissions: dto.permissions
+        permissions: dto.permissions,
       },
       {
         ignoreUndefined: true,
@@ -65,8 +65,8 @@ export class UserService {
         ignoreUndefined: true,
       },
     );
-    
-    await this.em.flush()
+
+    await this.em.flush();
     return user as UserLoadedInfo;
   }
 }

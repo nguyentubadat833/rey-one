@@ -89,14 +89,14 @@ const open = ref(false);
 
 const Modal = resolveComponent("UModal");
 
-  const { data: myDomainInfo, execute: loadMyDomain } = useLazyAsyncData(
-    () => {
-      return useAPI<ApiResponse<Domain>>("/domains/info");
-    },
-    {
-      immediate: false
-    },
-  );
+const { data: myDomainInfo, execute: loadMyDomain } = useLazyAsyncData(
+  () => {
+    return useAPI<ApiResponse<Domain>>("/domains/info");
+  },
+  {
+    immediate: false,
+  },
+);
 
 const submit = () =>
   save().then(() => {
@@ -108,7 +108,10 @@ const MemberButton = (row?: DomainMember) => {
   return h(
     Modal,
     {
-      title: isAdd ? "*New member" : row.name,
+      title: "Tài khoản thành viên",
+      ui: {
+        content: "min-w-[50vw]",
+      },
     },
     {
       default: () =>

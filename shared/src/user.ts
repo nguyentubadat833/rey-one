@@ -15,29 +15,46 @@ export const USER_STATUSES = [
   // "deleted",
 ] as const;
 
+export const USER_TYPES = [
+  "system_user",
+  "domain_staff",
+  "domain_customer",
+] as const;
+
 export const USER_DOMAIN_SCOPE_TYPE = "domain" as const;
 export const USER_SYSTEM_SCOPE_TYPE = "system" as const;
 
 export type UserStatus = (typeof USER_STATUSES)[number];
 
-export const SystemUserPermissionsSchema = z.array(z.enum(SYSTEM_PERMISSIONS))
-export const DomainUserPermissionsSchema = z.array(z.enum(DOMAIN_PERMISSIONS))
+export const SystemUserPermissionsSchema = z.array(z.enum(SYSTEM_PERMISSIONS));
+export const DomainUserPermissionsSchema = z.array(z.enum(DOMAIN_PERMISSIONS));
 
 export const SystemUserScopeSchema = z.object({
   type: z.literal("system"),
-  permissions: SystemUserPermissionsSchema
+  permissions: SystemUserPermissionsSchema,
+  isBoss: z.boolean(),
 });
 
-export const DomainUserScopeSchema = z.object({
-  type: z.literal("domain"),
+export const DomainStaffUserScopeSchema = z.object({
+  type: z.literal("domain_staff"),
   domainId: z.string(),
-  permissions: DomainUserPermissionsSchema
+  access: z.object({
+    permissions: DomainUserPermissionsSchema,
+    isBoss: z.boolean(),
+  }),
+});
+
+export const DomainCustomerUserScopeSchema = z.object({
+  type: z.literal("domain_customer"),
+  domainId: z.string(),
 });
 
 export const UserScopeSchema = z.discriminatedUnion("type", [
   SystemUserScopeSchema,
-  DomainUserScopeSchema,
+  DomainStaffUserScopeSchema,
+  DomainCustomerUserScopeSchema
 ]);
+
 export type UserScope = z.infer<typeof UserScopeSchema>;
 export type UserPermissions = SystemPermission[] | DomainPermission[];
 
@@ -69,7 +86,7 @@ export const UpdateDomainUserSchema = BaseDomainUserSchema.extend({
 
 const UserIdentity = z.object({
   id: z.uuid().readonly(),
-  code: z.string().readonly()
+  code: z.string().readonly(),
 });
 
 export const SystemUserSchema = BaseSystemUserSchema.extend(UserIdentity.shape);
@@ -83,4 +100,4 @@ export const DomainUserSchema = BaseDomainUserSchema.extend(
   }),
 });
 
-export const UserSummarySchema = BaseUserSchema.extend(UserIdentity.shape)
+export const UserSummarySchema = BaseUserSchema.extend(UserIdentity.shape);

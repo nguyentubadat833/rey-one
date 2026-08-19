@@ -24,7 +24,6 @@ import { PaginatedResponse } from '@rey-one/shared';
 import { User } from '@/persistence/entities/user.entity';
 import { UserLoadedInfoAndDomain } from '@/persistence/types/user-type';
 import { UserNotFoundError } from '@/utils/errors/user.error';
-import { DomainLoadedInfo } from '@/persistence/types/domain-type';
 
 @RequireAuth()
 @ApiTags('IAM / Domains')
@@ -130,7 +129,6 @@ export class DomainController {
     return DomainMapper.toDomain(domain);
   }
 
-  // @RequireDomainPermission('base@read', true)
   @ApiDomainHeader()
   @ApiOperation({ summary: 'My available domain' })
   @ApiOkResponse({

@@ -64,6 +64,7 @@ export class DomainService implements DomainUtils {
       permissions: dto.permissions,
       subscription: {
         startedAt: dto.startedAt,
+        expiresAt: dto.expiresAt,
         plan: dto.plan,
       },
       info: {
@@ -147,9 +148,9 @@ export class DomainService implements DomainUtils {
       },
     });
 
-    if (!member.permissions.length) {
-      member.permissions = ['base@read'];
-    }
+    // if (!member.permissions.length) {
+    //   member.permissions = ['base@read'];
+    // }
     domain.users.add(member);
 
     await this.em.flush();
@@ -191,9 +192,9 @@ export class DomainService implements DomainUtils {
       },
     );
 
-    if (!member.permissions.length) {
-      member.permissions = ['base@read'];
-    }
+    // if (!member.permissions.length) {
+    //   member.permissions = ['base@read'];
+    // }
     await this.em.flush();
     return member;
   }

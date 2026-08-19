@@ -3,7 +3,7 @@ import type z from "zod";
 import type { TableColumn, TableRow } from "@nuxt/ui";
 import { SYSTEM_PERMISSIONS, type UserSummarySchema } from "@rey-one/shared";
 import { createPaginationQuery } from "~/composables/api/pagination-query";
-import { permission } from '#imports'
+import { permission } from "#imports";
 import CreateButton from "~/components/ui/button/CreateButton.vue";
 import EditButton from "~/components/ui/button/EditButton.vue";
 import RefreshButton from "~/components/ui/button/RefreshButton.vue";
@@ -12,12 +12,11 @@ import Pagination from "~/components/ui/Pagination.vue";
 import useUserForm from "~/components/user/composables/useUserForm";
 import UserForm from "~/components/user/UserForm.vue";
 
-
-type UserSummaryView = z.infer<typeof UserSummarySchema>
+type UserSummaryView = z.infer<typeof UserSummarySchema>;
 
 definePageMeta({
   title: "Users Management",
-  middleware: ['system-user'],
+  middleware: ["system-user"],
 });
 
 const Modal = resolveComponent("UModal");
@@ -42,7 +41,7 @@ const {
 
 const paginationQuery = createPaginationQuery<UserSummaryView>("/users");
 const { searchInput, TableGlobalSearch } = createTableGlobalFilter();
-const { createPermissionsChecks } = permission()
+const { createPermissionsChecks } = permission();
 
 const { fetch, data } = paginationQuery;
 const { pending, refresh } = await fetch();
@@ -56,12 +55,15 @@ function onSelect(e: Event, row: TableRow<UserSummaryView>) {
 }
 
 function UserButton(user?: UserSummaryView) {
-  const isAdd = !user
+  const isAdd = !user;
 
   return h(
     Modal,
     {
-      title: isAdd ? "*New User" : useUserForm.name,
+      title: "Người dùng",
+      ui: {
+        content: "min-w-[50vw]",
+      },
     },
     {
       default: () =>
@@ -74,8 +76,8 @@ function UserButton(user?: UserSummaryView) {
 
             userFormState.permissionChecks = createPermissionsChecks({
               referencePermissions: userFormState.referencePermissions,
-              currentPermissions: userFormState.data.permissions
-            })
+              currentPermissions: userFormState.data.permissions,
+            });
           },
         }),
       body: () => h(UserForm),
@@ -91,9 +93,9 @@ function UserButton(user?: UserSummaryView) {
 }
 
 onMounted(() => {
-  userFormState.referencePermissions = [...SYSTEM_PERMISSIONS]
-  userFormState.type = 'systemUser'
-})
+  userFormState.referencePermissions = [...SYSTEM_PERMISSIONS];
+  userFormState.type = "systemUser";
+});
 </script>
 
 <template>
@@ -106,9 +108,19 @@ onMounted(() => {
       </div>
     </div>
 
-    <UTable ref="usersTable" :columns="columns" v-model:row-selection="rowSelection" :data="data"
-      v-model:global-filter="searchInput" :loading="pending" loading-color="primary" loading-animation="carousel" sticky
-      class="flex-1 overflow-auto" @select="onSelect">
+    <UTable
+      ref="usersTable"
+      :columns="columns"
+      v-model:row-selection="rowSelection"
+      :data="data"
+      v-model:global-filter="searchInput"
+      :loading="pending"
+      loading-color="primary"
+      loading-animation="carousel"
+      sticky
+      class="flex-1 overflow-auto"
+      @select="onSelect"
+    >
       <template #no-cell="{ row }">{{ row.index + 1 }}</template>
       <template #actions-cell="{ row }">
         <component :is="() => UserButton(row.original)" />

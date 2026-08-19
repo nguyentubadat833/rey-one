@@ -12,7 +12,7 @@ export const DOMAIN_PERMISSIONS = [
   "manage@setting",
   "manage@read",
   //
-  "base@read",
+  // "base@read",
   //
   "member@create",
   "member@update",

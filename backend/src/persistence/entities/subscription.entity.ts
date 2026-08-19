@@ -1,6 +1,6 @@
 import { defineEntity } from '@mikro-orm/core';
 import { Domain } from './domain.entity';
-import { SUBSCRIPTION_PLANS } from '@rey-one/shared';
+import { CURRENCIES, SUBSCRIPTION_PLANS } from '@rey-one/shared';
 
 const SubscriptionEntitySchema = defineEntity({
   name: 'SubscriptionEntity',
@@ -9,8 +9,10 @@ const SubscriptionEntitySchema = defineEntity({
     id: p.integer().primary().autoincrement(),
     startedAt: p.datetime().fieldName('started_at'),
     expiresAt: p.datetime().nullable().fieldName('expires_at'),
+    currency: p.enum(CURRENCIES),
     plan: p.enum(SUBSCRIPTION_PLANS),
-    
+    price: p.bigint(),
+
     domain: () => p.oneToOne(Domain).mappedBy((domain) => domain.subscription),
   }),
 });

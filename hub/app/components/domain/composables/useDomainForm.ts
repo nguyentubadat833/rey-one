@@ -19,6 +19,7 @@ const defaultData: Partial<Domain> = {
         status: "pending"
     },
     startedAt: undefined,
+    expiresAt: undefined,
     permissions: [],
 }
 

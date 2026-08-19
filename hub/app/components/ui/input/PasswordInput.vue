@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-const password = defineModel<string>()
+const password = defineModel<string>('password')
 
 const show = ref(false)
 
@@ -9,7 +9,7 @@ const show = ref(false)
 <template>
   <UInput
     v-model="password"
-    placeholder="Password used for sign-in"
+    placeholder="Pass@wor$_"
     :type="show ? 'text' : 'password'"
     :ui="{ trailing: 'pe-1' }"
   >

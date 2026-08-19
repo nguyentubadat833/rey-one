@@ -56,7 +56,10 @@ function DomainButton(type: 'edit' | 'add', rowData?: DomainSummary) {
 
     return h(Modal,
         {
-            title: isAdd ? '*New Domain' : domainFormData.value.name
+            title: "Doanh nghiệp",
+            ui: {
+                content: 'min-w-[50vw]'
+            }
         },
         {
             default: () => h(isAdd ? CreateButton : EditButton,
