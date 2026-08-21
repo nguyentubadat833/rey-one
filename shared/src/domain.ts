@@ -1,6 +1,7 @@
 import z from "zod";
 import { USER_STATUSES } from "./user";
 import { DOMAIN_PERMISSIONS } from "./app";
+import { CURRENCIES } from "./utils";
 
 export const DOMAIN_STATUSES = [
   'active', // Đang hoạt động
@@ -25,6 +26,8 @@ const BaseDomainSchema = z.object({
   name: z.string({ error: "Domain name is required" }),
   status: z.enum(DOMAIN_STATUSES),
   permissions: z.array(z.enum(DOMAIN_PERMISSIONS)).default([]),
+  currency: z.enum(CURRENCIES).default('VND'),
+  price: z.number(),
   plan: z.enum(SUBSCRIPTION_PLANS, { error: "Subscription plan is required" }),
   startedAt: z.iso.datetime({ error: "Started at is required" }),
   expiresAt: z.iso.datetime().optional(),

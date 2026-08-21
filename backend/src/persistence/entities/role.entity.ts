@@ -26,6 +26,7 @@ const RoleEntitySchema = defineEntity({
 
 export class Role extends RoleEntitySchema.class {}
 RoleEntitySchema.setClass(Role);
+
 RoleEntitySchema.addHook('beforeCreate', saveHandler)
 RoleEntitySchema.addHook('beforeUpdate', saveHandler)
 

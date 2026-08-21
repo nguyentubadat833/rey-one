@@ -9,6 +9,7 @@ import {
   DomainPermission,
   SystemPermission,
   UserScope,
+  DomainStaffUserScopeSchema,
 } from '@rey-one/shared';
 import { AppError } from '@/utils/errors/app.error';
 import { UserRepository } from '../repositories/user-repository';
@@ -22,6 +23,8 @@ import randomstring from 'randomstring';
 import { Order } from './order.entity';
 import { Role } from './role.entity';
 import z from 'zod';
+
+type DomainStaffScope = z.infer<typeof DomainStaffUserScopeSchema>;
 
 const UserSecurityShema = defineEntity({
   name: 'UserAuditEntity',
@@ -74,9 +77,10 @@ const UserEntitySchema = defineEntity({
     role: () => p.manyToOne(Role).nullable().eager(),
     orders: () => p.oneToMany(Order).mappedBy((order) => order.customer),
 
-    isSystemAdmin: p.boolean().persist(false),
+    isSystemBoss: p.boolean().persist(false),
     isDomainCustomer: p.boolean().persist(false),
     isDomainStaff: p.boolean().persist(false),
+    isDomainBoss: p.boolean().persist(false),
   },
 });
 
@@ -137,9 +141,14 @@ UserEntitySchema.addHook('beforeUpdate', saveHandler);
 UserEntitySchema.addHook('onLoad', (args) => {
   const scope = User.parseScope(args.entity);
 
-  args.entity.isSystemAdmin = scope.type === 'system' && scope.isBoss;
+  args.entity.isSystemBoss = scope.type === 'system' && scope.isBoss;
   args.entity.isDomainCustomer = scope.type === 'domain_customer';
-  args.entity.isDomainStaff = scope.type === 'domain_staff';
+
+  if ((scope.type = 'domain_staff')) {
+    const domainStaffScope = scope as DomainStaffScope;
+    args.entity.isDomainStaff = true;
+    args.entity.isDomainBoss = domainStaffScope.access.isBoss;
+  }
 });
 
 async function saveHandler(args: EventArgs<User>) {
@@ -148,13 +157,14 @@ async function saveHandler(args: EventArgs<User>) {
   if (!changeSetType) return;
 
   const entity = args.entity;
+  const orignalEntity = args.changeSet?.originalEntity
   const changeSet = args.changeSet?.payload;
 
   const changeEmail = changeSet?.email;
   const changeUsername = changeSet?.username;
   const changePhone = changeSet?.phone;
   const changePassword = args.changeSet?.payload.password;
-  const changeDomain = args.changeSet?.payload.domain;
+  // const changeDomain = args.changeSet?.payload.domain;
 
   if (changeSetType === ChangeSetType.CREATE) {
     if (!entity.isDomainCustomer && !changeEmail && !changeUsername && !changePhone) {
@@ -175,7 +185,7 @@ async function saveHandler(args: EventArgs<User>) {
       throw AppError.withMessage('PROPERTY_IMMUTABLE', 'Username cannot be changed');
     }
 
-    if (changeDomain && changeDomain !== entity.domain) {
+    if (orignalEntity && orignalEntity.domain !== entity.domain) {
       throw AppError.withMessage('PROPERTY_IMMUTABLE', 'Domain cannot be changed');
     }
   }

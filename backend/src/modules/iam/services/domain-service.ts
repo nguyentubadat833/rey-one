@@ -1,5 +1,4 @@
 import { Domain } from '@/persistence/entities/domain.entity';
-import { DomainRepository } from '@/persistence/repositories/domain-repository';
 import { DoaminLoadedInfoAndOwner, DomainObject } from '@/persistence/types/domain-type';
 import { DomainNotFoundError } from '@/utils/errors/domain.error';
 import { EntityManager, wrap } from '@mikro-orm/core';
@@ -22,7 +21,6 @@ export class DomainService implements DomainUtils {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly em: EntityManager,
     private readonly appStore: ClsService<AppClsStore>,
-    private readonly domainRepo: DomainRepository,
     @Inject(authConfig.KEY) private readonly config: ConfigType<typeof authConfig>,
   ) {}
 
@@ -40,7 +38,7 @@ export class DomainService implements DomainUtils {
     let domainEntity: Domain;
 
     if (!domainCacheObject) {
-      domainEntity = await this.domainRepo.findOneOrFail(
+      domainEntity = await this.em.findOneOrFail(Domain,
         {
           id,
         },
@@ -51,7 +49,7 @@ export class DomainService implements DomainUtils {
 
       await this.cacheManager.set(`domain::${id}`, wrap(domainEntity).toObject());
     } else {
-      domainEntity = this.domainRepo.merge(domainCacheObject);
+      domainEntity = this.em.merge(Domain, domainCacheObject);
     }
 
     if (requireActive) domainEntity.ensureActive();
@@ -60,11 +58,13 @@ export class DomainService implements DomainUtils {
   }
 
   async createDomain(dto: CreateDomainDto) {
-    const domain = this.domainRepo.create({
+    const domain = this.em.create(Domain,{
       permissions: dto.permissions,
       subscription: {
         startedAt: dto.startedAt,
         expiresAt: dto.expiresAt,
+        currency: 'VND',
+        price: 
         plan: dto.plan,
       },
       info: {
